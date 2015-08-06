@@ -32,7 +32,7 @@ function wechat_qr_entity_info() {
     'entity class' => 'WechatQr',
     'controller class' => 'EntityAPIController',
     'base table' => 'wechat_qr',
-    'fieldable' => FALSE,
+    'fieldable' => TRUE,
     'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
     'entity keys' => array(
