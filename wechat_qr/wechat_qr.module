@@ -20,9 +20,10 @@ function wechat_qr_menu() {
   $items['admin/structure/wechat_qr/add'] = array(
     'title' => '添加新的二维码',
     'description' => '添加新的二维码.',
-    'page callback' => 'wechat_qr_page',
+    'page callback' => 'wechat_qr_add',
     'access arguments' => array('administer users'),
     'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_qr.pages.inc',
   );
   return $items;
 }
