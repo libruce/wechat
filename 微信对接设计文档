@@ -1,0 +1,13 @@
+微信对接
+
+api负责sdk对象初始化，对接认证
+session负责消息的状态管理
+massages负责处理普通消息
+kf客服系统
+
+reply
+request
+material
+
+
+各个模块的设置表单地址必须在admin/config/wechat路径下

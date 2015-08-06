@@ -1,0 +1,337 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function wechat_menu_install() {
+  if (!menu_load('wechat-custom-menu')) {
+    menu_save(array(
+      'menu_name' => 'wechat-custom-menu',
+      'title' => '微信自定义菜单',
+      'description' => '微信自定义菜单',
+    ));
+  }
+}
+
+
+function wechat_menu_pull_menu() {
+  menu_delete_links('wechat-custom-menu');
+  $wechat = wechat_api_init_wechatobj();
+  $menu = $wechat->getMenu();
+  foreach ($menu['menu']['button'] as $item) {
+    $menu = array(
+      'link_path' => 'node',
+      'menu_name' => 'wechat-custom-menu',
+    );
+    if (empty($item['sub_button'])) {
+      $menu += array(
+        'link_title' => $item['name'],
+        'options' => array(
+          'attributes' => array(
+            'wechat_type' => $item['type'],
+          )
+        ),
+      );
+
+      switch ($item['type']) {
+        case 'click':
+        case 'scancode_waitmsg':
+        case 'scancode_push':
+        case 'pic_sysphoto':
+        case 'pic_photo_or_album':
+        case 'pic_weixin':
+        case 'location_select': {
+          $menu['options']['attributes']['wechat_key'] = $item['key'];
+          break;
+        }
+        case 'view': {
+          $menu['options']['attributes']['wechat_url'] = $item['url'];
+          break;
+        }
+        case 'media_id':
+        case 'view_limited': {
+          $menu['options']['attributes']['wechat_media_id'] = $item['media_id'];
+          break;
+        }
+      }
+      menu_link_save($menu);
+    }
+    else {
+      $menu += array(
+        'link_title' => $item['name'],
+      );
+      $pmlid = menu_link_save($menu);
+      foreach ($item['sub_button'] as $sub_item) {
+        $menu = array(
+          'link_path' => 'node',
+          'menu_name' => 'wechat-custom-menu',
+        );
+        $menu += array(
+          'link_title' => $sub_item['name'],
+          'plid' => $pmlid,
+        );
+        $menu += array(
+          'options' => array(
+            'attributes' => array(
+              'wechat_type' => $sub_item['type'],
+            )
+          ),
+        );
+        switch ($sub_item['type']) {
+          case 'click':
+          case 'scancode_waitmsg':
+          case 'scancode_push':
+          case 'pic_sysphoto':
+          case 'pic_photo_or_album':
+          case 'pic_weixin':
+          case 'location_select': {
+            $menu['options']['attributes']['wechat_key'] = $sub_item['key'];
+            break;
+          }
+          case 'view': {
+            $menu['options']['attributes']['wechat_url'] = $sub_item['url'];
+            break;
+          }
+          case 'media_id':
+          case 'view_limited': {
+            $menu['options']['attributes']['wechat_media_id'] = $sub_item['media_id'];
+            break;
+          }
+        }
+
+        menu_link_save($menu);
+      }
+    }
+
+  }
+}
+
+function wechat_menu_get_menu_array() {
+  $menu_tree = menu_build_tree('wechat-custom-menu', array('max_depth' => 2));
+  $menu_array = array();
+  $menu_array['button'] = array();
+  foreach ($menu_tree as $val) {
+    if ($val['link']['hidden']) {
+      continue;
+    }
+    $element = array();
+    $element['name'] = $val['link']['link_title'];
+    $element['sub_button'] = array();
+    if (!empty($val['below'])) {
+      foreach ($val['below'] as $subval) {
+        if ($subval['link']['hidden']) {
+          continue;
+        }
+        $element['sub_button'][] = wechat_menu_item($subval);
+      }
+    }
+    if (empty($element['sub_button'])) {
+      unset($element['sub_button']);
+      $element = wechat_menu_item($val);
+    }
+    $menu_array['button'][] = $element;
+  }
+  return $menu_array;
+}
+
+function wechat_menu_item($subval) {
+  $subelement = array();
+  $subelement['name'] = $subval['link']['link_title'];
+
+  if ((isset($subval['link']['options']['attributes']['wechat_type']))) {
+    $wechat_menu_type = $subval['link']['options']['attributes']['wechat_type'];
+    switch ($wechat_menu_type) {
+      case 'click':
+      case 'scancode_waitmsg':
+      case 'scancode_push':
+      case 'pic_sysphoto':
+      case 'pic_photo_or_album':
+      case 'pic_weixin':
+      case 'location_select': {
+        $subelement['type'] = $wechat_menu_type;
+        $subelement['key'] = $subval['link']['options']['attributes']['wechat_key'];
+        break;
+      }
+      case 'view': {
+        $subelement['type'] = $wechat_menu_type;
+        $subelement['url'] = $subval['link']['options']['attributes']['wechat_url'];
+        break;
+      }
+      case 'media_id':
+      case 'view_limited': {
+        $subelement['type'] = $wechat_menu_type;
+        $subelement['media_id'] = $subval['link']['options']['attributes']['wechat_media_id'];
+        break;
+      }
+    }
+  }
+
+  return $subelement;
+}
+
+function wechat_menu_update_menu() {
+  $menu_array = wechat_menu_get_menu_array();
+  if (empty($menu_array['button'])) {
+    drupal_set_message(t('菜单为空'), 'error');
+  }
+  else {
+    $wechat_obj = wechat_api_init_wechatobj();
+    //dpm($menu_array);
+    if ($wechat_obj->createMenu($menu_array)) {
+      drupal_set_message(t('更新成功.'));
+    }
+    else {
+      drupal_set_message($wechat_obj->errMsg . '-' . ErrCode::getErrText($wechat_obj->errCode), 'error');
+    }
+  }
+  return;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function wechat_menu_form_alter(&$form, &$form_state, $form_id) {
+
+  if ($form_id == 'menu_overview_form') {
+    if ($form['#menu']['menu_name'] == 'wechat-custom-menu') {
+
+      $form['top'] = array(
+        '#type' => 'item',
+        '#markup' => t('使用<b>获取服务器设置</b>获取到的菜单，一级菜单不带参数，会出现<b>不合法的子菜单按钮类型</b>的错误.'),
+      );
+      if (isset($form['#empty_text'])) {
+        $form['actions']['pull_update'] = array(
+          '#type' => 'submit',
+          '#submit' => array('wechat_menu_pull_menu'),
+          '#value' => t('获取服务器设置'),
+        );
+      }
+      else {
+        $form['actions']['save_update'] = array(
+          '#type' => 'submit',
+          '#submit' => array('wechat_menu_update_menu'),
+          '#value' => t('保存更新'),
+        );
+      }
+      //dpm($form);
+    }
+  }
+
+  if ($form_id == 'menu_edit_item') {
+    $item = $form['original_item']['#value'];
+    if ($item['menu_name'] == 'wechat-custom-menu') {
+      //dpm($item['menu_name']);
+
+      $form['link_path']['#default_value'] = 'node';
+      $form['options']['#tree'] = TRUE;
+      $form['options']['#weight'] = 50;
+      $parent_options = $form['parent']['#options'];
+      $parent_options_new = array();
+      foreach ($parent_options as $key => $value) {
+        if (substr($key, 0, 6) == 'wechat') {
+          $parent_options_new[$key] = $value;
+        }
+      }
+      $form['parent']['#access'] = FALSE;
+      $form['link_path']['#access'] = FALSE;
+      $form['description']['#access'] = FALSE;
+      $form['enabled']['#access'] = FALSE;
+      $form['expanded']['#access'] = FALSE;
+      $form['weight']['#access'] = FALSE;
+
+      //print debug($form['parent']);
+      // Unset the previous value so that the new values get saved.
+      unset($form['options']['#value']['attributes']);
+
+      $form['options']['attributes'] = array(
+        '#type' => 'fieldset',
+        '#title' => '自定义菜单设置',
+        '#collapsible' => FALSE,
+        '#collapsed' => FALSE,
+        '#tree' => TRUE,
+        '#prefix' => '<div id="wechat_menu_settings_wrapper">',
+        '#suffix' => '</div>',
+      );
+
+      $options = array(
+        'click' => t('点击推事件（click）'),
+        'view' => t('跳转URL（view）'),
+        //待开发。
+        'scancode_push' => t('扫码推事件（scancode_push）'),
+        'scancode_waitmsg' => t('扫码推事件且弹出“消息接收中”提示框（scancode_waitmsg）'),
+        'pic_sysphoto' => t('弹出系统拍照发图（pic_sysphoto）'),
+        'pic_photo_or_album' => t('弹出拍照或者相册发图（pic_photo_or_album）'),
+        'pic_weixin' => t('弹出微信相册发图器（pic_weixin）'),
+        'location_select' => t('弹出地理位置选择器（location_select）'),
+        'media_id' => t('下发消息（除文本消息）（media_id）'),
+        'view_limited' => t('跳转图文消息URL（view_limited）'),
+
+      );
+      $default = isset($item['options']['attributes']['wechat_type']) ? $item['options']['attributes']['wechat_type'] : 'click';
+
+      if (isset($form_state['triggering_element'])) {
+        //dpm($form_state);
+        $default = $form_state['triggering_element']['#value'];
+      }
+      $form['options']['attributes']['wechat_type'] = array(
+        '#type' => 'radios',
+        '#title' => t('菜单类型'),
+        '#default_value' => isset($item['options']['attributes']['wechat_type']) ? $item['options']['attributes']['wechat_type'] : 'click',
+        '#options' => $options,
+        '#description' => t('点击选择添加不同的菜单类型.'),
+        '#required' => TRUE,
+        '#ajax' => array(
+          'callback' => 'wechat_menu_form_refresh',
+          'wrapper' => 'wechat_menu_settings_wrapper',
+        ),
+      );
+      switch ($default) {
+        case 'click':
+        case 'scancode_waitmsg':
+        case 'scancode_push':
+        case 'pic_sysphoto':
+        case 'pic_photo_or_album':
+        case 'pic_weixin':
+        case 'location_select': {
+          $form['options']['attributes']['wechat_key'] = array(
+            '#type' => 'textfield',
+            '#title' => t('菜单KEY值（key）'),
+            '#description' => t('菜单KEY值，用于消息接口推送，不超过128字节'),
+            '#default_value' => isset($item['options']['attributes']['wechat_key']) ? $item['options']['attributes']['wechat_key'] : '',
+            '#required' => TRUE,
+          );
+          break;
+        }
+        case 'view': {
+          $form['options']['attributes']['wechat_url'] = array(
+            '#type' => 'textfield',
+            '#title' => t('网页链接（url）'),
+            '#description' => t('网页链接，用户点击菜单可打开链接，不超过256字节.'),
+            '#default_value' => isset($item['options']['attributes']['wechat_url']) ? $item['options']['attributes']['wechat_url'] : '',
+            '#required' => TRUE,
+          );
+          break;
+        }
+        case 'media_id':
+        case 'view_limited': {
+          $form['options']['attributes']['wechat_media_id'] = array(
+            '#type' => 'textfield',
+            '#title' => t('素材接口返回Media id（media_id）'),
+            '#description' => t('调用新增永久素材接口返回的合法media_id.'),
+            '#default_value' => isset($item['options']['attributes']['wechat_media_id']) ? $item['options']['attributes']['wechat_media_id'] : '',
+            '#required' => TRUE,
+          );
+          break;
+        }
+      }
+      //$form['#validate'][] = '_wechat_menu_form_validate';
+    }
+  }
+  //dpm($form);
+  return;
+}
+
+function wechat_menu_form_refresh($form, &$form_state) {
+  //dpm($form);
+  return $form['options']['attributes'];
+}

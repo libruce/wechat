@@ -1,0 +1,200 @@
+<?php
+
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_kf_send_entity_info() {
+  $return['wechat_kf_send'] = array(
+    'label' => t('客服发送消息'),
+    'plural label' => t('客服发送的消息'),
+    'description' => t('客服发送的消息.'),
+    'entity class' => 'WechatKfSend',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_kf_send',
+    'fieldable' => TRUE,
+    'view modes' => array(
+      'full' => array(
+        'label' => t('客服发送的消息'),
+        'custom settings' => FALSE,
+      ),
+    ),
+    'entity keys' => array(
+      'id' => 'id',
+      'bundle' => 'msg_type',
+      'label' => 'create_time',
+    ),
+    'bundles' => array(),
+    'bundle keys' => array(
+      'bundle' => 'type',
+    ),
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'access callback' => 'wechat_kf_send_type_access',
+    'module' => 'wechat_kf_send',
+    'metadata controller class' => 'WechatKfSendMetadataController'
+  );
+  // Add bundle info but bypass entity_load() as we cannot use it here.
+  $types = db_select('wechat_kf_send_type', 'w')
+    ->fields('w')
+    ->execute()
+    ->fetchAllAssoc('type');
+  foreach ($types as $type => $info) {
+    $return['wechat_kf_send']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/structure/wechat_kf_send/manage/%wechat_kf_send_type',
+        'real path' => 'admin/structure/wechat_kf_send/manage/' . $type,
+        'bundle argument' => 4,
+        'access arguments' => array('administer wechat kf send'),
+      ),
+    );
+  }
+  $return['wechat_kf_send_type'] = array(
+    'label' => t('客服发送的消息类型'),
+    'plural label' => t('客服发送的消息类型（复数）'),
+    'description' => t('客服发送的消息类型.'),
+    'entity class' => 'WechatKfSendType',
+    'controller class' => 'EntityAPIControllerExportable',
+    'base table' => 'wechat_kf_send_type',
+    'fieldable' => FALSE,
+    'bundle of' => 'wechat_kf_send',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      'name' => 'type',
+      'label' => 'label',
+    ),
+    'access callback' => 'wechat_kf_send_type_access',
+    'module' => 'wechat_kf_send',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => 'admin/structure/wechat_kf_send',
+      'file' => 'wechat_kf_send.admin.inc',
+      'controller class' => 'WechatKfSendTypeUIController',
+    ),
+
+  );
+
+
+  return $return;
+}
+
+
+function wechat_kf_send_type_access() {
+  return TRUE;
+}
+
+function wechat_kf_send_load($id, $reset = FALSE) {
+  $return = wechat_kf_send_load_multiple(array($id), array(), $reset);
+  return reset($return);
+}
+
+function wechat_kf_send_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_kf_send', $ids, $conditions, $reset);
+}
+
+function wechat_kf_send_type_load($type) {
+  return wechat_kf_send_types($type);
+}
+
+function wechat_kf_send_types($type_name = NULL) {
+  $types = entity_load_multiple_by_name('wechat_kf_send_type', isset($type_name) ? array($type_name) : FALSE);
+  return isset($type_name) ? reset($types) : $types;
+}
+
+class WechatKfSend extends Entity {
+
+  public $id;
+  public $msg_type;
+  public $kf_uid;
+  public $create_time;
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_kf_send');
+  }
+
+  protected function defaultLabel() {
+    return $this->create_time;
+  }
+
+  protected function defaultUri() {
+    return array('path' => 'wechat_kf_send/' . $this->id);
+  }
+
+  public function save() {
+
+    if (empty($this->create_time)) {
+      $this->create_time = time();
+    }
+
+    parent::save();
+  }
+}
+
+class WechatKfSendType extends Entity {
+
+  public $type;
+  public $label;
+  public $weight = 0;
+  public $description;
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_kf_send_type');
+  }
+
+
+  public function isLocked() {
+    return isset($this->status) && empty($this->is_new) && (($this->status & ENTITY_IN_CODE) || ($this->status & ENTITY_FIXED));
+  }
+
+
+  /**
+   * Overrides Entity::save().
+   */
+  public function save() {
+    parent::save();
+    field_info_cache_clear();
+  }
+}
+
+class WechatKfSendMetadataController extends EntityDefaultMetadataController {
+
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info['wechat_kf_send']['properties'];
+
+    $properties['msg_type'] = array(
+      'label' => t('消息类型'),
+      'description' => t('发送的消息类型.'),
+      'type' => 'token',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat kf send',
+      'options list' => 'wechat_kf_send_type_options_list',
+      'required' => TRUE,
+      'schema field' => 'msg_type',
+    );
+    $properties['kf_uid'] = array(
+      'type' => 'token',
+      'label' => t('UID'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat kf send',
+      'getter callback' => 'user_load',
+      'schema field' => 'kf_uid',
+      'required' => TRUE,
+    );
+
+    $properties['create_time'] = array(
+      'type' => 'date',
+      'label' => t('Create time'),
+      'description' => t('创建时间.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat kf send',
+      'schema field' => 'create_time',
+      'required' => TRUE,
+    );
+
+    return $info;
+  }
+
+
+}

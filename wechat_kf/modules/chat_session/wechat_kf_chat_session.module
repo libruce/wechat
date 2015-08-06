@@ -1,0 +1,249 @@
+<?php
+/**-----------------实体定义---------**/
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_kf_chat_session_entity_info() {
+  $return['wechat_kf_chat_session'] = array(
+    'label' => t('客服聊天会话'),
+    'plural label' => t('客服聊天会话（复数）'),
+    'description' => t('客服聊天会话.'),
+    'entity class' => 'WechatKfChatSession',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_kf_chat_session',
+    'fieldable' => FALSE,
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'user_openid',
+      'label' => 'update_time'
+    ),
+    'access callback' => 'wechat_kf_chat_session_access',
+    'module' => 'wechat_kf_chat_session',
+    'metadata controller class' => 'WechatKfChatSessionMetadataController',
+    'bundles' => array(
+      'wechat_kf_chat_session' => array(
+        'label' => t('会话'),
+//        'admin' => array(
+//          'path' => 'admin/structure/wechat_kf_chat_session',
+//          'access arguments' => array('administer kf chat session'),
+//        ),
+      ),
+    ),
+  );
+  return $return;
+}
+
+function wechat_kf_chat_session_load($id, $reset = FALSE) {
+  $return = wechat_kf_chat_session_load_multiple(array($id), array(), $reset);
+  return reset($return);
+}
+
+function wechat_kf_chat_session_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_kf_chat_session', $ids, $conditions, $reset);
+}
+
+function wechat_kf_chat_session_access() {
+  return TRUE;
+}
+
+class WechatKfChatSession extends Entity {
+
+  public $kf_uid;
+  public $user_openid;
+  public $status;
+  public $update_time;
+  public $create_time;
+  public $is_new;
+
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_kf_chat_session');
+  }
+
+  protected function defaultLabel() {
+    return $this->update_time;
+  }
+
+  protected function defaultUri() {
+    return array('path' => 'wechat_kf_chat_session/' . $this->user_openid);
+  }
+
+  public function save() {
+    if (empty($this->create_time)) {
+      $this->create_time = time();
+    }
+    parent::save();
+  }
+}
+
+class WechatKfChatSessionMetadataController extends EntityDefaultMetadataController {
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info['wechat_kf_chat_session']['properties'];
+    $properties['kf_uid'] = array(
+      'type' => 'integer',
+      'label' => t('客服UID'),
+      'description' => t('Create time of wechat response message.'),
+      'schema field' => 'kf_uid',
+      'required' => TRUE,
+    );
+    $properties['user_openid'] = array(
+      'type' => 'text',
+      'label' => t('客户openid'),
+      'description' => t('Create time of wechat response message.'),
+      'schema field' => 'user_openid',
+      'required' => TRUE,
+    );
+    $properties['status'] = array(
+      'type' => 'integer',
+      'label' => t('状态'),
+      'description' => t('Create time of wechat response message.'),
+      'schema field' => 'status',
+      'required' => TRUE,
+    );
+    $properties['update_time'] = array(
+      'type' => 'date',
+      'label' => t('刷新时间'),
+      'description' => t('Create time of wechat response message.'),
+      'schema field' => 'update_time',
+      'required' => TRUE,
+    );
+    $properties['create_time'] = array(
+      'type' => 'date',
+      'label' => t('创建时间'),
+      'description' => t('Create time of wechat response message.'),
+      'schema field' => 'create_time',
+      'required' => TRUE,
+    );
+
+    return $info;
+  }
+
+
+}
+
+/**-----------------逻辑相关代码---------**/
+function wechat_kf_chat_session_start($openid) {
+  $return = wechat_kf_chat_session_load($openid);
+  $kf_uid = wechat_kf_chat_get_free_kf();
+  $kf_uid = 1;
+  //检查客服返回值
+  if ($kf_uid) {
+    if (!$return) {
+      $return = entity_create('wechat_kf_chat_session', array());
+      $return->user_openid = $openid;
+      $return->kf_uid = $kf_uid;
+      $return->status = 1;
+      $return->update_time = time();
+      $return->create_time = time();
+      $return->save();
+    }
+    else {
+      $return->kf_uid = $kf_uid;
+      $return->status = 1;
+      $return->update_time = time();
+      $return->save();
+    }
+    return $return;
+  }
+  return FALSE;
+}
+
+//todo 查询此会话是否活跃
+function wechat_kf_chat_get_kf_uid($openid) {
+  //读取会话
+  $return = wechat_kf_chat_session_load($openid);
+  //如果会话不存在
+  if (!$return) {
+    //返回一个空闲客服uid
+    $kf_uid = wechat_kf_chat_get_free_kf();
+    //创建一个会话
+    $return = entity_create('wechat_kf_chat_session', array());
+    $return->user_openid = $openid;
+    $return->kf_uid = $kf_uid;
+    $return->status = 1;
+    $return->update_time = time();
+    $return->create_time = time();
+    $return->save();
+    return $return->kf_uid;
+  }
+  //会话存在，检查是否活跃，检查状态是否为关闭状态
+  if ($return->update_time > time() - 3000) {
+
+  }
+
+}
+
+function wechat_kf_get_kf_session_number($kf_uid) {
+  $table = 'wechat_kf_chat_session';
+  $result = db_select($table)
+    ->fields($table)
+    ->condition('kf_uid', $kf_uid)
+    ->condition('status', 1)
+    ->condition('update_time', time() - 1000, '>')
+    ->execute()
+    ->rowCount();
+  //->fetchAllAssoc('user_openid');
+  //->fetchAll();
+  return $result;
+}
+
+//array_reverse
+//array_push
+//array_pop
+function wechat_kf_chat_get_kf_session($kf_uid) {
+  $table = 'wechat_kf_chat_session';
+  $result = db_select($table)
+    ->fields($table)
+    ->condition('kf_uid', $kf_uid)
+    ->condition('status', 1)
+    //->condition('update_time', time() - 1000, '>')
+    ->execute()
+    //->rowCount();
+    ->fetchAllAssoc('user_openid');
+  //->fetchAll();
+  return $result;
+}
+
+
+function wechat_kf_chat_check_session($openid) {
+  $return = wechat_kf_chat_session_load($openid);
+  if (!$return) {
+    return FALSE;
+  }
+  else {
+    return $return->kf_uid;
+  }
+}
+
+/**
+ * Implements hook_rules_action_info().
+ */
+function wechat_kf_chat_session_rules_action_info() {
+  $action['wechat_kf_chat_session_assign_kf'] = array(
+    'parameter' => array(
+      'openid' => array(
+        'type' => 'text',
+        'label' => t('OpenId'),
+        'save' => TRUE,
+      )
+    ),
+    'provides' => array(
+      'uid' => array(
+        'type' => 'integer',
+        'label' => t('客服UID'),
+      ),
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('分配可用客服人员，返回值客服UID。若为0则表示分配失败'),
+    'base' => 'wechat_kf_chat_session_assign_kf',
+  );
+  return $action;
+}
+
+function wechat_kf_chat_session_assign_kf($openid) {
+  $uid = '';
+  return array('uid' => $uid);
+}

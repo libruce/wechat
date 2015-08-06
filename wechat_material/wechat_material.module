@@ -1,0 +1,161 @@
+<?php
+
+/**
+ * @param $material_body
+ * @param $material_type
+ * @param int $forever
+ * @return array|bool|int|string
+ * @todo 素材上传
+ */
+function wechat_material_upload($material_body, $material_type, $entity_type, $entity_id, $forever = 0) {
+  $media_id = '';
+  switch ($material_type) {
+    case 'image':
+    case 'thumb':
+    case 'video':
+    case 'voice': {
+      $media_id = wechat_material_upload_file($material_body, $material_type, $forever);
+      break;
+    }
+    case 'news': {
+      $media_id = wechat_material_upload_news($material_body, $material_type, $forever);
+      break;
+    }
+  }
+
+  $wechatMaterial = new WechatMaterial();
+  $wechatMaterial->material_type = $material_type;
+  $wechatMaterial->media_id = $media_id;
+  $wechatMaterial->entity_type = $entity_type;
+  $wechatMaterial->entity_id = $entity_id;
+  //图文素材只有永久类型
+  if ($forever || $material_type == 'news') {
+    $wechatMaterial->permanent = 1;
+  }
+  $wechatMaterial->save();
+  return array('material_id' => $wechatMaterial->id, 'media_id' => $media_id);
+
+}
+
+function wechat_material_upload_file($material_body, $material_type, $forever) {
+  //初始化weicha对象
+  $wechat_obj = wechat_api_init_wechatobj();
+
+  $file = file_load($material_body['fid']);
+  $file_path = drupal_realpath($file->uri);
+
+  //拼装数组
+  $data = ['media' => '@' . $file_path];
+
+  if ($forever) {
+    $return = $wechat_obj->uploadForeverMedia($data, $material_type);
+  }
+  else {
+    $return = $wechat_obj->uploadMedia($data, $material_type);
+  }
+
+  if ($material_type == 'thumb' && !$forever) {
+    return $return['thumb_media_id'];
+  }
+  else {
+    return $return['media_id'];
+  }
+}
+
+function wechat_material_upload_news($material_body, $material_type, $forever) {
+  $wechat_obj = wechat_api_init_wechatobj();
+  return $wechat_obj->uploadForeverArticles($material_body);
+}
+
+
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_material_entity_info() {
+  $return['wechat_material'] = array(
+    'label' => t('微信素材'),
+    'plural label' => t('微信素材'),
+    'description' => t('微信素材.'),
+    'entity class' => 'WechatMaterial',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_material',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'media_id',
+    ),
+    'bundles' => array(),
+    'bundle keys' => array(
+      'bundle' => 'type',
+    ),
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'access callback' => 'wechat_material_access',
+    'module' => 'wechat_material',
+    'metadata controller class' => 'WechatMaterialMetadataController'
+  );
+
+  return $return;
+}
+
+/**
+ * Implements hook_load().
+ */
+function wechat_material_load($id, $reset = FALSE) {
+  $entity = wechat_material_load_multiple(array($id), array(), $reset);
+  return reset($entity);
+}
+
+function wechat_material_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_material', $ids, $conditions, $reset);
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function wechat_material_permission() {
+  return array(
+    'administer material' => array(
+      'title' => t('Administer material'),
+      'restrict access' => TRUE,
+    ),
+  );
+}
+
+function wechat_material_access() {
+  return TRUE;
+}
+
+
+class WechatMaterial extends Entity {
+  /**
+   * The message id.
+   *
+   * @var integer
+   */
+  public $id;
+  public $media_id;
+  public $material_type;
+  public $permanent;
+  public $entity_type;
+  public $entity_id;
+  public $create_time;
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_material');
+  }
+
+  protected function defaultLabel() {
+    return $this->media_id;
+  }
+
+
+  public function save() {
+    $this->create_time = time();
+    parent::save();
+  }
+}
+
+class WechatMaterialMetadataController extends EntityDefaultMetadataController {
+}

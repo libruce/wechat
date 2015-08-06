@@ -1,0 +1,83 @@
+<?php
+/**
+ * Implements hook_schema().
+ */
+function wechat_user_schema() {
+
+  $schema['wechat_user'] = array(
+    'description' => 'wechat message.',
+    'fields' => array(
+      'uid' => array(
+        'description' => 'userid.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'openid' => array(
+        'description' => 'openid',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'subscribe' => array(
+        'description' => 'subscribe',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'nickname' => array(
+        'description' => 'nickname',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sex' => array(
+        'description' => 'sex',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'province' => array(
+        'description' => 'province',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'city' => array(
+        'description' => 'city',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'country' => array(
+        'description' => 'country',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'headimgurl' => array(
+        'description' => 'headimgurl',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'subscribe_time' => array(
+        'description' => t('subscribe time.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('openid'),
+  );
+
+  return $schema;
+}

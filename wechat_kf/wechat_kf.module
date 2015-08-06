@@ -1,0 +1,680 @@
+<?php
+/**
+ * Implements hook_forms().
+ */
+function wechat_kf_forms($form_id, $args) {
+  $forms['wechat_kf_chat_form'] = array(
+    'callback' => 'wechat_kf_chat_form',
+  );
+
+  return $forms;
+}
+
+function wechat_kf_chat_form($form, &$form_state, $user_openid, $kf_uid) {
+
+  $user_openid_sha = sha1($user_openid);
+  $form_state['user_openid'] = $user_openid;
+  $form_state['kf_uid'] = $kf_uid;
+  $form[$user_openid_sha]['actions'] = array('#type' => 'actions');
+
+  $form[$user_openid_sha] = array(
+    '#type' => 'container',
+    '#title' => '发送方式设置',
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+    '#prefix' => '<div id="' . $user_openid_sha . '">',
+    '#suffix' => '</div>',
+  );
+  $form[$user_openid_sha]['chat_log'] = array(
+//    '#title' => '聊天记录',
+    // '#type' => 'container',
+    //'#disabled' => TRUE,
+    '#markup' => theme('wechat_kf_chat_log', array(
+      'user_openid' => $user_openid,
+      'kf_uid' => $kf_uid,
+    )),
+    '#prefix' => '<div id="' . $user_openid_sha . 'chat_log">',
+    '#suffix' => '</div>',
+    '#ajax' => array(
+      'callback' => 'wechat_kf_chat_log_refresh',
+      'wrapper' => $user_openid_sha . 'chat_log',
+
+    ),
+    //'#resizable'=>FALSE,
+  );
+  $form[$user_openid_sha]['actions']['chat_log_refresh'] = array(
+    '#type' => 'submit',
+    '#value' => t('刷新聊天记录'),
+    '#weight' => 1,
+    //'#submit' => array('wechat_kf_chat_log_refresh'),
+    // If no javascript action.
+    '#ajax' => array(
+      'callback' => 'wechat_kf_chat_log_refresh',
+      'wrapper' => $user_openid_sha . 'chat_log',
+      'effect' => 'trigger',
+    ),//#ajax['effect']
+  );
+
+//  $chat_log = wechat_kf_get_chat_log($user_openid, $kf_uid);
+//  foreach ($chat_log as $openid => $chat_info) {
+//    $form[$user_openid_sha]['chat_log'][$openid] = array(
+//      '#type' => 'item',
+//    );
+//    $form[$user_openid_sha]['chat_log'][$openid]['date'] = array(
+//      '#markup' => 'asdfasfasd',
+//    );
+//  }
+  $form[$user_openid_sha]['content'] = array(
+    '#type' => 'container',
+    '#title' => '发送方式设置',
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+  $form[$user_openid_sha]['content']['radios'] = array(
+    '#type' => 'radios',
+    '#title' => t('选择发送的消息类型'),
+    '#default_value' => 'text',
+    '#options' => array(
+//      'mpnews' => '图文',
+      'text' => '文本',
+//      'voice' => '语音',
+//      'music' => '音乐',
+//      'image' => '图片',
+//      'video' => '视频',
+    ),
+  );
+
+  $form[$user_openid_sha]['content']['text'] = array(
+    '#type' => 'textarea',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="' . $user_openid_sha . '[content][radios]"]' => array('value' => 'text'),
+      ),
+    ),
+  );
+
+  $form[$user_openid_sha]['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('发送'),
+    '#weight' => 1,
+    //'#submit' => array('wechat_kf_chat_form_submit'),
+    // If no javascript action.
+    '#ajax' => array(
+      'callback' => 'wechat_kf_js',
+      'wrapper' => $user_openid_sha,
+
+    ),
+  );
+
+  return $form;
+}
+
+function wechat_kf_chat_form_submit($form, &$form_state) {
+  $body = array();
+  $wechat_obj = wechat_api_init_wechatobj();
+
+  $touser = $form_state['user_openid'];
+  $kf_uid = $form_state['kf_uid'];
+
+  $openid_sha = sha1($touser);
+
+  $msgtype = $form_state['input'][$openid_sha]['content']['radios'];
+  // dpm($msgtype);
+  switch ($msgtype) {
+    case 'text': {
+      $body['content'] = $form_state['input'][$openid_sha]['content']['text'];
+      break;
+    }
+    case '': {
+
+      break;
+    }
+  }
+
+
+  $data = array(
+    'touser' => $touser,
+    'msgtype' => $msgtype,
+    $msgtype => $body,
+  );
+
+  //dpm($data);
+
+  $return = $wechat_obj->sendCustomMessage($data);
+  if ($return['errcode'] == '0' && $return['errmsg'] == 'ok') {
+    drupal_set_message('发送成功');
+  }
+
+  $kf_send = entity_create('wechat_kf_send', array('msg_type' => $msgtype));
+  $kf_send_wrapper = entity_metadata_wrapper('wechat_kf_send', $kf_send);
+  $kf_send_wrapper->field_kf_send_text_content->set($form_state['input'][$openid_sha]['content']['text']);
+  $kf_send_wrapper->save();
+
+  $chat_log = entity_create('wechat_kf_chat_log', array());
+  $chat_log->msg_type = $msgtype;
+  $chat_log->user_openid = $touser;
+  $chat_log->kf_uid = $kf_uid;
+  $chat_log->who_to_who = 'kf_to_user';
+  $chat_log->send_id = $kf_send->id;
+  $chat_log->received_id = 0;
+  $chat_log->create_time = time();
+  $chat_log->save();
+
+}
+
+function wechat_kf_chat_log_refresh($form, &$form_state) {
+  $openid_sha = sha1($form_state['openid']);
+  return $form[$openid_sha]['chat_log'];
+}
+
+function wechat_kf_js($form, &$form_state) {
+//  $openid = $form_state['openid'];
+//  dpm($form);
+//  dpm($form_state);
+//  $openid_sha = sha1($form_state['openid']);
+//
+//  //unset($form_state['input'][$openid_sha]);
+//  $form_state['rebuild'] = TRUE;
+  //$form = drupal_rebuild_form($form_state['input']['form_id'], $form_state);
+  //$new_form = drupal_get_form('wechat_kf_chat_form', $openid);
+  return $form;
+}
+
+function template_preprocess_wechat_kf_received(&$variables) {
+
+  foreach (element_children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+
+
+}
+
+/**
+ * Implements hook_theme().
+ */
+function wechat_kf_theme($existing, $type, $theme, $path) {
+  return array(
+    'wechat_kf_server_box' => array(
+      'render element' => 'elements',
+      'template' => 'wechat_kf_server_box',
+      'path' => $path . '/theme',
+    ),
+    'wechat_kf_received' => array(
+      'render element' => 'elements',
+      'template' => 'wechat_kf_received',
+      'path' => $path . '/theme',
+    ),
+    'wechat_kf_page' => array(
+      'variables' => array(
+        'uid_list' => NULL,
+      ),
+      'template' => 'wechat_kf_page',
+      'path' => $path . '/theme',
+    ),
+    'wechat_kf_item' => array(
+      'variables' => array(
+        'uid' => NULL,
+      ),
+      'template' => 'wechat_kf_item',
+      'path' => $path . '/theme',
+    ),
+    'wechat_kf_chat_page' => array(
+      'variables' => array(
+        'kf_uid' => NULL,
+      ),
+      'template' => 'wechat_kf_chat_page',
+      'path' => $path . '/theme',
+    ),
+    'wechat_kf_chat_session' => array(
+      'variables' => array(
+        'user_openid' => NULL,
+        'kf_uid' => NULL,
+      ),
+      'template' => 'wechat_kf_chat_session',
+      'path' => $path . '/theme',
+    ),
+    'wechat_kf_chat_log' => array(
+      'variables' => array(
+        'user_openid' => NULL,
+        'kf_uid' => NULL,
+      ),
+      'template' => 'wechat_kf_chat_log',
+      'path' => $path . '/theme',
+    ),
+  );
+}
+
+
+function wechat_kf_get_chat_log_page() {
+//  $user_openid = $_POST['user_openid'];
+//  $kf_uid = $_POST['kf_uid'];
+  $user_openid = 'oXLV-s_Rwy52YryNW-PU3-OD5la0';
+  $kf_uid = 1;
+  $chat_log = wechat_kf_get_chat_log($user_openid, $kf_uid);
+  $output = '';
+  foreach ($chat_log as $openid => $chat_info) {
+    $view = '';
+    if ($chat_info->who_to_who == 'user_to_kf') {
+      $massage = wechat_kf_received_load($chat_info->received_id);
+      $view = $massage->view();
+    }
+    elseif ($chat_info->who_to_who == 'kf_to_user') {
+      $massage = wechat_kf_send_load($chat_info->send_id);
+      $view = $massage->view();
+    }
+    $output .= drupal_render($view);
+  }
+  $json['status'] = 0;
+  $json['total_messages'] = '123123';
+  $json['last_timestamp'] = time();
+  $json['buddylist'] = 'vvvvv';
+  drupal_json_output($json);
+}
+
+function wechat_kf_send() {
+
+  $wechat_obj = wechat_api_init_wechatobj();
+  $body = array();
+
+  $touser = $_POST['user_openid'];
+  $kf_uid = $_POST['kf_uid'];
+  $msgtype = $_POST['msgtype'];
+
+  switch ($msgtype) {
+    case 'text': {
+      $body['content'] = $_POST['content'];
+      break;
+    }
+  }
+
+  $data = array(
+    'touser' => $touser,
+    'msgtype' => $msgtype,
+    $msgtype => $body,
+  );
+
+  $return = $wechat_obj->sendCustomMessage($data);
+//  if ($return['errcode'] == '0' && $return['errmsg'] == 'ok') {
+//    drupal_set_message('发送成功');
+//  }
+
+  $kf_send = entity_create('wechat_kf_send', array('msg_type' => $msgtype));
+  $kf_send_wrapper = entity_metadata_wrapper('wechat_kf_send', $kf_send);
+  $kf_send_wrapper->field_kf_send_text_content->set($_POST['content']);
+  $kf_send_wrapper->save();
+
+  $chat_log = entity_create('wechat_kf_chat_log', array());
+  $chat_log->msg_type = $msgtype;
+  $chat_log->user_openid = $touser;
+  $chat_log->kf_uid = $kf_uid;
+  $chat_log->who_to_who = 'kf_to_user';
+  $chat_log->send_id = $kf_send->id;
+  $chat_log->received_id = 0;
+  $chat_log->create_time = time();
+  $chat_log->save();
+
+
+  drupal_json_output(array());
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function wechat_kf_block_info() {
+  $blocks['wechat_kf_server'] = array(
+    'info' => t('客服系统'),
+    'cache' => DRUPAL_NO_CACHE
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function wechat_kf_block_view($delta = '') {
+  $block = array();
+  if ($delta == 'wechat_kf_server') {
+    $block['content'] = array(
+      '#theme' => 'wechat_kf_server_box',
+    );
+  }
+  return $block;
+}
+
+
+/**
+ * Implements hook_menu().
+ */
+function wechat_kf_menu() {
+  $items['wechat_kf/send'] = array(
+    'page callback' => 'wechat_kf_send',
+    'access arguments' => array('access wechat_kf send'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['wechat_kf/chat_log'] = array(
+    'page callback' => 'wechat_kf_get_chat_log_page',
+    //'page arguments' => array(2, 3),
+    //'delivery callback' => 'ajax_deliver',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+
+  $items['wechat_kf'] = array(
+    'title' => '微信客服系统',
+    'page callback' => 'wechat_kf_page',
+    //'page arguments' => array('wechat_request_reply', 2),
+    'access callback' => TRUE,
+    'weight' => 0,
+    'type' => MENU_CALLBACK,
+    'file' => 'include/wechat_kf.pages.inc',
+  );
+
+
+  $items['user/%user/kf_sign'] = array(
+    'title' => '客服系统设置',
+    'description' => '客服系统设置。',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_kf_settings_form'),
+    'access callback' => TRUE,
+//    'file' => 'wechat_user.forms.inc',
+  );
+
+  $items['admin/structure/wechat_kf'] = array(
+    'title' => '客服系统设置',
+    'description' => '客服系统设置。',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_kf_settings_form'),
+    'access callback' => TRUE,
+    //'file' => 'wechat_user.forms.inc',
+  );
+
+  $items['admin/structure/wechat_kf/settings'] = array(
+    'title' => 'Settings',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  return $items;
+}
+
+function wechat_kf_settings_form($form, &$form_state) {
+  $form['wechat_kf_max_session'] = array(
+    '#type' => 'textfield',
+    '#title' => t('最大单客服接入数量'),
+    '#default_value' => variable_get('wechat_kf_max_session', 5),
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#required' => TRUE,
+    '#element_validate' => array('element_validate_number'),
+  );
+  return system_settings_form($form);
+//  $form['actions'] = array('#type' => 'actions');
+//  $form['actions']['submit'] = array(
+//    '#type' => 'submit',
+//    '#value' => t('保存'),
+//    '#weight' => 40,
+//  );
+  //return $form;
+}
+
+function wechat_kf_users_by_role($role_name) {
+  $role = user_role_load_by_name($role_name);
+  $query = 'SELECT ur.uid
+    FROM {users_roles} AS ur
+    WHERE ur.rid = :rid';
+  $result = db_query($query, array(':rid' => $role->rid));
+  $uids = $result->fetchCol();
+  return user_load_multiple($uids);
+}
+
+function wechat_kf_get_kf_list() {
+  $return = array();
+
+  return $return;
+}
+
+
+/**
+ * Implements hook_form_alter().
+ */
+function wechat_kf_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'user_profile_form') {
+    if ($form['#user_category'] == 'wechat_kf') {
+      $form['#submit'][] = 'wechat_kf_update_kf_info';
+      $form['actions']['update'] = array(
+        '#type' => 'submit',
+        '#value' => t('同步到微信'),
+        '#weight' => 40,
+      );
+    }
+  }
+}
+
+function wechat_kf_update_kf_info($form, &$form_state) {
+  //$wechat_obj = wechat_api_init_wechatobj();
+
+  //$wechat_obj->addKFAccount();
+  //dpm($form_state);
+}
+
+function wechat_kf_chat_get_free_kf() {
+  $array = variable_get('wechat_kf_kf_uid_stack', array());
+  $return = $array[0];
+  wechat_kf_pop_stack();
+  return $return;
+}
+
+function wechat_kf_push_stack($kf_uid) {
+  $array = variable_get('wechat_kf_kf_uid_stack', array());
+  array_push($array, $kf_uid);
+  variable_set('wechat_kf_kf_uid_stack', $array);
+}
+
+function wechat_kf_pop_stack() {
+  $array = variable_get('wechat_kf_kf_uid_stack', array());
+  array_reverse($array, TRUE);
+  array_pop($array);
+  array_reverse($array, TRUE);
+  variable_set('wechat_kf_kf_uid_stack', $array);
+}
+
+
+function wechat_kf_get_session_status() {
+
+}
+
+function wechat_kf_get_chat_log($user_openid, $kf_uid) {
+  $table = 'wechat_kf_chat_log';
+  $result = db_select($table)
+    ->fields($table)
+    ->condition('kf_uid', $kf_uid)
+    ->condition('user_openid', $user_openid)
+    ->execute()//->rowCount();
+    ->fetchAllAssoc('id');
+  //->fetchAll();
+  return $result;
+}
+
+function wechat_kf_check_apply_kf_uid($received_info) {
+//检测消息内容，获取客户指定的客服
+  return 1;
+}
+
+
+//@todo 预处理微信消息，判断是否需要开启客服会话。
+function wechat_kf_process_massage($wechat) {
+  $wechat->getRev();
+  $xml_obj = $wechat->getRevData();
+  $xml_obj = (object) $xml_obj;
+  $user_openid = $xml_obj->FromUserName;
+  watchdog('wechat_kf_test_openid', json_encode($user_openid));
+  rules_invoke_event('wechat_kf_process_massage', $user_openid);
+
+//  $nodes = node_load_multiple(array(), array('title' => $user_openid));
+//  if (!empty($nodes)) {
+//    return TRUE;
+//  }
+//  else {
+//    return FALSE;
+//  }
+
+  //查询会话状态
+  $chat_session = wechat_kf_chat_session_load($user_openid);
+  watchdog('wechat_kf_test', json_encode($chat_session));
+
+  if ($chat_session) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+
+//@todo 客服消息存储
+function wechat_kf_save_request_messages($wechat) {
+  $wechat->getRev();
+  $xml_obj = $wechat->getRevData();
+  $xml_obj = (object) $xml_obj;
+  $user_openid = $xml_obj->FromUserName;
+  //watchdog('wechat_kf_save_request_messages', json_encode($user_openid));
+  //消息操作
+  $msg_type = $xml_obj->MsgType;
+  watchdog('wechat_kf_save_request_messages', json_encode($msg_type));
+  $received = entity_create('wechat_kf_received', array('msg_type' => $msg_type));
+  $received_wrapper = entity_metadata_wrapper('wechat_kf_received', $received);
+
+  $received_wrapper->kf_uid->set(1);
+  $received_wrapper->user_openid->set($user_openid);
+  $received_wrapper->create_time->set(time());
+
+  if ($xml_obj->MsgType == 'event') {
+    $received_wrapper->msg_id->set('');
+  }
+  else {
+    $received_wrapper->msg_id->set($xml_obj->MsgId);
+  }
+
+
+//todo 判断消息类型，读取消息内容。暂不处理除文本消息外的其它消息
+
+  switch ($xml_obj->MsgType) {
+    case 'text': {
+      $received_wrapper->field_kf_received_text_content->set($xml_obj->Content);
+      break;
+    }
+//    case 'image': {
+//      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+//      $file = wechat_messages_save_media($file_content, $xml_obj->MediaId . '.jpg', 'field_wechat_image', 'image');
+//      $request_wrapper->field_media_id->set($xml_obj->MediaId);
+//      $request_wrapper->field_pic_url->set($xml_obj->PicUrl);
+//      $request_wrapper->field_wechat_image->file->set($file);
+//      break;
+//    }
+//    case 'voice': {
+//      //存媒体ID
+//      $request_wrapper->field_media_id->set($xml_obj->MediaId);
+//      //存语音格式
+//      $request_wrapper->field_file_format->set($xml_obj->Format);
+//      //存媒体文件，是用格式拼装
+//      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+//      $file = wechat_messages_save_media($file_content, $xml_obj->MediaId . '.' . $xml_obj->Format, 'field_media_file', 'file');
+//      $request_wrapper->field_media_file->file->set($file);
+//      //存语音识别结果
+//      if (isset($xml_obj->Recognition)) {
+//        $request_wrapper->field_recongnition->set($xml_obj->Recognition);
+//      }
+//      break;
+//    }
+//    case 'shortvideo':
+//    case 'video': {
+//      //存媒体和媒体缩略图ID
+//      $request_wrapper->field_media_id->set($xml_obj->MediaId);
+//      $request_wrapper->field_thumb_media_id->set($xml_obj->MediaId);
+//      //存媒体文件
+//      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+//      $file = wechat_messages_save_media($file_content, $xml_obj->MediaId . '.mp4', 'field_media_file', 'file');
+//      $request_wrapper->field_media_file->file->set($file);
+//      //存缩略图文件
+//      $file_content = $wechat_obj->getMedia($xml_obj->ThumbMediaId);
+//      $file = wechat_messages_save_media($file_content, $xml_obj->ThumbMediaId . '.jpeg', 'field_thumb_media_image', 'image');
+//      $request_wrapper->field_thumb_media_image->file->set($file);
+//      break;
+//    }
+//    case 'location': {
+//      $request_wrapper->field_label->set($xml_obj->Label);
+//      $request_wrapper->field_scale->set($xml_obj->Scale);
+//      $request_wrapper->field_location_x->set($xml_obj->Location_X);
+//      $request_wrapper->field_location_y->set($xml_obj->Location_Y);
+//      break;
+//    }
+//    case 'link': {
+//      $request_wrapper->field_title->set($xml_obj->Title);
+//      $request_wrapper->field_description->set($xml_obj->Description);
+//      $request_wrapper->field_url->set($xml_obj->Url);
+//      break;
+//    }
+//    case 'event': {
+//      $EventKey = $xml_obj->EventKey;
+//      if (!empty($EventKey)) {
+//        $request_wrapper->field_event_key->set($EventKey);
+//      }
+//      //watchdog('wechat_EventKey', $EventKey);
+//      $request_wrapper->field_event->set($xml_obj->Event);
+//      //watchdog('wechat', json_encode((array) $xml_obj));
+//
+//      //处理特殊事件数据，如上报地理位置事件、关注、取消关注等。
+//      switch ($xml_obj->Event) {
+//        //关注，处理扫码关注。普通关注无特殊数据
+//        case 'subscribe':
+//          //用户已关注时的事件推送
+//        case 'SCAN': {
+//          $request_wrapper->field_ticket->set($xml_obj->Ticket);
+//          break;
+//        }
+//        //上报地理位置事件
+//        case 'LOCATION': {
+//          $request_wrapper->field_location_x->set($xml_obj->Latitude);
+//          $request_wrapper->field_location_y->set($xml_obj->Longitude);
+//          $request_wrapper->field_precision->set($xml_obj->Precision);
+//        }
+//      }
+//      break;
+//    }
+  }
+  $received_wrapper->save();
+
+
+//  //写入消息记录
+//  $chat_log = entity_create('wechat_kf_chat_log', array());
+//  $chat_log->msg_type = $msg_type;
+//  $chat_log->user_openid = $user_openid;
+//  $chat_log->kf_uid = 1;
+//  $chat_log->who_to_who = 'user_to_kf';
+//  $chat_log->send_id = 0;
+//
+//
+//  $chat_log->received_id = $received->id;
+//  $chat_log->create_time = time();
+//
+//  $chat_log->save();
+
+}
+
+function wechat_kf_wechat_session_status() {
+  return array(
+    'wechat_kf' => array(
+      'name' => '客服消息',
+      'function callback' => 'wechat_kf_save_request_messages',
+      'echo callback' => 'wechat_kf_echo',
+      'timeout' => 1800,
+    ),
+  );
+}
+
+function wechat_kf_echo($wechat) {
+  return 'success';
+}

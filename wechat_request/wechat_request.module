@@ -1,0 +1,457 @@
+<?php
+include_once 'wechat_request.features.inc';
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_request_entity_info() {
+  $return = array(
+    'wechat_request' => array(
+      'label' => t('微信请求消息'),
+      'plural label' => t('微信请求消息'),
+      'description' => t('微信请求消息实体.'),
+      'entity class' => 'WechatRequest',
+      'controller class' => 'EntityAPIController',
+      'base table' => 'wechat_request',
+      'fieldable' => TRUE,
+      'view modes' => array(
+        'full' => array(
+          'label' => t('查看消息'),
+          'custom settings' => FALSE,
+        ),
+        'preview' => array(
+          'label' => t('消息预览'),
+          'custom settings' => FALSE,
+        ),
+      ),
+      'entity keys' => array(
+        'id' => 'id',
+        'bundle' => 'msg_type',
+        'label' => 'msg_id',
+      ),
+      'bundles' => array(),
+      'bundle keys' => array(
+        'bundle' => 'type',
+      ),
+      'uri callback' => 'entity_class_uri',
+      'label callback' => 'entity_class_label',
+      'access callback' => 'wechat_request_access',
+      'module' => 'wechat_request',
+      'metadata controller class' => 'WechatRequestMetadataController'
+    ),
+  );
+
+  // Add bundle info but bypass entity_load() as we cannot use it here.
+  $types = db_select('wechat_request_type', 'w')
+    ->fields('w')
+    ->execute()
+    ->fetchAllAssoc('type');
+
+  foreach ($types as $type => $info) {
+    $return['wechat_request']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/structure/wechat/request/manage/%wechat_request_type',
+        'real path' => 'admin/structure/wechat/request/manage/' . $type,
+        'bundle argument' => 5,
+        'access arguments' => array('administer wechat messages request'),
+      ),
+    );
+  }
+
+  $return['wechat_request_type'] = array(
+    'label' => t('微信请求消息类型'),
+    'plural label' => t('微信请求消息类型'),
+    'description' => t('微信请求消息类型.'),
+    'entity class' => 'WechatRequestType',
+    'controller class' => 'EntityAPIControllerExportable',
+    'base table' => 'wechat_request_type',
+    'fieldable' => FALSE,
+    'bundle of' => 'wechat_request',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      'name' => 'type',
+      'label' => 'label',
+    ),
+    'access callback' => 'wechat_request_type_access',
+    'module' => 'wechat_request',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => 'admin/structure/wechat/request',
+      'file' => 'wechat_request.admin.inc',
+      'controller class' => 'WechatRequestTypeUIController',
+    ),
+  );
+
+  return $return;
+}
+
+
+function wechat_request_access($op, $wechat_request = NULL, $account = NULL) {
+  if (user_access('administer profiles', $account)) {
+    return TRUE;
+  }
+  if ($op == 'create' || $op == 'update') {
+    $op = 'edit';
+  }
+  // Allow modules to grant / deny access.
+  $access = module_invoke_all('wechat_request_access', $op, $wechat_request, $account);
+
+  // Only grant access if at least one module granted access and no one denied
+  // access.
+  if (in_array(FALSE, $access, TRUE)) {
+    return FALSE;
+  }
+  elseif (in_array(TRUE, $access, TRUE)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+function wechat_request_type_access() {
+  return user_access('administer wecaht request messages');
+}
+
+function wechat_request_wechat_request_access($op, $wechat_request = NULL, $account = NULL) {
+  // Don't grant access for users to delete their profile.
+  if (isset($wechat_request) && ($type_name = $wechat_request->type) && $op != 'delete') {
+    if (user_access("$op any $type_name wecaht request messages", $account)) {
+      return TRUE;
+    }
+    $account = isset($account) ? $account : $GLOBALS['user'];
+    if (isset($wechat_request->uid) && $wechat_request->uid == $account->uid && user_access("$op own $type_name wecaht request messages", $account)) {
+      return TRUE;
+    }
+  }
+  // Do not explicitly deny access so others may still grant access.
+}
+
+/**
+ * Implements hook_permission().
+ */
+function wechat_request_permission() {
+  $permissions = array(
+    'administer wecaht request messages' => array(
+      'title' => t('管理所有消息'),
+      'description' => t('管理员权限.'),
+    ),
+  );
+  // Generate per profile type permissions.
+  foreach (wechat_request_get_types() as $type) {
+    $type_name = check_plain($type->type);
+    $permissions += array(
+      "edit own $type_name wecaht request messages" => array(
+        'title' => t('%type_name: 编辑自己的消息', array('%type_name' => $type->label)),
+      ),
+      "edit any $type_name wecaht request messages" => array(
+        'title' => t('%type_name: 编辑所有消息', array('%type_name' => $type->label)),
+      ),
+      "view own $type_name wecaht request messages" => array(
+        'title' => t('%type_name: 查看自己的消息', array('%type_name' => $type->label)),
+      ),
+      "view any $type_name wecaht request messages" => array(
+        'title' => t('%type_name: 查看所有消息', array('%type_name' => $type->label)),
+      ),
+    );
+  }
+  return $permissions;
+}
+
+/**---------------request----------------**/
+function wechat_request_type_load($type) {
+  return wechat_request_get_types($type);
+}
+
+function wechat_request_get_types($type_name = NULL) {
+  $types = entity_load_multiple_by_name('wechat_request_type', isset($type_name) ? array($type_name) : FALSE);
+  return isset($type_name) ? reset($types) : $types;
+}
+
+function wechat_request_load($id, $reset = FALSE) {
+  $wechat_request = wechat_request_load_multiple(array($id), array(), $reset);
+  return reset($wechat_request);
+}
+
+function wechat_request_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_request', $ids, $conditions, $reset);
+}
+
+
+class WechatRequest extends Entity {
+
+  public $id;
+  public $msg_type;
+  public $create_time;
+  public $msg_id;
+  public $subscription;
+  public $openid;
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_request');
+  }
+
+  protected function defaultLabel() {
+    return $this->msg_id;
+  }
+
+  public function save() {
+    parent::save();
+  }
+
+}
+
+class WechatRequestType extends Entity {
+
+
+  public $type;
+  public $label;
+  public $weight = 0;
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_request_type');
+  }
+
+  /**
+   * Returns whether the wechat_request_message type is locked, thus may not be deleted or renamed.
+   *
+   * Wechat_request_message types provided in code are automatically treated as locked, as well
+   * as any fixed wechat_request_message type.
+   */
+  public function isLocked() {
+    return isset($this->status) && empty($this->is_new) && (($this->status & ENTITY_IN_CODE) || ($this->status & ENTITY_FIXED));
+  }
+
+
+  /**
+   * Overrides Entity::save().
+   */
+  public function save() {
+    parent::save();
+    // Clear field info caches such that any changes to extra fields get
+    // reflected.
+    field_info_cache_clear();
+  }
+}
+
+class WechatRequestMetadataController extends EntityDefaultMetadataController {
+
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info['wechat_request']['properties'];
+
+    $properties['msg_id'] = array(
+      'label' => t('消息id'),
+      'description' => t('消息id，64位整型.'),
+      'type' => 'text',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'required' => TRUE,
+      'schema field' => 'msg_id',
+    );
+    $properties['subscription'] = array(
+      'label' => t('开发者微信号'),
+      'description' => t('开发者微信号.'),
+      'type' => 'text',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'required' => TRUE,
+      'schema field' => 'subscription',
+    );
+    $properties['openid'] = array(
+      'label' => t('发送方帐号'),
+      'description' => t('发送方帐号（一个OpenID）.'),
+      'type' => 'text',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'required' => TRUE,
+      'schema field' => 'openid',
+    );
+    $properties['msg_type'] = array(
+      'label' => t('消息类型'),
+      'description' => t('消息类型.'),
+      'type' => 'token',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'required' => TRUE,
+      'schema field' => 'msg_type',
+    );
+    $properties['data'] = array(
+      'label' => t('消息数据'),
+      'description' => t('消息数据 json格式.'),
+      'type' => 'text',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'required' => TRUE,
+      'schema field' => 'data',
+    );
+    $properties['create_time'] = array(
+      'label' => t('消息创建时间'),
+      'description' => t('消息创建时间 （整型）.'),
+      'type' => 'date',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'required' => TRUE,
+      'schema field' => 'create_time',
+    );
+
+    return $info;
+  }
+
+}
+
+function wechat_request_save_media($file_content, $file_name, $field_name, $msg_type) {
+
+  $info_instance = field_info_instance('wechat_request', $field_name, $msg_type);
+  $info_field = field_info_field($field_name);
+
+  $file_directory = $info_instance['settings']['file_directory'] . '/';
+  $uri_scheme = $info_field['settings']['uri_scheme'] . '://';
+
+  $dir = $uri_scheme . $file_directory;
+
+  $return = file_prepare_directory($dir);
+  if (empty($return)) {
+    drupal_mkdir($dir, 0777, TRUE);
+  }
+  return file_save_data($file_content, $dir . $file_name);
+}
+
+/**
+ * @param \Wechat $wechat
+ */
+function wechat_request_save_request_messages(Wechat $wechat) {
+  $wechat->getRev();
+  $xml_obj = $wechat->getRevData();
+  $xml_obj = (object) $xml_obj;
+
+  $wechat_obj = wechat_api_init_wechatobj();
+
+  $request = entity_create('wechat_request', array('msg_type' => $xml_obj->MsgType));
+  $request_wrapper = entity_metadata_wrapper('wechat_request', $request);
+
+
+  $request_wrapper->subscription->set($xml_obj->ToUserName);
+  $request_wrapper->openid->set($xml_obj->FromUserName);
+  $request_wrapper->create_time->set(time());
+
+  if ($xml_obj->MsgType == 'event') {
+    $request_wrapper->msg_id->set('');
+  }
+  else {
+    $request_wrapper->msg_id->set($xml_obj->MsgId);
+  }
+
+
+  switch ($xml_obj->MsgType) {
+    case 'text': {
+      $request_wrapper->field_content->set($xml_obj->Content);
+      break;
+    }
+    case 'image': {
+      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.jpg', 'field_wechat_image', 'image');
+      $request_wrapper->field_media_id->set($xml_obj->MediaId);
+      $request_wrapper->field_pic_url->set($xml_obj->PicUrl);
+      $request_wrapper->field_wechat_image->file->set($file);
+      break;
+    }
+    case 'voice': {
+      //存媒体ID
+      $request_wrapper->field_media_id->set($xml_obj->MediaId);
+      //存语音格式
+      $request_wrapper->field_file_format->set($xml_obj->Format);
+      //存媒体文件，是用格式拼装
+      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+
+      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.' . $xml_obj->Format, 'field_media_file', 'file');
+      $request_wrapper->field_media_file->file->set($file);
+
+      //存语音识别结果
+      $Recognition = $xml_obj->Recognition;
+      if (!empty($Recognition)) {//使用isset存在bug
+        $request_wrapper->field_recongnition->set($xml_obj->Recognition);
+      }
+      break;
+    }
+
+    case 'shortvideo':
+    case 'video': {
+      //存媒体和媒体缩略图ID
+      $request_wrapper->field_media_id->set($xml_obj->MediaId);
+      $request_wrapper->field_thumb_media_id->set($xml_obj->MediaId);
+      //存媒体文件
+      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.mp4', 'field_media_file', 'file');
+      $request_wrapper->field_media_file->file->set($file);
+      //存缩略图文件
+      $file_content = $wechat_obj->getMedia($xml_obj->ThumbMediaId);
+      $file = wechat_request_save_media($file_content, $xml_obj->ThumbMediaId . '.jpeg', 'field_thumb_media_image', 'image');
+      $request_wrapper->field_thumb_media_image->file->set($file);
+      break;
+    }
+
+    case 'location': {
+      $request_wrapper->field_label->set($xml_obj->Label);
+      $request_wrapper->field_scale->set($xml_obj->Scale);
+      $request_wrapper->field_location_x->set($xml_obj->Location_X);
+      $request_wrapper->field_location_y->set($xml_obj->Location_Y);
+      break;
+    }
+
+    case 'link': {
+      $request_wrapper->field_title->set($xml_obj->Title);
+      $request_wrapper->field_description->set($xml_obj->Description);
+      $request_wrapper->field_url->set($xml_obj->Url);
+      break;
+    }
+    case 'event': {
+      $EventKey = $xml_obj->EventKey;
+      if (!empty($EventKey)) {
+        $request_wrapper->field_event_key->set($EventKey);
+      }
+      //watchdog('wechat_EventKey', $EventKey);
+      $request_wrapper->field_event->set($xml_obj->Event);
+      //watchdog('wechat', json_encode((array) $xml_obj));
+
+      //处理特殊事件数据，如上报地理位置事件、关注、取消关注等。
+      switch ($xml_obj->Event) {
+        //关注，处理扫码关注。普通关注无特殊数据
+        case 'subscribe':
+          //用户已关注时的事件推送
+        case 'SCAN': {
+          $request_wrapper->field_ticket->set($xml_obj->Ticket);
+          break;
+        }
+        //上报地理位置事件
+        case 'LOCATION': {
+          $request_wrapper->field_location_x->set($xml_obj->Latitude);
+          $request_wrapper->field_location_y->set($xml_obj->Longitude);
+          $request_wrapper->field_precision->set($xml_obj->Precision);
+        }
+      }
+      break;
+    }
+  }
+  //全部消息数据转换为json格式，存入数据库
+  $request_wrapper->data->set(json_encode((array) $xml_obj));
+  $request_wrapper->save();
+
+}
+
+function wechat_request_echo(Wechat $wechat) {
+  return 'success';
+}
+
+function wechat_request_wechat_session_status() {
+  return array(
+    'wechat_request' => array(
+      'name' => '一般请求消息消息（Messages）',
+      'function callback' => 'wechat_request_save_request_messages',
+      'echo callback' => 'wechat_request_echo',
+      'timeout' => 0,
+    ),
+  );
+}
+
+
+

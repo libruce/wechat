@@ -1,0 +1,4 @@
+name = 微信JSSDK
+core = 7.x
+package = wechat
+dependencies[] = wechat_api

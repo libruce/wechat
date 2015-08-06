@@ -1,0 +1,590 @@
+<?php
+
+
+/**
+ * Implements hook_wechat_session_status().
+ */
+function wechat_qr_wechat_session_status() {
+  return array(
+    'wechat_qr_save' => array(
+      'name' => '二维码消息绑定',
+      'function callback' => 'wechat_request_save_request_messages',
+      'echo callback' => 'wechat_request_echo',
+      'timeout' => 60,
+    ),
+    'wechat_qr_read' => array(
+      'name' => '二维码消息读取',
+      'function callback' => 'wechat_request_save_request_messages',
+      'echo callback' => 'wechat_request_echo',
+      'timeout' => 30,
+    ),
+  );
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_qr_entity_info() {
+  $return['wechat_qr'] = array(
+    'label' => t('微信QR'),
+    'plural label' => t('微信QR'),
+    'description' => t('微信QR.'),
+    'entity class' => 'WechatQr',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_qr',
+    'fieldable' => FALSE,
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'ticket'
+    ),
+    'access callback' => 'wechat_qr_access',
+    'module' => 'wechat_qr',
+    'metadata controller class' => 'WechatQrMetadataController',
+    'bundles' => array(
+      'wechat_qr' => array(
+        'label' => t('微信QR'),
+      ),
+    ),
+  );
+  return $return;
+}
+
+function wechat_qr_load($id, $reset = FALSE) {
+  $return = wechat_qr_load_multiple(array($id), array(), $reset);
+  return reset($return);
+}
+
+function wechat_qr_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_qr', $ids, $conditions, $reset);
+}
+
+function wechat_qr_access() {
+  return TRUE;
+}
+
+
+class WechatQr extends Entity {
+
+  public $id;
+  public $ticket;
+  public $qr_type;
+  public $qr_key;
+  public $expire;
+  public $create_time;
+
+  public $qr_url;
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_qr');
+  }
+
+  protected function defaultLabel() {
+    return $this->ticket;
+  }
+
+  public function save() {
+    if (empty($this->create_time)) {
+      $this->create_time = time();
+    }
+    $we_obj = wechat_api_init_wechatobj();
+
+    $ticket_array = $we_obj->getQRCode($this->qr_key, $this->qr_type, $this->expire);
+    //dpm($ticket_array);
+    if (!empty($ticket_array['ticket'])) {
+      $this->ticket = $ticket_array['ticket'];
+      $this->qr_url = $we_obj->getQRUrl($this->ticket);
+    }
+    parent::save();
+  }
+
+  public function  get_url() {
+    return $this->qr_url;
+  }
+}
+
+
+class WechatQrMetadataController extends EntityDefaultMetadataController {
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info['wechat_qr']['properties'];
+
+    $properties['ticket'] = array(
+      'type' => 'text',
+      'label' => t('二维码Ticket'),
+      'description' => t('Ticket可到指定URL换取二维码.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'ticket',
+    );
+    $properties['qr_type'] = array(
+      'type' => 'text',
+      'label' => t('二维码类型'),
+      'description' => t('永久还是临时二维码.0 临时 1 永久'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'qr_type',
+      'required' => TRUE,
+    );
+    $properties['qr_key'] = array(
+      'type' => 'text',
+      'label' => t('二维码关联KEY'),
+      'description' => t('二维码关联KEY，关联到一个请求消息ID.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'qr_key',
+      'required' => TRUE,
+    );
+    $properties['expire'] = array(
+      'type' => 'integer',
+      'label' => t('过期时间'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'expire',
+      'required' => TRUE,
+    );
+    $properties['create_time'] = array(
+      'type' => 'date',
+      'label' => t('创建时间'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'create_time',
+      'required' => TRUE,
+    );
+    return $info;
+  }
+}
+
+
+/**
+ * Implements hook_rules_condition_info().
+ */
+function wechat_qr_rules_condition_info() {
+  $condition = array(
+    'wechat_qr_key_data' => array(
+      'label' => t('判断QR KEY是否存在数据'),
+      'parameter' => array(
+        'event' => array(
+          'type' => 'text',
+          'label' => t('事件类型'),
+          'description' => t('事件类型.'),
+          'save' => TRUE,
+        ),
+        'ticket' => array(
+          'type' => 'text',
+          'label' => t('二维码ticket'),
+          'description' => t('二维码ticket.'),
+          'save' => TRUE,
+        ),
+        'qr_key' => array(
+          'type' => 'text',
+          'label' => t('二维码KEY'),
+          'description' => t('二维码KEY.'),
+          'save' => TRUE,
+        ),
+      ),
+      'group' => t('微信'),
+      'access callback' => 'rules_user_integration_access',
+      'base' => 'wechat_qr_condition_key_data',
+    ),
+  );
+  return $condition;
+}
+
+function wechat_qr_condition_key_data($event, $ticket, $qr_key) {
+  //watchdog('wechat_qr_condition_key_data', json_encode($event));
+  //return TRUE;
+  switch ($event) {
+    case 'SCAN': {
+
+      break;
+    }
+    case 'subscribe': {
+      $qr_key = substr($qr_key, 8);
+      break;
+    }
+  }
+
+  $query = db_select('wechat_qr', 'wq');
+  $query->join('wechat_qr_data', 'wqd', 'wq.id = wqd.id');
+  $query->fields('wq', array('id'))
+    ->condition('wq.ticket', $ticket)
+    ->condition('wq.qr_key', $qr_key)
+    ->condition('wqd.data', NULL, '!=');
+  $results = $query->execute()->fetchCol();
+
+  //watchdog('wechat_qr_condition_key_data', json_encode($results));
+  if (!empty($results)) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Implements hook_rules_action_info().
+ */
+function wechat_qr_rules_action_info() {
+  $action['wechat_qr_action_save_data_get_id'] = array(
+    'parameter' => array(
+      'openid' => array(
+        'type' => 'text',
+        'label' => t('OpenId'),
+        'save' => TRUE,
+      ),
+    ),
+    'provides' => array(
+      'key' => array(
+        'type' => 'integer',
+        'label' => t('二维码KEY'),
+        'save' => TRUE,
+      ),
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('读取需要绑定的二维码id'),
+    'base' => 'wechat_qr_action_save_data_get_id',
+  );
+  $action['wechat_qr_action_save_data'] = array(
+    'parameter' => array(
+      'id' => array(
+        'type' => 'text',
+        'label' => t('二维码id'),
+      ),
+      'openid' => array(
+        'type' => 'text',
+        'label' => t('OpenId'),
+      ),
+      'data' => array(
+        'type' => '*',
+        'label' => t('需关联的消息实体'),
+        'optional' => TRUE,
+      )
+    ),
+    'provides' => array(
+      'status' => array(
+        'type' => 'boolean',
+        'label' => t('关联结果'),
+      ),
+      'massage' => array(
+        'type' => 'text',
+        'label' => t('关联结果消息'),
+      ),
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('给二维码KEY关联数据'),
+    'base' => 'wechat_qr_action_save_data',
+  );
+  $action['wechat_qr_action_get_data'] = array(
+    'parameter' => array(
+      'ticket' => array(
+        'type' => '*',
+        'label' => t('二维码ticket'),
+      ),
+    ),
+    'provides' => array(
+      'data' => array(
+        'type' => 'integer',
+        'label' => t('二维码DATA'),
+      ),
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('读二维码的数据'),
+    'base' => 'wechat_qr_action_get_data',
+  );
+  $action['wechat_qr_action_qr_data'] = array(
+    'parameter' => array(
+      'data' => array(
+        'type' => 'entity',
+        'label' => t('请求消息实体'),
+        'save' => TRUE,
+      )
+    ),
+    'provides' => array(
+      'body' => array(
+        'type' => 'text',
+        'label' => t('转换结果'),
+      ),
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('转换二维码关联的数据，供下发使用'),
+    'base' => 'wechat_qr_action_qr_data',
+  );
+  return $action;
+}
+
+
+function wechat_qr_action_save_data_get_id($openid) {
+  watchdog('wechat_qr_action_save_data_get_id_openid', json_encode($openid));
+  $result = db_select('wechat_qr_data', 'wqd')
+    ->fields('wqd')
+    ->condition('openid', $openid)
+    ->condition('data', '')
+    ->execute()
+    ->fetchCol();
+  watchdog('wechat_qr_action_save_data_get_id', json_encode($result));
+  return array('key' => $result[0]);
+}
+
+function wechat_qr_action_save_data($id, $openid, $data = NULL) {
+
+  $result = db_select('wechat_qr_data', 'wqd')
+    ->fields('wqd')
+    ->condition('id', $id)
+    ->execute()
+    ->fetchAssoc();
+
+  $fields = array(
+    'id' => (int) $id,
+    'openid' => (string) $openid,
+    'data' => (string) $data,
+    'create_time' => (int) time(),
+  );
+
+  if (empty($result)) {
+    db_insert('wechat_qr_data')->fields($fields)->execute();
+  }
+  else {
+    db_update('wechat_qr_data')
+      ->fields($fields)
+      ->condition('id', $id)
+      ->execute();
+  }
+
+  return array('status' => TRUE, 'massage' => '关联成功');
+
+}
+
+function wechat_qr_action_get_data($ticket) {
+  $query = db_select('wechat_qr', 'wq');
+  $query->join('wechat_qr_data', 'wqd', 'wq.id = wqd.id');
+  $query->fields('wqd', array('data'))
+    ->condition('wq.ticket', $ticket)
+    ->condition('wqd.data', '', '!=');
+  $results = $query->execute()->fetchCol();
+  return array('data' => $results[0]);
+}
+
+function wechat_qr_action_qr_data($data) {
+  $body = array();
+  $wechat_request_wrapper = entity_metadata_wrapper('wechat_request', $data);
+  $msg_type = $wechat_request_wrapper->msg_type->value();
+  switch ($msg_type) {
+    case 'text': {
+      $body += array('content' => $wechat_request_wrapper->field_content->value());
+      break;
+    }
+    case 'image': {
+      $body = array('media_id' => wechat_qr_get_media_id($data, 'field_wechat_image'));
+      break;
+    }
+    /**
+     * {
+     * "touser":"OPENID",
+     * "msgtype":"voice",
+     * "voice":
+     * {
+     * "media_id":"MEDIA_ID"
+     * }
+     * }
+     *
+     */
+    case 'voice': {
+      //$body += array('content' => 'test');
+      $body['media_id'] = wechat_qr_get_media_id($data, 'field_media_file');
+      break;
+    }
+    default: {
+      $body += array('content' => '消息类型错误！');
+      break;
+    }
+//    /**
+//     * {
+//     * "touser":"OPENID",
+//     * "msgtype":"video",
+//     * "video":
+//     * {
+//     * "media_id":"MEDIA_ID",
+//     * "thumb_media_id":"MEDIA_ID",
+//     * "title":"TITLE",
+//     * "description":"DESCRIPTION"
+//     * }
+//     * }
+//     */
+//    case 'video': {
+//
+//      $body['media_id'] = wechat_reply_get_media_id($wechatReply, 'wechat_reply_video');
+//      $body['thumb_media_id'] = wechat_reply_get_media_id($wechatReply, 'wechat_reply_thumb_media');
+//      $body['title'] = $entity_wrapper->wechat_reply_video_title->value();
+//      $body['description'] = $entity_wrapper->wechat_reply_video_description->value();
+//      //dpm($body);
+//      break;
+//    }
+//    /**
+//     * {
+//     *    "touser":"OPENID",
+//     *    "msgtype":"music",
+//     *    "music":
+//     *      {
+//     *        "title":"MUSIC_TITLE",
+//     *        "description":"MUSIC_DESCRIPTION",
+//     *        "musicurl":"MUSIC_URL",
+//     *        "hqmusicurl":"HQ_MUSIC_URL",
+//     *        "thumb_media_id":"THUMB_MEDIA_ID"
+//     *      }
+//     * }
+//     */
+//    case 'music': {
+//      $body += wechat_reply_process_reply_music($wechatReply);
+//      break;
+//    }
+//    /**
+//     * {
+//     * "touser":"OPENID",
+//     *  "msgtype":"news",
+//     *    "news":{
+//     *      "articles": [
+//     *        {
+//     *          "title":"Happy Day",
+//     *          "description":"Is Really A Happy Day",
+//     *          "url":"URL",
+//     *          "picurl":"PIC_URL"
+//     *        },
+//     *        {
+//     *          "title":"Happy Day",
+//     *          "description":"Is Really A Happy Day",
+//     *          "url":"URL",
+//     *          "picurl":"PIC_URL"
+//     *        }
+//     *      ]
+//     *    }
+//     *
+//     * }
+//     */
+//    case 'news': {
+//      $body = array(
+//        'articles' => array(
+//          array(
+//            'title' => $entity_wrapper->wechat_reply_news_title->value(),
+//            'description' => $entity_wrapper->wechat_reply_news_description->value(),
+//            'url' => $entity_wrapper->wechat_reply_news_url->value(),
+//            'picurl' => file_create_url($entity_wrapper->wechat_reply_news_image->value()['uri']),
+//          ),
+//        )
+//      );
+//      break;
+//    }
+//    case 'multiple_news': {
+//      $value = array();
+//      $multiple_news = $entity_wrapper->field_news_reference->value();
+//      foreach ($multiple_news as $news) {
+//        $news_wrapper = entity_metadata_wrapper('wechat_reply', $news);
+//        $value[] = array(
+//          'title' => $news_wrapper->wechat_reply_news_title->value(),
+//          'description' => $news_wrapper->wechat_reply_news_description->value(),
+//          'url' => $news_wrapper->wechat_reply_news_url->value(),
+//          'picurl' => file_create_url($news_wrapper->wechat_reply_news_image->value()['uri']),
+//        );
+//        unset($news_wrapper);
+//      }
+//      $body = array(
+//        'articles' => $value,
+//      );
+//
+//      break;
+//    }
+  }
+  //watchdog('wechat_reply_music_test', json_encode($body, JSON_UNESCAPED_UNICODE));
+  //watchdog('wechat_test', json_encode($body, JSON_UNESCAPED_UNICODE));
+  //$body += array('content' => $entity_wrapper->wechat_reply_content->value());
+  //$body['content'] = $entity_wrapper->wechat_reply_content->value();
+  return array('body' => json_encode($body, JSON_UNESCAPED_UNICODE));
+}
+
+function wechat_qr_get_media_id($data, $field_name = '', $forever = 0) {
+  $entity_wrapper = entity_metadata_wrapper('wechat_request', $data);
+
+
+  $update = FALSE;
+  $qr_material_id = 0;
+
+  $fid = 0;
+  if ($field_name) {
+    $fid = $entity_wrapper->$field_name->value()['fid'];
+  }
+  $entity_id = $entity_wrapper->id->value();
+  $entity_type = $entity_wrapper->type();
+
+  //查询是否存在
+  $result = db_select('wechat_qr_material', 'w')
+    ->fields('w')
+    ->condition('entity_id', $entity_id)
+    ->condition('fid', $fid)//->condition('create_time', time() - 250000, '>')
+    ->execute()
+    ->fetchAssoc();
+  if ($result) {
+    $update = TRUE;
+    $qr_material_id = $result['id'];
+    //检查过期，检查是否是永久素材
+    if ($result['update_time'] > time() - 250000 || $result['permanent']) {
+      return $result['media_id'];
+    }
+  }
+
+
+  //素材上传变量拼装
+  $material_type = '';
+  $material_body = '';
+  switch ($field_name) {
+    case'field_wechat_image': {
+      $material_type = 'image';
+      $material_body['fid'] = $entity_wrapper->$field_name->value()['fid'];
+      break;
+    }
+    case'field_media_file': {
+      $material_type = 'voice';
+      $material_body['fid'] = $entity_wrapper->$field_name->value()['fid'];
+      break;
+    }
+    default: {
+      $material_type = 'news';
+      break;
+    }
+  }
+  //上传素材，回去返回的素材ID和media id
+  $material = wechat_material_upload($material_body, $material_type, $entity_type, $entity_id, $forever = 0);
+  //array('material_id' => $wechatMaterial->id, 'media_id' => $media_id);
+
+
+  $fields = array(
+    'entity_id' => (int) $entity_id,
+    'fid' => (int) $material_body['fid'],
+    'media_id' => (string) $material['media_id'],
+    'material_id' => (int) $material['material_id'],
+    'permanent' => (int) $forever,
+    'update_time' => (int) time(),
+  );
+
+  //判断是否是更新
+  if ($update) {
+    db_update('wechat_qr_material')
+      ->fields($fields)
+      ->condition('id', $qr_material_id)
+      ->execute();
+    return $material['media_id'];
+  }
+  $fields += array(
+    'id' => NULL,
+  );
+  db_insert('wechat_qr_material')->fields($fields)->execute();
+  //watchdog('wechat_qr_get_media_id', json_encode($media_id));
+  return $material['media_id'];
+}
+

@@ -1,0 +1,9 @@
+name = 微信二维码绑定
+description = 微信二维码用户绑定自定义消息。
+core = 7.x
+package = wechat
+dependencies[] = wechat_session
+dependencies[] = wechat_api
+dependencies[] = rules
+dependencies[] = wechat_request
+dependencies[] = wechat_material

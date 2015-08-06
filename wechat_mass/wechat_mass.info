@@ -1,0 +1,5 @@
+name =  微信消息群发
+description = 微信消息群发。
+core = 7.x
+package = wechat
+

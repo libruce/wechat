@@ -1,0 +1,6 @@
+name = 微信素材
+description = 微信素材管理，提供上传的函数，素材的管理交由各个模块自行完成。
+core = 7.x
+package = wechat
+dependencies[] = entity
+dependencies[] = wechat_api

@@ -1,0 +1,43 @@
+<?php
+/**
+ * Implements hook_schema().
+ */
+function wechat_kf_chat_session_schema() {
+  $schema['wechat_kf_chat_session'] = array(
+    'description' => '会话控制表.',
+    'fields' => array(
+      'kf_uid' => array(
+        'description' => '客服帐号，使用网站用户管理系统，保存UID',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'user_openid' => array(
+        'description' => '用户OPENID，主键',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => '状态，用来表示会话是否结束 0=结束 ，1=未结束',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'update_time' => array(
+        'description' => '会话刷新时间，超2小时未刷新则结束会话',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'create_time' => array(
+        'description' => '会话创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('user_openid'),
+  );
+  return $schema;
+}

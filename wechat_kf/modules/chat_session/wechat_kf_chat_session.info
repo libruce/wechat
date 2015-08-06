@@ -1,0 +1,5 @@
+name = 微信客服Session
+description = 微信客服Session管理，实体定义。
+core = 7.x
+package = wechat
+dependencies[] = entity

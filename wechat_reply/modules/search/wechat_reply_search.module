@@ -1,0 +1,140 @@
+<?php
+
+function wechat_reply_search_get_reply_by_keyword($keyword, $no_result) {
+  $options = array();
+  $return = '';
+
+  $index = variable_get('wechat_reply_search_index', 0);
+  watchdog('wechat_reply_search_get_reply_by_keyword', json_encode($keyword));
+
+  if (!$index) {
+    watchdog('wechat_reply_search_get_reply_by_keyword_index', json_encode($index));
+    return array('reply_id' => $no_result);
+  }
+
+  $results = search_api_query($index, $options)
+    ->keys($keyword)
+    ->execute();
+
+  if (empty($results['results'])) {
+    $return = $no_result;
+  }
+  else {
+    $id = reset($results['results']);
+    $return = $id['id'];
+  }
+  watchdog('wechat_reply_search_get_reply_by_keyword_return', json_encode($return));
+  return array('reply_id' => $return);
+}
+
+
+/**
+ * Implements hook_menu().
+ */
+function wechat_reply_search_menu() {
+  $items['admin/config/wechat/reply/search/index'] = array(
+    'title' => '微信回复消息搜索索引',
+    'description' => '设置微信回复消息搜索索引.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_reply_search_settings_form'),
+    'access arguments' => array('administer wechat configuration'),
+  );
+  return $items;
+}
+
+function wechat_reply_search_settings_form($form, &$form_state) {
+  $indexes = search_api_index_load_multiple(FALSE);
+  if (!$indexes) {
+    drupal_set_message(t('There are no searches indexes which can be searched. Please <a href="@url">create an index</a> first.', array('@url' => url('admin/config/search/search_api/add_index'))), 'warning');
+    return array();
+  }
+  $index_options = array();
+  foreach ($indexes as $index) {
+    if ($index->enabled) {
+      $index_options[$index->machine_name] = $index->name;
+    }
+  }
+  foreach ($indexes as $index) {
+    if (!$index->enabled) {
+      $index_options[$index->machine_name] = $index->name . ' (' . t('disabled') . ')';
+    }
+  }
+  $form['wechat_reply_search_index'] = array(
+    '#type' => 'radios',
+    '#title' => t('索引选择'),
+    '#default_value' => variable_get('wechat_reply_search_index', 0),
+    '#options' => $index_options,
+    '#description' => t('选择回复消息搜索使用的索引.'),
+  );
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_rules_action_info().
+ */
+function wechat_reply_search_rules_action_info() {
+  $action['wechat_reply_search_get_reply_by_keyword'] = array(
+    'parameter' => array(
+      'keyword' => array(
+        'type' => 'text',
+        'label' => t('关键字'),
+        'description' => t('需要进行查询的关键字.<a href="">配置索引</a>'),
+        'save' => TRUE,
+      ),
+      'no_result' => array(
+        'type' => 'integer',
+        'label' => t('无结果回复ID'),
+        'description' => t('无结果回复ID.'),
+        'save' => TRUE,
+      ),
+    ),
+    'provides' => array(
+      'reply_id' => array(
+        'type' => 'integer',
+        'label' => t('消息实体id'),
+      ),
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('通过关键字提取消息实体（通过搜索API）'),
+    'base' => 'wechat_reply_search_get_reply_by_keyword',
+  );
+  return $action;
+}
+
+//function wechat_reply_search_rules_action_info() {
+//  $action['wechat_reply_search_get_reply_by_keyword'] = array(
+//    'parameter' => array(
+//      'keyword' => array(
+//        'type' => 'text',
+//        'label' => t('关键字'),
+//        'description' => t('需要进行查询的关键字.'),
+//        'save' => TRUE,
+//      ),
+//      'limit' => array(
+//        'type' => 'integer',
+//        'label' => t('返回结果数'),
+//        'description' => t('如果有结果，最多返回结果的个数.'),
+//        'optional' => TRUE,
+//        'default value' => '3',
+//      ),
+//      'no_result' => array(
+//        'type' => 'entity',
+//        'label' => t('无结果回复'),
+//        'description' => t('无结果回复.'),
+//        'save' => TRUE,
+//      ),
+//    ),
+//    'provides' => array(
+//      'wechat_reply' => array(
+//        'type' => 'entity',
+//        'label' => t('消息实体WechatReply'),
+//      ),
+//    ),
+//    'group' => t('微信'),
+//    'access callback' => user_access('administer permissions'),
+//    'label' => t('通过关键字提取消息实体（通过搜索API）'),
+//    'base' => 'wechat_reply_search_get_reply_by_keyword',
+//  );
+//  return $action;
+//}

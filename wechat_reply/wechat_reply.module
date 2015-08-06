@@ -1,0 +1,710 @@
+<?php
+/**
+ * @file
+ * Code for the 微信回复消息管理 feature.
+ */
+
+include_once 'wechat_reply.features.inc';
+/**
+ * @param $wechatReply
+ * @return array
+ * 微信回应音乐消息预处理
+ */
+function wechat_reply_process_reply_music($wechatReply) {
+  $body = [];
+  $wechatReply_wrapper = entity_metadata_wrapper('wechat_reply', $wechatReply);
+
+  $body['title'] = $wechatReply_wrapper->wechat_reply_music_title->value();
+  $body['description'] = $wechatReply_wrapper->wechat_reply_music_description->value();
+  $body['thumb_media_id'] = wechat_reply_get_media_id($wechatReply, 'wechat_reply_thumb_media');
+
+  $wechat_reply_music_url = $wechatReply_wrapper->wechat_reply_music_url->value();
+  $wechat_reply_music_hq_url = $wechatReply_wrapper->wechat_reply_music_hq_url->value();
+
+  if ($wechat_reply_music_url && $wechat_reply_music_hq_url) {
+    $body['musicurl'] = $wechat_reply_music_url;
+    $body['hqmusicurl'] = $wechat_reply_music_hq_url;
+    return $body;
+  }
+  if ($wechat_reply_music_url || $wechat_reply_music_hq_url) {
+    $body['musicurl'] = $wechat_reply_music_url . $wechat_reply_music_hq_url;
+    $body['hqmusicurl'] = $wechat_reply_music_url . $wechat_reply_music_hq_url;
+    return $body;
+  }
+  $file = $wechatReply_wrapper->wechat_reply_music->value();
+  $body['musicurl'] = file_create_url($file['uri']);
+  $body['hqmusicurl'] = file_create_url($file['uri']);
+
+  return $body;
+}
+
+/**
+ * @param $wechatReply
+ * @return array
+ * 将reply对象转换为客服接口可以发送的json数据格式。
+ * 由于素材管理现在由各模块自行管理，这里需要按照素材上传的格式写
+ */
+function wechat_reply_entity_to_json($wechatReply) {
+  $body = array();
+  $wechatReply_wrapper = entity_metadata_wrapper('wechat_reply', $wechatReply);
+  $msg_type = $wechatReply_wrapper->msg_type->value();
+  switch ($msg_type) {
+    case 'text': {
+      $body += array('content' => $wechatReply_wrapper->wechat_reply_content->value());
+      break;
+    }
+
+    case 'image': {
+      $body = array('media_id' => wechat_reply_get_media_id($wechatReply, 'wechat_reply_image'));
+      break;
+    }
+    /**
+     * {
+     * "touser":"OPENID",
+     * "msgtype":"voice",
+     * "voice":
+     * {
+     * "media_id":"MEDIA_ID"
+     * }
+     * }
+     *
+     */
+    case 'voice': {
+      $body['media_id'] = wechat_reply_get_media_id($wechatReply, 'wechat_reply_voice');
+      break;
+    }
+    /**
+     * {
+     * "touser":"OPENID",
+     * "msgtype":"video",
+     * "video":
+     * {
+     * "media_id":"MEDIA_ID",
+     * "thumb_media_id":"MEDIA_ID",
+     * "title":"TITLE",
+     * "description":"DESCRIPTION"
+     * }
+     * }
+     */
+    case 'video': {
+
+      $body['media_id'] = wechat_reply_get_media_id($wechatReply, 'wechat_reply_video');
+      $body['thumb_media_id'] = wechat_reply_get_media_id($wechatReply, 'wechat_reply_thumb_media');
+      $body['title'] = $wechatReply_wrapper->wechat_reply_video_title->value();
+      $body['description'] = $wechatReply_wrapper->wechat_reply_video_description->value();
+      //dpm($body);
+      break;
+    }
+    /**
+     * {
+     *    "touser":"OPENID",
+     *    "msgtype":"music",
+     *    "music":
+     *      {
+     *        "title":"MUSIC_TITLE",
+     *        "description":"MUSIC_DESCRIPTION",
+     *        "musicurl":"MUSIC_URL",
+     *        "hqmusicurl":"HQ_MUSIC_URL",
+     *        "thumb_media_id":"THUMB_MEDIA_ID"
+     *      }
+     * }
+     */
+    case 'music': {
+      $body += wechat_reply_process_reply_music($wechatReply);
+      break;
+    }
+    /**
+     * {
+     * "touser":"OPENID",
+     *  "msgtype":"news",
+     *    "news":{
+     *      "articles": [
+     *        {
+     *          "title":"Happy Day",
+     *          "description":"Is Really A Happy Day",
+     *          "url":"URL",
+     *          "picurl":"PIC_URL"
+     *        },
+     *        {
+     *          "title":"Happy Day",
+     *          "description":"Is Really A Happy Day",
+     *          "url":"URL",
+     *          "picurl":"PIC_URL"
+     *        }
+     *      ]
+     *    }
+     *
+     * }
+     */
+    case 'news': {
+      $body = array(
+        'articles' => array(
+          array(
+            'title' => $wechatReply_wrapper->wechat_reply_news_title->value(),
+            'description' => $wechatReply_wrapper->wechat_reply_news_description->value(),
+            'url' => $wechatReply_wrapper->wechat_reply_news_url->value(),
+            'picurl' => file_create_url($wechatReply_wrapper->wechat_reply_news_image->value()['uri']),
+          ),
+        )
+      );
+      break;
+    }
+    case 'multiple_news': {
+      $value = array();
+      $multiple_news = $wechatReply_wrapper->field_news_reference->value();
+      foreach ($multiple_news as $news) {
+        $news_wrapper = entity_metadata_wrapper('wechat_reply', $news);
+        $value[] = array(
+          'title' => $news_wrapper->wechat_reply_news_title->value(),
+          'description' => $news_wrapper->wechat_reply_news_description->value(),
+          'url' => $news_wrapper->wechat_reply_news_url->value(),
+          'picurl' => file_create_url($news_wrapper->wechat_reply_news_image->value()['uri']),
+        );
+        unset($news_wrapper);
+      }
+      $body = array(
+        'articles' => $value,
+      );
+
+      break;
+    }
+  }
+  //watchdog('wechat_reply_music_test', json_encode($body, JSON_UNESCAPED_UNICODE));
+  //watchdog('wechat_test', json_encode($body, JSON_UNESCAPED_UNICODE));
+  //$body += array('content' => $wechatReply_wrapper->wechat_reply_content->value());
+  //$body['content'] = $wechatReply_wrapper->wechat_reply_content->value();
+  return array('wechat_reply_message_body' => json_encode($body, JSON_UNESCAPED_UNICODE));
+}
+
+/**
+ * Implements hook_wechat_messages_type_repair_alter().
+ * @todo 使用drupal_alter修改消息类型bug。微信回复消息没有multiple_news类型，只有news类型。
+ * @see wechat_messages_send_message().
+ */
+function wechat_reply_wechat_messages_type_repair_alter(&$type) {
+  if ($type == 'multiple_news') {
+    $type = 'news';
+    return $type;
+  }
+}
+
+/**
+ * @param $wechatReply
+ * @param string $field_name
+ * @return mixed
+ * 返回media id
+ */
+function wechat_reply_get_media_id($wechatReply, $field_name = '', $forever = 0) {
+  $wechatReply_wrapper = entity_metadata_wrapper('wechat_reply', $wechatReply);
+
+  //默认值，图文类型无fid
+  $update = FALSE;
+  $reply_material = 0;
+  $fid = 0;
+  if ($field_name) {
+    $fid = $wechatReply_wrapper->$field_name->value()['fid'];
+  }
+  $replay_id = $wechatReply_wrapper->id->value();
+  $entity_type = $wechatReply_wrapper->type();
+  $entity_id = $replay_id;
+  //查询是否存在
+  $result = db_select('wechat_reply_material', 'wrm')
+    ->fields('wrm')
+    ->condition('reply_id', $replay_id)
+    ->condition('fid', $fid)//->condition('create_time', time() - 250000, '>')
+    ->execute()
+    ->fetchAssoc();
+  if ($result) {
+    $update = TRUE;
+    $reply_material = $result['id'];
+    //检查过期，检查是否是永久素材
+    if ($result['update_time'] > time() - 250000 || $result['permanent']) {
+      return $result['media_id'];
+    }
+  }
+
+  $material_type = '';
+  $material_body = '';
+  switch ($field_name) {
+    case 'wechat_reply_thumb_media': {
+      $material_type = 'thumb';
+      $material_body['fid'] = $wechatReply_wrapper->$field_name->value()['fid'];
+      break;
+    }
+    case'wechat_reply_image': {
+      $material_type = 'image';
+      $material_body['fid'] = $wechatReply_wrapper->$field_name->value()['fid'];
+      break;
+    }
+    case'wechat_reply_video': {
+      $material_type = 'video';
+      $material_body['fid'] = $wechatReply_wrapper->$field_name->value()['fid'];
+      break;
+    }
+    case'wechat_reply_voice': {
+      $material_type = 'voice';
+      $material_body['fid'] = $wechatReply_wrapper->$field_name->value()['fid'];
+      break;
+    }
+    default: {
+      $material_type = 'news';
+      $forever = 1;
+      break;
+    }
+  }
+
+  $material = wechat_material_upload($material_body, $material_type, $entity_type, $entity_id, $forever = 0);
+  $fields = array(
+    'reply_id' => (int) $entity_id,
+    'fid' => (int) $material_body['fid'],
+    'media_id' => (string) $material['media_id'],
+    'material_id' => (int) $material['material_id'],
+    'permanent' => (int) $forever,
+    'update_time' => (int) time(),
+  );
+
+  //判断是否是更新
+  if ($update) {
+    db_update('wechat_reply_material')
+      ->fields($fields)
+      ->condition('id', $reply_material)
+      ->execute();
+    return $material['media_id'];
+  }
+  $fields += array(
+    'id' => NULL,
+  );
+  db_insert('wechat_reply_material')->fields($fields)->execute();
+
+  return $material['media_id'];
+}
+
+
+function wechat_reply_action_wechat_reply_message_body($wechatReply) {
+  return array('wechat_reply_message_body' => wechat_reply_entity_to_json($wechatReply));
+}
+
+/**
+ * Implements hook_rules_action_info().
+ */
+function wechat_reply_rules_action_info() {
+  $action['wechat_reply_drew_message_body'] = array(
+    'parameter' => array(
+      'wechat_reply' => array(
+        'type' => 'entity',
+        'label' => t('消息实体WechatReply'),
+        'description' => t('The user whose roles should be changed.'),
+        'save' => TRUE,
+      )
+    ),
+    'provides' => array(
+      'wechat_reply_message_body' => array(
+        'type' => 'text',
+        'label' => t('wechat_messages result'),
+      ),
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('将回应消息转换为json格式，提供给下一步发送使用'),
+    'base' => 'wechat_reply_entity_to_json',
+  );
+  return $action;
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function wechat_reply_admin_paths() {
+
+  $paths = array(
+    'reply/*/edit' => TRUE,
+    'reply/*/delete' => TRUE,
+//      'node/*/revisions' => TRUE,
+//      'node/*/revisions/*/revert' => TRUE,
+//      'node/*/revisions/*/delete' => TRUE,
+    'reply/add' => TRUE,
+    'reply/add/*' => TRUE,
+  );
+  return $paths;
+
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function wechat_reply_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link to 'node/add' on 'admin/content' page.
+  if ($root_path == 'admin/content/reply') {
+    $item = menu_get_item('reply/add');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function wechat_reply_menu() {
+  $items['admin/content/reply'] = array(
+    'title' => 'reply',
+    'description' => 'Manage files used on your site.',
+    'page callback' => 'wechat_reply_list_pages',
+    //'page arguments' => array('file_entity_admin_file'),
+    'access arguments' => array('administer reply'),
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+    'file' => 'wechat_reply.pages.inc',
+  );
+  $items['admin/content/reply/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['reply/%wechat_reply'] = array(
+    'title' => 'Reply Messages',
+    'access callback' => 'wechat_reply_access',
+    'access arguments' => array('view', 1),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'description' => 'Add a new property.',
+    'page callback' => 'wechat_reply_pages',
+    'page arguments' => array(1),
+    'file' => 'wechat_reply.pages.inc',
+  );
+
+  $items['reply/%wechat_reply/edit'] = array(
+    'page callback' => 'wechat_reply_edit_form',
+    'page arguments' => array(1),
+    'access callback' => 'wechat_reply_access',
+    'access arguments' => array('edit', 1),
+    'weight' => 0,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_reply.forms.inc',
+  );
+  $items['reply/%wechat_reply/delete'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_reply_delete_confirm', 1),
+    'access callback' => 'wechat_reply_access',
+    'access arguments' => array('delete', 1),
+    'weight' => 0,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_reply.pages.inc',
+  );
+
+  $items['reply/add'] = array(
+    'title' => '微信回复消息',
+    'access callback' => 'wechat_reply_access',
+    'access arguments' => array('add_all'),
+    'description' => 'Add a new property.',
+    'page callback' => 'wechat_reply_add_page',
+    'weight' => 10,
+    'file' => 'wechat_reply.pages.inc',
+  );
+
+  $types = wechat_reply_get_types();
+  foreach ($types as $type) {
+    //$type_url_str = str_replace('_', '-', $type->type);
+    //参数看entity_info定义
+    $items['reply/add/' . $type->type] = array(
+      'title' => $type->label,
+      'page callback' => 'wechat_reply_add_form',
+      'page arguments' => array($type->type),
+      'access callback' => TRUE,
+      'description' => $type->description,
+      'weight' => $type->weight,
+      'file' => 'wechat_reply.forms.inc',
+    );
+  }
+
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function wechat_reply_theme() {
+  return array(
+    'wechat_reply_add_list' => array(
+      'variables' => array('content' => NULL),
+      'file' => 'wechat_reply.pages.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_reply_entity_info() {
+  $return['wechat_reply'] = array(
+    'label' => t('微信回应消息'),
+    'plural label' => t('全部微信回应消息'),
+    'description' => t('微信回应消息实体.'),
+    'entity class' => 'WechatReply',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_reply',
+    'revision table' => 'wechat_reply_revision',
+    'fieldable' => TRUE,
+    'view modes' => array(
+      'full' => array(
+        'label' => t('微信回应消息'),
+        'custom settings' => FALSE,
+      ),
+    ),
+    'entity keys' => array(
+      'id' => 'id',
+      'bundle' => 'msg_type',
+      'label' => 'title',
+      'revision' => 'vid',
+    ),
+    'bundles' => array(),
+    'bundle keys' => array(
+      'bundle' => 'type',
+    ),
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'access callback' => 'wechat_reply_access',
+    'module' => 'wechat_reply',
+    'metadata controller class' => 'WechatReplyMetadataController'
+  );
+  // Add bundle info but bypass entity_load() as we cannot use it here.
+  $types = db_select('wechat_reply_type', 'w')
+    ->fields('w')
+    ->execute()
+    ->fetchAllAssoc('type');
+
+  foreach ($types as $type => $info) {
+    $return['wechat_reply']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/structure/wechat_reply/manage/%wechat_reply_type',
+        'real path' => 'admin/structure/wechat_reply/manage/' . $type,
+        'bundle argument' => 4,
+        'access arguments' => array('administer wechat reply'),
+      ),
+    );
+  }
+
+  $return['wechat_reply_type'] = array(
+    'label' => t('微信回应消息类型'),
+    'plural label' => t('微信回应消息类型'),
+    'description' => t('微信回应消息类型.'),
+    'entity class' => 'WechatReplyType',
+    'controller class' => 'EntityAPIControllerExportable',
+    'base table' => 'wechat_reply_type',
+    'fieldable' => FALSE,
+    'bundle of' => 'wechat_reply',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      'name' => 'type',
+      'label' => 'label',
+    ),
+    'access callback' => 'wechat_reply_type_access',
+    'module' => 'wechat_reply',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => 'admin/structure/wechat_reply',
+      'file' => 'wechat_reply.admin.inc',
+      'controller class' => 'WechatReplyTypeUIController',
+    ),
+  );
+
+  return $return;
+}
+
+
+/**-----------------------**/
+function wechat_reply_load($id, $reset = FALSE) {
+  $material = wechat_reply_load_multiple(array($id), array(), $reset);
+  return reset($material);
+}
+
+function wechat_reply_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_reply', $ids, $conditions, $reset);
+}
+
+function wechat_reply_type_load($type) {
+  return wechat_reply_get_types($type);
+}
+
+function wechat_reply_new($type = '') {
+  return entity_get_controller('wechat_reply')->create(array('type' => $type));
+}
+
+function wechat_reply_access($op, $wechat_reply = NULL, $account = NULL) {
+  //dpm($op);
+  return TRUE;
+}
+
+function wechat_reply_type_access($op, $wechat_reply_type = NULL, $account = NULL) {
+  return user_access('administer wechat reply type', $account);
+}
+
+/**
+ * Implements hook_permission().
+ */
+function wechat_reply_permission() {
+  return array(
+    'administer wechat reply type' => array(
+      'title' => t('微信回复消息类型'),
+      'description' => t('管理微信回复消息类型.'),
+    ),
+  );
+}
+
+function wechat_reply_get_types($type_name = NULL) {
+  $types = entity_load_multiple_by_name('wechat_reply_type', isset($type_name) ? array($type_name) : FALSE);
+  return isset($type_name) ? reset($types) : $types;
+}
+
+function wechat_reply_save(WechatReply $wechat_reply) {
+  return $wechat_reply->save();
+}
+
+
+function wechat_reply_delete($wechat_reply_id) {
+  return wechat_reply_delete_multiple(array($wechat_reply_id));
+}
+
+function wechat_reply_delete_multiple($wechat_reply_ids) {
+  return entity_get_controller('wechat_reply')->delete($wechat_reply_ids);
+}
+
+
+class WechatReply extends Entity {
+
+  public $id;
+  public $vid;
+  public $title;
+  public $msg_type;
+  public $uid;
+  public $data;
+  public $update_time;
+  public $create_time;
+  public $is_new_revision;
+
+  public function __construct($values = array()) {
+    $this->is_new_revision = TRUE;
+    parent::__construct($values, 'wechat_reply');
+  }
+
+  protected function defaultLabel() {
+    return $this->title;
+  }
+
+  protected function defaultUri() {
+    return array('path' => 'reply/' . $this->id);
+  }
+
+  public function save() {
+    if (empty($this->title)) {
+      $this->title = format_date(time(), 'short');
+    }
+    $this->update_time = time();
+    if (empty($this->create_time)) {
+      $this->create_time = time();
+    }
+
+    parent::save();
+  }
+}
+
+class WechatReplyType extends Entity {
+
+
+  public $type;
+  public $label;
+  public $weight = 0;
+  public $description;
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_reply_type');
+  }
+
+  /**
+   * Returns whether the wechat_request_message type is locked, thus may not be deleted or renamed.
+   *
+   * Wechat_request_message types provided in code are automatically treated as locked, as well
+   * as any fixed wechat_request_message type.
+   */
+  public function isLocked() {
+    return isset($this->status) && empty($this->is_new) && (($this->status & ENTITY_IN_CODE) || ($this->status & ENTITY_FIXED));
+  }
+
+
+  /**
+   * Overrides Entity::save().
+   */
+  public function save() {
+    parent::save();
+    // Clear field info caches such that any changes to extra fields get
+    // reflected.
+    field_info_cache_clear();
+  }
+}
+
+
+class WechatReplyMetadataController extends EntityDefaultMetadataController {
+
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info['wechat_reply']['properties'];
+
+
+    $properties['msg_type'] = array(
+      'label' => t('消息类型'),
+      'description' => t('Message type of wechat response message.'),
+      'type' => 'token',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'options list' => 'wechat_request_message_type_options_list',
+      'required' => TRUE,
+      'schema field' => 'msg_type',
+    );
+    $properties['uid'] = array(
+      'type' => 'token',
+      'label' => t('UID'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'getter callback' => 'user_load',
+      'schema field' => 'uid',
+      'required' => TRUE,
+    );
+    $properties['data'] = array(
+      'type' => 'text',
+      'label' => t('Create time'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'data',
+      'required' => TRUE,
+    );
+    $properties['update_time'] = array(
+      'type' => 'date',
+      'label' => t('Update time'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'update_time',
+      'required' => TRUE,
+    );
+    $properties['create_time'] = array(
+      'type' => 'date',
+      'label' => t('Create time'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'create_time',
+      'required' => TRUE,
+    );
+
+    return $info;
+  }
+
+
+}
+

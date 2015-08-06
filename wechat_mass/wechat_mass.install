@@ -1,0 +1,62 @@
+<?php
+/**
+ * Implements hook_schema().
+ */
+function wechat_mass_schema() {
+
+  $schema['wechat_mass'] = array(
+    'description' => 'wechat message.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键，自增长',
+      ),
+      'uid' => array(
+        'description' => '创建这次群发的网站用户UID',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'create_time' => array(
+        'description' => '创建这次群发的时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'touser' => array(
+        'description' => 'OPENID 列表 json格式',
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+      'is_to_all' => array(
+        'description' => 'is_to_all？',
+        'type' => 'int',
+        'default' => 0,
+        'not null' => FALSE,
+      ),
+      'group_id' => array(
+        'description' => '分组ID',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'msgtype' => array(
+        'description' => '消息类型',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'media_id' => array(
+        'description' => 'media id 使用素材上传获取',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}

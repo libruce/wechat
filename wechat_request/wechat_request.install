@@ -1,0 +1,125 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function wechat_request_schema() {
+  $schema['wechat_request'] = array(
+    'description' => '微信请求消息存储表.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键.',
+      ),
+      'msg_id' => array(
+        'description' => '微信消息id.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'subscription' => array(
+        'description' => '微信号、公众号.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'openid' => array(
+        'description' => '用户openid.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'msg_type' => array(
+        'description' => '消息类型.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => '消息的数据',
+        'type' => 'blob',
+        'serialize' => TRUE,
+        'not null' => FALSE,
+        'size' => 'big',
+      ),
+      'create_time' => array(
+        'description' => t('创建时间.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  $schema['wechat_request_type'] = array(
+    'description' => '请求消息的类型表.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键.',
+      ),
+      'type' => array(
+        'description' => '类型.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => '标签.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => '权重.',
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => '数据.',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        // Set the default to ENTITY_CUSTOM without using the constant as it is
+        // not safe to use it at this point.
+        'default' => 0x01,
+        'size' => 'tiny',
+        'description' => '状态.',
+      ),
+      'module' => array(
+        'description' => '模块.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'type' => array('type'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function wechat_request_uninstall() {
+  $name = 'wechat_request';
+  $path = drupal_get_path('module', $name) . '/' . $name . '.info';
+  $info = drupal_parse_info_file($path);
+  foreach ($info['features']['field_base'] as $field_name) {
+    field_delete_field($field_name);
+  }
+}

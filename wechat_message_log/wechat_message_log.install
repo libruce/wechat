@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function wechat_message_log_schema() {
+  $schema['wechat_message_log'] = array(
+    'description' => 'Stores wechat response message items.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键',
+      ),
+      'openid' => array(
+        'description' => t('From user name of wechat request message.'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => '具体回复的数据（json）',
+      ),
+      'create_time' => array(
+        'description' => '创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    )
+  );
+  return $schema;
+}

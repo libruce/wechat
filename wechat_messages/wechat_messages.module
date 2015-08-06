@@ -1,0 +1,132 @@
+<?php
+/**
+ * Implements hook_help().
+ */
+function wechat_messages_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#wechat_messages':
+      $output = '';
+      $output .= '<h3>' . t('参数说明') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('接收者') . '</dt>';
+      $output .= '<dd>' . t('接收者就是接收消息的用户，用户的openid，在请求的消息中有用户的openid，直接选取即可。wechat-request:from-user-name') . '</dd>';
+      $output .= '<dt>' . t('消息类型') . '</dt>';
+      $output .= '<dd>' . t('需要回复的消息类型可用类型参看<a href="http://mp.weixin.qq.com/wiki/1/70a29afed17f56d537c833f89be979c9.html#.E5.AE.A2.E6.9C.8D.E6.8E.A5.E5.8F.A3-.E5.8F.91.E6.B6.88.E6.81.AF">微信文档</a>') . '</dd>';
+      $output .= '<dt>' . t('消息内容') . '</dt>';
+      $output .= '<dd>' . t('消息内容为回复的这个消息的内容，和消息类型有关联，参看<a href="http://mp.weixin.qq.com/wiki/1/70a29afed17f56d537c833f89be979c9.html#.E5.AE.A2.E6.9C.8D.E6.8E.A5.E5.8F.A3-.E5.8F.91.E6.B6.88.E6.81.AF">微信文档</a>。例：<pre>
+    {
+    "touser":"OPENID",
+    "msgtype":"video",
+    "video":
+        {
+          "media_id":"MEDIA_ID",
+          "thumb_media_id":"MEDIA_ID",
+          "title":"TITLE",
+          "description":"DESCRIPTION"
+        }
+    }
+</pre>
+则消息内容填写
+<pre>
+    {
+      "media_id":"MEDIA_ID",
+      "thumb_media_id":"MEDIA_ID",
+      "title":"TITLE",
+      "description":"DESCRIPTION"
+    }
+</pre>
+') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_rules_action_info().
+ */
+function wechat_messages_rules_action_info() {
+  $action['wechat_messages_send_message'] = array(
+    'parameter' => array(
+      'user' => array(
+        'type' => 'text',
+        'label' => t('接收者'),
+        'description' => t('选择或填写接收消息的用户 <a href="/admin/help/wechat_messages"><b>点击查看详细</b></a>.'),
+        'save' => TRUE,
+      ),
+      'type' => array(
+        'type' => 'text',
+        'label' => t('消息类型'),
+        'description' => t('选择或填写一个消息类型 <a href="/admin/help/wechat_messages"><b>点击查看详细</b></a>.'),
+        'save' => TRUE,
+      ),
+      'body' => array(
+        'type' => 'text',
+        'label' => t('消息内容'),
+        'description' => t('json格式 <a href="/admin/help/wechat_messages"><b>点击查看详细</b></a>.'),
+        'save' => TRUE,
+      )
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('微信发送消息（使用客服接口）'),
+    'base' => 'wechat_messages_action_send_message',
+  );
+  return $action;
+}
+
+function wechat_messages_action_send_message($user, $type, $body) {
+  //消息类型修正钩子
+  drupal_alter('wechat_messages_type_repair', $type);
+
+  $wechat_obj = wechat_api_init_wechatobj();
+  $body = json_decode($body);
+  $body = (array) $body;
+  $data = array(
+    'touser' => $user,
+    'msgtype' => $type,
+    $type => $body,
+  );
+  $wechat_obj->sendCustomMessage($data);
+
+  watchdog('wechat_messages_send_message', json_encode($data, JSON_UNESCAPED_UNICODE));
+}
+
+
+/**
+ * Implements hook_rules_condition_info().
+ */
+function wechat_messages_rules_condition_info() {
+  $condition = array(
+    'wechat_messages_keyword_search' => array(
+      'label' => t('微信消息关键字查询'),
+      'parameter' => array(
+        'text' => array(
+          'type' => 'text',
+          'label' => t('Text'),
+          'restriction' => 'selector',
+        ),
+        'match' => array(
+          'type' => 'text',
+          'label' => t('Matching text'),
+          'description' => t('多个关键字用英文逗号 “,” 隔开。'),
+        ),
+      ),
+      'group' => t('微信'),
+      'base' => 'wechat_messages_condition_keyword_search',
+    ),
+  );
+  return $condition;
+}
+
+function wechat_messages_condition_keyword_search($text, $match) {
+  $array = drupal_explode_tags($match);
+  $return = FALSE;
+  foreach ($array as $key) {
+    $str = stristr($text, $key);
+    if (!empty($str)) {
+      $return = TRUE;
+      break;
+    }
+  }
+  return $return;
+}

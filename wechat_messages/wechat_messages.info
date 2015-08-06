@@ -1,0 +1,6 @@
+name = 微信消息
+description = 微信消息，提供关键字查询ruels条件，回复操作动作
+core = 7.x
+package = wechat
+dependencies[] = wechat_api
+dependencies[] = rules

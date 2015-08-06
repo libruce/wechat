@@ -1,0 +1,157 @@
+<?php
+
+
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_kf_chat_log_entity_info() {
+  $return['wechat_kf_chat_log'] = array(
+    'label' => t('客服聊天记录'),
+    'plural label' => t('客服聊天记录（复数）'),
+    'description' => t('客服聊天记录.'),
+    'entity class' => 'WechatKfChatLog',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_kf_chat_log',
+    'fieldable' => FALSE,
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'create_time'
+    ),
+    'access callback' => 'wechat_kf_chat_log_access',
+    'module' => 'wechat_kf_chat_log',
+    'metadata controller class' => 'WechatKfChatLogMetadataController',
+    'bundles' => array(
+      'wechat_kf_chat_log' => array(
+        'label' => t('客服聊天记录'),
+        'admin' => array(
+          'path' => 'admin/structure/wechat_kf_chat_log',
+          'access arguments' => array('administer kf chat log'),
+        ),
+      ),
+    ),
+    'view modes' => array(
+      'full' => array(
+        'label' => t('客服聊天记录'),
+        'custom settings' => FALSE,
+      ),
+    ),
+  );
+  return $return;
+}
+
+function wechat_kf_chat_log_access() {
+  return TRUE;
+}
+
+class WechatKfChatLog extends Entity {
+
+  public $id;
+  public $msg_type;
+  public $user_openid;
+  public $kf_uid;
+  //user_to_kf kf_to_user
+  public $who_to_who;
+
+  public $send_id;
+  public $received_id;
+  public $create_time;
+
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_kf_chat_log');
+  }
+
+  protected function defaultLabel() {
+    return $this->create_time;
+  }
+
+  protected function defaultUri() {
+    return array('path' => 'wechat_kf_chat_log/' . $this->id);
+  }
+
+  public function save() {
+    if (empty($this->create_time)) {
+      $this->create_time = time();
+    }
+    if ($this->who_to_who == 'user_to_kf' || $this->who_to_who == 'kf_to_user') {
+      parent::save();
+    }
+  }
+}
+
+class WechatKfChatLogMetadataController extends EntityDefaultMetadataController {
+
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info['wechat_kf_chat_log']['properties'];
+    $properties['msg_type'] = array(
+      'label' => t('Message type'),
+      'description' => t('Message type of wechat response message.'),
+      'type' => 'text',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'required' => TRUE,
+      'schema field' => 'msg_type',
+    );
+    $properties['user_openid'] = array(
+      'type' => 'text',
+      'label' => t('Create time'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'user_openid',
+      'required' => TRUE,
+    );
+    $properties['kf_uid'] = array(
+      'type' => 'int',
+      'label' => t('UID'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'kf_uid',
+      'required' => TRUE,
+    );
+    $properties['who_to_who'] = array(
+      'type' => 'text',
+      'label' => t('Create time'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'who_to_who',
+      'required' => TRUE,
+    );
+    $properties['send_id'] = array(
+      'type' => 'int',
+      'label' => t('UID'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'send_id',
+      'required' => TRUE,
+    );
+    $properties['received_id'] = array(
+      'type' => 'int',
+      'label' => t('UID'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'received_id',
+      'required' => TRUE,
+    );
+    $properties['create_time'] = array(
+      'type' => 'date',
+      'label' => t('Create time'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'create_time',
+      'required' => TRUE,
+    );
+
+    return $info;
+  }
+
+
+}

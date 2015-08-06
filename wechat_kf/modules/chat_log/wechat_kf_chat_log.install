@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function wechat_kf_chat_log_schema() {
+  $schema['wechat_kf_chat_log'] = array(
+    'description' => 'Stores wechat reply message items.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键，自增长',
+      ),
+      'msg_type' => array(
+        'description' => '消息类型',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'user_openid' => array(
+        'description' => '用户信息，微信openid',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'kf_uid' => array(
+        'description' => '客服帐号，使用网站用户管理系统，保存UID',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'who_to_who' => array(
+        'description' => '标识谁发给谁，允许的值，user_to_kf kf_to_user',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'send_id' => array(
+        'description' => '客服发送的消息ID',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'received_id' => array(
+        'description' => '客户发送的消息ID',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'create_time' => array(
+        'description' => '消息创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}

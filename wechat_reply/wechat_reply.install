@@ -1,0 +1,262 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function wechat_reply_schema() {
+
+  $schema['wechat_reply'] = array(
+    'description' => '微信回应消息管理表.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键，自增长',
+      ),
+      'vid' => array(
+        'description' => '历史id',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => '消息标题，描述当前消息，不在微信中使用',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'msg_type' => array(
+        'description' => '消息类型',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => '作者',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => '消息的json格式，使用客服接口可直接发送，创建和更新时需更新。',
+      ),
+      'update_time' => array(
+        'description' => '消息更新时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'create_time' => array(
+        'description' => '消息创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'reply_author' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+      'wechat_reply_revision' => array(
+        'table' => 'wechat_reply_revision',
+        'columns' => array('vid' => 'vid'),
+      ),
+    ),
+
+  );
+  $schema['wechat_reply_revision'] = array(
+    'description' => '微信回应消息历史表.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'id',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'vid' => array(
+        'description' => '版本id.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => '消息标题，描述当前消息，不在微信中使用',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'msg_type' => array(
+        'description' => '消息类型',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => '作者',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => '消息的json格式，使用客服接口可直接发送，创建和更新时需更新。',
+      ),
+      'update_time' => array(
+        'description' => '消息更新时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'create_time' => array(
+        'description' => '消息创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('vid'),
+    'foreign keys' => array(
+      'wechat_reply' => array(
+        'table' => 'wechat_reply',
+        'columns' => array('id' => 'id'),
+      ),
+    ),
+  );
+
+
+  $schema['wechat_reply_type'] = array(
+    'description' => '微信回应消息类型表.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键.',
+      ),
+      'type' => array(
+        'description' => '类型.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => '标签.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => '权重.',
+      ),
+      'description' => array(
+        'description' => '类型介绍.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'medium',
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => '类型数据.',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        // Set the default to ENTITY_CUSTOM without using the constant as it is
+        // not safe to use it at this point.
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => '状态.',
+      ),
+      'module' => array(
+        'description' => '模块.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'type' => array('type'),
+    ),
+  );
+
+
+  $schema['wechat_reply_material'] = array(
+    'description' => '回复消息素材管理.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键，自增长',
+      ),
+      'reply_id' => array(
+        'description' => '回复消息id',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'fid' => array(
+        'description' => '文件fid.',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'media_id' => array(
+        'description' => '对应的media id.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'material_id' => array(
+        'description' => '素材id',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'permanent' => array(
+        'description' => '是否为永久素材.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'update_time' => array(
+        'description' => '更新时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function wechat_reply_uninstall() {
+  $name = 'wechat_reply';
+  $path = drupal_get_path('module', $name) . '/' . $name . '.info';
+  $info = drupal_parse_info_file($path);
+  foreach ($info['features']['field_base'] as $field_name) {
+    field_delete_field($field_name);
+  }
+}

@@ -1,0 +1,16 @@
+name = 微信客服功能
+description = 微信客服管理。
+core = 7.x
+package = wechat
+dependencies[] = entity
+dependencies[] = features
+dependencies[] = image
+dependencies[] = profile2
+dependencies[] = rules
+dependencies[] = text
+dependencies[] = wechat_api
+dependencies[] = wechat_kf_send
+dependencies[] = wechat_kf_received
+dependencies[] = wechat_kf_chat_session
+dependencies[] = wechat_kf_chat_log
+

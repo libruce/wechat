@@ -1,0 +1,221 @@
+<?php
+/**
+ * Implements hook_menu().
+ */
+function wechat_mass_menu() {
+  $items['wechat_mass/send'] = array(
+    'title' => '群发',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_mass_send_message'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function wechat_mass_send_message($form, &$form_state) {
+  $form['touser'] = array(
+    '#type' => 'fieldset',
+    '#title' => '发送方式设置',
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+  );
+  $form['touser']['radios'] = array(
+    '#type' => 'radios',
+    '#title' => t('群发类型'),
+    '#options' => array('openid' => 'OPENID', 'group_id' => '分组ID'),
+    '#description' => t('选择使用的群发方式。'),
+  );
+
+  $form['touser']['openid'] = array(
+    '#type' => 'select',
+    '#title' => t('选择接收粉'),
+    '#options' => array(
+      0 => t('No'),
+      1 => t('Yes'),
+    ),
+    '#states' => array(
+      // Hide the settings when the cancel notify checkbox is disabled.
+      'visible' => array(
+        ':input[name="touser[radios]"]' => array('value' => 'openid'),
+
+      ),
+    ),
+  );
+
+  $group_id_list = array(
+    'asdf',
+    1,
+    651,
+    651,
+    56,
+    165,
+    1,
+    65,
+    1489465,
+    4165,
+    1,
+    6
+  );
+  $form['touser']['group_id'] = array(
+    '#type' => 'select',
+    '#title' => t('选择分组'),
+    '#options' => $group_id_list,
+    '#states' => array(
+      // Hide the settings when the cancel notify checkbox is disabled.
+      'visible' => array(
+        ':input[name="touser[radios]"]' => array('value' => 'group_id'),
+      ),
+    ),
+  );
+
+
+  $form['content'] = array(
+    '#type' => 'fieldset',
+    '#title' => '内容设置',
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+  );
+  $form['content']['radios'] = array(
+    '#type' => 'radios',
+    '#title' => t('选择发送的消息类型'),
+    '#options' => array(
+      'mpnews' => '图文',
+      'text' => '文本',
+      'voice' => '语音',
+      'music' => '音乐',
+      'image' => '图片',
+      'video' => '视频',
+    ),
+  );
+
+  $form['content']['reply_id'] = array(
+    '#type' => 'select',
+    '#title' => t('创建一个文本消息'),
+    '#options' => array(
+      0 => t('No'),
+      1 => t('Yes'),
+    ),
+    '#states' => array(
+      // Hide the settings when the cancel notify checkbox is disabled.
+      'visible' => array(
+        ':input[name="touser[radios]"]' => array('value' => 'openid'),
+      ),
+    ),
+  );
+
+  $group_id_list = array(
+    'asdf',
+    1,
+  );
+  $form['content']['reply_id'] = array(
+    '#type' => 'select',
+    '#title' => t('选择以保存消息'),
+    '#options' => $group_id_list,
+    '#states' => array(
+      // Hide the settings when the cancel notify checkbox is disabled.
+      'visible' => array(
+        ':input[name="touser[radios]"]' => array('value' => 'group_id'),
+      ),
+    ),
+  );
+
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('发送'),
+  );
+  return $form;
+}
+
+function wechat_mass_send_message_submit($form, &$from_state) {
+
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_mass_entity_info() {
+  $return['wechat_mass'] = array(
+    'label' => t('Wechat Mass'),
+    'plural label' => t('Wechat mass'),
+    'description' => t('Wechat mass.'),
+    'entity class' => 'WechatMass',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_mass',
+    'fieldable' => TRUE,
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'create_time'
+    ),
+    'access callback' => 'wechat_mass_access',
+    'module' => 'wechat_mass',
+    'metadata controller class' => 'WechatMassMetadataController',
+    'bundles' => array(
+      'wechat_mass' => array(
+        'label' => t('Wechat Mass'),
+        'admin' => array(
+          'path' => 'admin/structure/wechat_mass',
+          'access arguments' => array('administer mass'),
+        ),
+      ),
+    ),
+    'view modes' => array(
+      'full' => array(
+        'label' => t('User account'),
+        'custom settings' => FALSE,
+      ),
+    ),
+  );
+
+  return $return;
+}
+
+function wechat_mass_load($id, $reset = FALSE) {
+  $material = wechat_mass_load_multiple(array($id), array(), $reset);
+  return reset($material);
+}
+
+function wechat_mass_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_mass', $ids, $conditions, $reset);
+}
+
+function wechat_mass_save(WechatMass $wechatMass) {
+  return $wechatMass->save();
+}
+
+class WechatMassMetadataController extends EntityDefaultMetadataController {
+
+}
+
+class WechatMass extends Entity {
+  public $id;
+  public $uid;
+  public $create_time;
+  public $touser;
+  public $is_to_all;
+  public $group_id;
+  public $msgtype;
+  public $media_id;
+
+  protected function defaultUri() {
+    return array('path' => 'wechat_mass/' . $this->uid);
+  }
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_mass');
+  }
+
+  protected function defaultLabel() {
+    return $this->create_time;
+  }
+
+
+  public function save() {
+    parent::save();
+  }
+}

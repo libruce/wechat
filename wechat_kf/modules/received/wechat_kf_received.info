@@ -1,0 +1,7 @@
+name = 接收的客服消息
+description = 接收的客服消息，实体定义。
+core = 7.x
+package = wechat
+dependencies[] = entity
+
+files[] = wechat_kf_received.admin.inc

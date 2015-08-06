@@ -1,0 +1,263 @@
+<?php
+
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_kf_received_entity_info() {
+  $return['wechat_kf_received'] = array(
+    'label' => t('用户发送的消息'),
+    'plural label' => t('用户发送的消息（复数）'),
+    'description' => t('用户发送的消息.'),
+    'entity class' => 'WechatKfReceived',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_kf_received',
+    'fieldable' => TRUE,
+    'view modes' => array(
+      'full' => array(
+        'label' => t('用户发送的消息完整显示'),
+        'custom settings' => FALSE,
+      ),
+      'full2' => array(
+        'label' => t('用户发送的消息完整显示'),
+        'custom settings' => FALSE,
+      ),
+    ),
+    'entity keys' => array(
+      'id' => 'id',
+      'bundle' => 'msg_type',
+      'label' => 'create_time',
+    ),
+    'bundles' => array(),
+    'bundle keys' => array(
+      'bundle' => 'type',
+    ),
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'access callback' => 'wechat_kf_received_type_access',
+    'module' => 'wechat_kf_received',
+    'metadata controller class' => 'WechatKfReceivedMetadataController'
+  );
+  // Add bundle info but bypass entity_load() as we cannot use it here.
+  $types = db_select('wechat_kf_received_type', 'w')
+    ->fields('w')
+    ->execute()
+    ->fetchAllAssoc('type');
+  foreach ($types as $type => $info) {
+    $return['wechat_kf_received']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/structure/wechat_kf_received/manage/%wechat_kf_received_type',
+        'real path' => 'admin/structure/wechat_kf_received/manage/' . $type,
+        'bundle argument' => 4,
+        'access arguments' => array('administer wechat kf received'),
+      ),
+    );
+  }
+  $return['wechat_kf_received_type'] = array(
+    'label' => t('用户发送的消息类型'),
+    'plural label' => t('用户发送的消息类型（复数）'),
+    'description' => t('用户发送的消息类型.'),
+    'entity class' => 'WechatKfReceivedType',
+    'controller class' => 'EntityAPIControllerExportable',
+    'base table' => 'wechat_kf_received_type',
+    'fieldable' => FALSE,
+    'bundle of' => 'wechat_kf_received',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      'name' => 'type',
+      'label' => 'label',
+    ),
+    'access callback' => 'wechat_kf_received_type_access',
+    'module' => 'wechat_kf_received',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => 'admin/structure/wechat_kf_received',
+      'file' => 'wechat_kf_received.admin.inc',
+      'controller class' => 'WechatKfReceivedTypeUIController',
+    ),
+  );
+
+  return $return;
+}
+
+function wechat_kf_received_type_access() {
+  return TRUE;
+}
+
+function wechat_kf_received_load($id, $reset = FALSE) {
+  $return = wechat_kf_received_load_multiple(array($id), array(), $reset);
+  return reset($return);
+}
+
+function wechat_kf_received_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_kf_received', $ids, $conditions, $reset);
+}
+
+function wechat_kf_received_type_load($type) {
+  return wechat_kf_received_types($type);
+}
+
+function wechat_kf_received_types($type_name = NULL) {
+  $types = entity_load_multiple_by_name('wechat_kf_received_type', isset($type_name) ? array($type_name) : FALSE);
+  return isset($type_name) ? reset($types) : $types;
+}
+
+
+class WechatKfReceived extends Entity {
+
+  public $id;
+  public $msg_id;
+  public $kf_uid;
+  public $user_openid;
+  public $msg_type;
+  public $create_time;
+
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_kf_received');
+  }
+
+  protected function defaultLabel() {
+    return $this->create_time;
+  }
+
+  protected function defaultUri() {
+    return array('path' => 'wechat_kf_received/' . $this->id);
+  }
+
+  public function save() {
+
+    if (empty($this->create_time)) {
+      $this->create_time = time();
+    }
+    parent::save();
+  }
+
+  public function view($view_mode = 'full', $langcode = NULL, $page = NULL) {
+
+    if (!isset($langcode)) {
+      $langcode = $GLOBALS['language_content']->language;
+    }
+
+    // Populate $node->content with a render() array.
+    $build = parent::buildContent($view_mode, $langcode);
+
+    //$build = $this->content;
+
+
+    dpm($build);
+    $build += array(
+      '#theme' => 'wechat_kf_received',
+      '#node' => $this,
+      '#view_mode' => $view_mode,
+      '#language' => $langcode,
+    );
+    return $build;
+
+
+    $return = parent::view();
+    dpm($return);
+    return $return;
+//    $view_mode = 'full2';
+//    $return = entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode);;
+//    dpm($return);
+//    return $return;
+  }
+}
+
+class WechatKfReceivedType extends Entity {
+
+
+  public $type;
+  public $label;
+  public $weight = 0;
+  public $description;
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_kf_received_type');
+  }
+
+  /**
+   * Returns whether the wechat_request_message type is locked, thus may not be deleted or renamed.
+   *
+   * Wechat_request_message types provided in code are automatically treated as locked, as well
+   * as any fixed wechat_request_message type.
+   */
+  public function isLocked() {
+    return isset($this->status) && empty($this->is_new) && (($this->status & ENTITY_IN_CODE) || ($this->status & ENTITY_FIXED));
+  }
+
+  /**
+   * Overrides Entity::save().
+   */
+  public function save() {
+    parent::save();
+    // Clear field info caches such that any changes to extra fields get
+    // reflected.
+    field_info_cache_clear();
+  }
+}
+
+class WechatKfReceivedMetadataController extends EntityDefaultMetadataController {
+
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info['wechat_kf_received']['properties'];
+
+    $properties['msg_id'] = array(
+      'label' => t('Message Id'),
+      'description' => t('Message type of wechat response message.'),
+      'type' => 'text',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat kf received',
+      'required' => TRUE,
+      'schema field' => 'msg_id',
+    );
+
+    $properties['kf_uid'] = array(
+      'label' => t('客服UID'),
+      'description' => t('Message type of wechat response message.'),
+      'type' => 'text',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat kf received',
+      'required' => TRUE,
+      'schema field' => 'kf_uid',
+    );
+
+    $properties['user_openid'] = array(
+      'label' => t('用户OpenId'),
+      'description' => t('Message type of wechat response message.'),
+      'type' => 'text',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat kf received',
+      'required' => TRUE,
+      'schema field' => 'user_openid',
+    );
+    $properties['msg_type'] = array(
+      'label' => t('消息类型'),
+      'description' => t('Message type.'),
+      'type' => 'token',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat kf received',
+      'required' => TRUE,
+      'schema field' => 'msg_type',
+    );
+
+    $properties['create_time'] = array(
+      'label' => t('创建事件'),
+      'description' => t('Message type of wechat response message.'),
+      'type' => 'date',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat kf received',
+      'required' => TRUE,
+      'schema field' => 'create_time',
+    );
+
+
+    return $info;
+  }
+
+
+}
+

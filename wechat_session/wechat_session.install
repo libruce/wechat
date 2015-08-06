@@ -1,0 +1,85 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function wechat_session_schema() {
+  $schema['wechat_session_status'] = array(
+    'description' => '微信session状态定义表.',
+    'fields' => array(
+      'status' => array(
+        'description' => '状态.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => '状态name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'function_callback' => array(
+        'description' => '状态回调函数.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'echo_callback' => array(
+        'description' => '状态echo函数.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'timeout' => array(
+        'description' => '超时时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('status'),
+  );
+  $schema['wechat_session'] = array(
+    'description' => '微信用户session.',
+    'fields' => array(
+//      'id' => array(
+//        'type' => 'serial',
+//        'not null' => TRUE,
+//        'description' => 'Primary Key: Unique profile type ID.',
+//      ),
+      'openid' => array(
+        'description' => '微信用户openid.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => '状态.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'update_time' => array(
+        'description' => '会话刷新时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'create_time' => array(
+        'description' => '会话创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('openid'),
+    'foreign keys' => array(
+      'status' => array(
+        'table' => 'wechat_session_status',
+        'columns' => array('status' => 'status'),
+      ),
+    ),
+  );
+  return $schema;
+}

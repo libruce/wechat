@@ -1,0 +1,135 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function wechat_qr_schema() {
+
+  $schema['wechat_qr'] = array(
+    'description' => '微信二维码管理表.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'id.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'ticket' => array(
+        'description' => '二维码ticket',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'qr_type' => array(
+        'description' => '二维码类型',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'qr_key' => array(
+        'description' => '二维码KEY',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'expire' => array(
+        'description' => '过期时间',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'create_time' => array(
+        'description' => '创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  $schema['wechat_qr_data'] = array(
+    'description' => '二维码数据关联表.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'id',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'openid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => '二维码数据绑定的用户openid。',
+      ),
+      'data' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => '二维码的数据(request id)。',
+      ),
+      'create_time' => array(
+        'description' => '创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'id' => array(
+        'table' => 'wechat_qr',
+        'columns' => array('id' => 'id'),
+      ),
+    ),
+  );
+
+  $schema['wechat_qr_material'] = array(
+    'description' => '素材管理.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键，自增长',
+      ),
+      'entity_id' => array(
+        'description' => 'entity_id',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'fid' => array(
+        'description' => t('文件fid.'),
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'media_id' => array(
+        'description' => '对应的media id.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'material_id' => array(
+        'description' => '素材id',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'permanent' => array(
+        'description' => '是否为永久素材.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'update_time' => array(
+        'description' => '更新时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}

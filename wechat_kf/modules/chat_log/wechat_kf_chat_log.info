@@ -1,0 +1,5 @@
+name = 微信客服消息记录
+description = 微信客服消息记录实体定义。
+core = 7.x
+package = wechat
+dependencies[] = entity

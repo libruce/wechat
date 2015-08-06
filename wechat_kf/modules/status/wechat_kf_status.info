@@ -1,0 +1,5 @@
+name = 微信客服状态管理
+description = 微信客服状态管理，实体定义。
+core = 7.x
+package = wechat
+dependencies[] = entity
