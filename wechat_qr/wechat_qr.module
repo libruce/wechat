@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * Implements hook_menu().
+ */
+function wechat_qr_menu() {
+  $items['admin/structure/wechat_qr'] = array(
+    'title' => '微信二维码',
+    'description' => '微信用户设置，如：微信登录自动注册为某角色，刷新用户信息等。',
+
+    'access callback' => 'user_access',
+    'access arguments' => array('wechat user update user info'),
+    //'file' => 'wechat_user.forms.inc',
+  );
+  return $items;
+}
 
 /**
  * Implements hook_wechat_session_status().
