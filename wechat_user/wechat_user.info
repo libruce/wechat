@@ -11,7 +11,7 @@ dependencies[] = views
 dependencies[] = wechat_api
 ;用户绑定需要
 dependencies[] = wechat_request
-
+dependencies[] = user_info
 features[ctools][] = views:views_default:3.0
 features[features_api][] = api:2
 features[field_base][] = field_wechat_group_id
