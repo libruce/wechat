@@ -12,7 +12,7 @@ function wechat_qr_menu() {
     'access arguments' => array('wechat user update user info'),
     //'file' => 'wechat_user.forms.inc',
   );
-  return $items;
+  //return $items;
 }
 
 /**
@@ -60,7 +60,7 @@ function wechat_qr_entity_info() {
       'wechat_qr' => array(
         'label' => t('微信QR'),
         'admin' => array(
-          'path' => 'admin/structure/wechat_qr',
+          'path' => 'admin/structure/wechat/wechat_qr',
           'access arguments' => array('administer wechat_qr'),
         ),
       ),
