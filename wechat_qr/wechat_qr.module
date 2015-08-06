@@ -9,6 +9,11 @@ function wechat_qr_menu() {
     'title' => 'Account settings',
     'description' => 'Configure default behavior of users, including registration requirements, e-mails, fields, and user pictures.',
     'page callback' => 'wechat_qr_page',
+    'access arguments' => array('administer users'),
+  );
+  $items['admin/structure/wechat_qr/list'] = array(
+    'title' => 'Account settings',
+    'description' => 'Configure default behavior of users, including registration requirements, e-mails, fields, and user pictures.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'access arguments' => array('administer users'),
   );
