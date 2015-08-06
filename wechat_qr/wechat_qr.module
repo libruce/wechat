@@ -45,6 +45,10 @@ function wechat_qr_entity_info() {
     'bundles' => array(
       'wechat_qr' => array(
         'label' => t('微信QR'),
+        'admin' => array(
+          'path' => 'admin/structure/wechat_qr',
+          'access arguments' => array('administer wechat_qr'),
+        ),
       ),
     ),
   );
