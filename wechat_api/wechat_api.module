@@ -65,14 +65,6 @@ function wechat_api_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  $items['admin/structure/wechat'] = array(
-    'title' => '微信内容',
-    'description' => '设置Token、Appid、Appsecret.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('wechat_api_settings_form'),
-    'access arguments' => array('administer wechat configuration'),
-  );
-
   return $items;
 }
 
