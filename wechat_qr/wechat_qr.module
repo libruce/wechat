@@ -9,13 +9,23 @@ function wechat_qr_menu() {
     'title' => 'Account settings',
     'description' => 'Configure default behavior of users, including registration requirements, e-mails, fields, and user pictures.',
     'page callback' => 'wechat_qr_page',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
     'access arguments' => array('administer users'),
+  );
+  $items['admin/structure/wechat_qr/add'] = array(
+    'title' => '添加新的二维码',
+    'description' => '添加新的二维码.',
+    'page callback' => 'wechat_qr_page',
+    'access arguments' => array('administer users'),
+    'type' => MENU_LOCAL_TASK,
   );
   return $items;
 }
-function wechat_qr_page(){
+
+function wechat_qr_page() {
   return 'aaa';
 }
+
 /**
  * Implements hook_wechat_session_status().
  */
