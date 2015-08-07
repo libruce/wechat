@@ -1,0 +1,121 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function wechat_qr2_schema() {
+  $schema['wechat_qr2'] = array(
+    'description' => '微信二维码管理表.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'id.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'bundle' => array(
+        'description' => 'bundle',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'ticket' => array(
+        'description' => '二维码ticket',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'qr_type' => array(
+        'description' => '二维码类型，永久1 临时0',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'qr_key' => array(
+        'description' => '二维码KEY',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'expire' => array(
+        'description' => '过期时间',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'create_time' => array(
+        'description' => '创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['wechat_qr2_type'] = array(
+    'description' => '微信二维码类型表，按使用场景区分。比如推广码，身份码，商品码',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键.',
+      ),
+      'type' => array(
+        'description' => '类型.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => '标签.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => '权重.',
+      ),
+      'description' => array(
+        'description' => '类型介绍.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'medium',
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => '类型数据.',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        // Set the default to ENTITY_CUSTOM without using the constant as it is
+        // not safe to use it at this point.
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => '状态.',
+      ),
+      'module' => array(
+        'description' => '模块.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'type' => array('type'),
+    ),
+  );
+
+  return $schema;
+}

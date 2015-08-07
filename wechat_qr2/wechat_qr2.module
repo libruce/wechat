@@ -1,0 +1,193 @@
+<?php
+/**
+ * Implements hook_menu().
+ */
+function wechat_qr2_menu() {
+  $items['qr/add'] = array(
+    'title' => '微信回复消息',
+    'access callback' => 'wechat_qr2_access',
+    'access arguments' => array('add_all'),
+    'description' => 'Add a new property.',
+    'page callback' => 'wechat_qr2_add_page',
+    'weight' => 10,
+    'file' => 'wechat_qr2.pages.inc',
+  );
+
+  $types = wechat_qr2_get_types();
+  foreach ($types as $type) {
+    //$type_url_str = str_replace('_', '-', $type->type);
+    //参数看entity_info定义
+    $items['qr/add/' . $type->type] = array(
+      'title' => $type->label,
+      'page callback' => 'wechat_qr2_add_form',
+      'page arguments' => array($type->type),
+      'access callback' => TRUE,
+      'description' => $type->description,
+      'weight' => $type->weight,
+      'file' => 'wechat_qr2.pages.inc',
+    );
+  }
+
+
+  return $items;
+}
+/**
+ * Implements hook_admin_paths().
+ */
+function wechat_qr2_admin_paths() {
+  $paths = array(
+    'qr/*/edit' => TRUE,
+    'qr/*/delete' => TRUE,
+    'qr/add' => TRUE,
+    'qr/add/*' => TRUE,
+  );
+  return $paths;
+}
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_qr2_entity_info() {
+  $return['wechat_qr2'] = array(
+    'label' => t('微信二维码'),
+    'plural label' => t('微信二维码'),
+    'description' => t('微信二维码.'),
+    'entity class' => 'WechatQr2',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_qr2',
+    'fieldable' => TRUE,
+    'view modes' => array(
+      'full' => array(
+        'label' => t('微信二维码'),
+        'custom settings' => FALSE,
+      ),
+    ),
+    'entity keys' => array(
+      'id' => 'id',
+      'bundle' => 'bundle',
+    ),
+    'bundles' => array(),
+    'bundle keys' => array(
+      'bundle' => 'type',
+    ),
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'access callback' => 'wechat_qr2_access',
+    'module' => 'wechat_qr2',
+    'metadata controller class' => 'WechatQr2MetadataController'
+  );
+  // Add bundle info but bypass entity_load() as we cannot use it here.
+  $types = db_select('wechat_qr2_type', 'w')
+    ->fields('w')
+    ->execute()
+    ->fetchAllAssoc('type');
+
+  foreach ($types as $type => $info) {
+    $return['wechat_qr2']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/structure/wechat_qr2/manage/%wechat_qr2_type',
+        'real path' => 'admin/structure/wechat_qr2/manage/' . $type,
+        'bundle argument' => 4,
+        'access arguments' => array('administer wechat qr2'),
+      ),
+    );
+  }
+
+  $return['wechat_qr2_type'] = array(
+    'label' => t('微信二维码类型'),
+    'plural label' => t('微信二维码类型'),
+    'description' => t('微信二维码类型，按使用场景区分.'),
+    'entity class' => 'WechatQr2Type',
+    'controller class' => 'EntityAPIControllerExportable',
+    'base table' => 'wechat_qr2_type',
+    'fieldable' => FALSE,
+    'bundle of' => 'wechat_qr2',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      'name' => 'type',
+      'label' => 'label',
+    ),
+    'access callback' => 'wechat_qr2_type_access',
+    'module' => 'wechat_qr2',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => 'admin/structure/wechat_qr2',
+      'file' => 'wechat_qr2_type.admin.inc',
+      'controller class' => 'WechatQr2TypeUIController',
+    ),
+  );
+
+  return $return;
+}
+
+function wechat_qr2_access() {
+  return TRUE;
+}
+
+function wechat_qr2_type_access() {
+  return TRUE;
+}
+
+
+function wechat_qr2_load($id, $reset = FALSE) {
+  $entity = wechat_qr2_load_multiple(array($id), array(), $reset);
+  return reset($entity);
+}
+
+function wechat_qr2_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_qr2', $ids, $conditions, $reset);
+}
+
+function wechat_qr2_type_load($type) {
+  return wechat_qr2_get_types($type);
+}
+
+function wechat_qr2_get_types($type_name = NULL) {
+  $types = entity_load_multiple_by_name('wechat_qr2_type', isset($type_name) ? array($type_name) : FALSE);
+  return isset($type_name) ? reset($types) : $types;
+}
+
+class WechatQr2 extends Entity {
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_qr2');
+  }
+}
+
+class WechatQr2MetadataController extends EntityDefaultMetadataController {
+
+}
+
+class WechatQr2Type extends Entity {
+
+
+  public $type;
+  public $label;
+  public $weight = 0;
+  public $description;
+
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_qr2_type');
+  }
+
+  /**
+   * Returns whether the wechat_request_message type is locked, thus may not be deleted or renamed.
+   *
+   * Wechat_request_message types provided in code are automatically treated as locked, as well
+   * as any fixed wechat_request_message type.
+   */
+  public function isLocked() {
+    return isset($this->status) && empty($this->is_new) && (($this->status & ENTITY_IN_CODE) || ($this->status & ENTITY_FIXED));
+  }
+
+
+  /**
+   * Overrides Entity::save().
+   */
+  public function save() {
+    parent::save();
+    // Clear field info caches such that any changes to extra fields get
+    // reflected.
+    field_info_cache_clear();
+  }
+}
