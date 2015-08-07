@@ -63,10 +63,11 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
   $form['qr_key'] = array(
     '#title' => t('二维码KEY'),
     '#description' => t('
-    场景值ID:<br/>
-    临时二维码时为32位非0整型.<br/>
-    永久二维码时最大值为100000（目前参数只支持1--100000）<br/>
-    场景值ID（字符串形式的ID），字符串类型，长度限制为1到64，仅永久二维码支持此字段
+    <b>临时二维码:</b><br/>
+       32位非0整型.<br/>
+    <b>永久二维码:</b><br/>
+       数字:1--100000<br/>
+       字符串:长度1到64.
     '),
     '#type' => 'textfield',
     '#default_value' => $entity->qr_key,
@@ -112,6 +113,17 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
   return $form;
 }
 
+function wechat_qr2_form_validate($form, &$form_state) {
+  dpm($form_state);
+  $qr_type = $form_state['values']['qr_type'];
+  $qr_key = $form_state['values']['qr_key'];
+  if ($qr_type == 0 && !is_numeric($qr_key)) {
+    form_set_error('qr_key', t('临时二维码KEY只能是数字'));
+  }
+
+
+//  dpm($form);
+}
 
 function wechat_qr2_form_submit(&$form, &$form_state) {
   global $user;
