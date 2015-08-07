@@ -307,7 +307,7 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
     );
 
     $properties['qr_key'] = array(
-      'label' => t('标题'),
+      'label' => t('QR Key'),
       'type' => 'text',
       'getter callback' => 'entity_property_getter_method',
       'setter callback' => 'entity_property_verbatim_set',
@@ -317,7 +317,7 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
       'description' => t('The profile type.'),
     );
     $properties['qr_type'] = array(
-      'label' => t('标题'),
+      'label' => t('类型'),
       'type' => 'text',
       'getter callback' => 'entity_property_getter_method',
       'setter callback' => 'entity_property_verbatim_set',
@@ -327,7 +327,7 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
       'description' => t('The profile type.'),
     );
     $properties['expire'] = array(
-      'label' => t('标题'),
+      'label' => t('过期时间'),
       'type' => 'integer',
       'getter callback' => 'entity_property_getter_method',
       'setter callback' => 'entity_property_verbatim_set',
@@ -337,13 +337,12 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
       'description' => t('The profile type.'),
     );
     $properties['ticket'] = array(
-      'label' => t('标题'),
+      'label' => t('Ticket'),
       'type' => 'text',
       'getter callback' => 'entity_property_getter_method',
       'setter callback' => 'entity_property_verbatim_set',
       'setter permission' => 'administer profiles',
       'schema field' => 'ticket',
-      'required' => TRUE,
       'description' => t('The profile type.'),
     );
 
