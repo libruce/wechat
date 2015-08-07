@@ -235,6 +235,12 @@ class WechatQr2 extends Entity {
     parent::__construct($values, 'wechat_qr2');
   }
 
+  public function  getUrl($ticket = NULL) {
+    $output = '';
+    $output .= '<img src="' . 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=' . $this->ticket . '"/>';
+    return $output;
+  }
+
   public function  save() {
     //$this->bundle = $this->bundle->type;
     dpm($this);
