@@ -185,8 +185,17 @@ function wechat_session_callback() {
 
   $function_callback = $status_info['function_callback'];
   $echo_callback = $status_info['echo_callback'];
-  echo $echo_callback($wechat_obj);
+
+
   $function_callback($wechat_obj);
+
+  $send_modal = variable_get('wechat_session_send_modal', 'asynchrony');
+  if ($send_modal == 'asynchrony') {
+    echo $echo_callback($wechat_obj);
+  }
+  if ($send_modal == 'silent') {
+    echo 'success';
+  }
 }
 
 function wechat_session_set_default_status($openid) {
@@ -262,7 +271,17 @@ function wechat_session_settings_form($form, &$form_state) {
     '#options' => $options,
     '#required' => TRUE,
   );
-
+  $form['required']['wechat_session_send_modal'] = array(
+    '#type' => 'radios',
+    '#title' => t('消息回复模式'),
+    '#default_value' => variable_get('wechat_session_send_modal', 'asynchrony'),
+    '#options' => array(
+      'sync' => '同步回复',
+      'asynchrony' => '异步回复',
+      'silent' => '静默',
+    ),
+    '#required' => TRUE,
+  );
   return system_settings_form($form);
 }
 
