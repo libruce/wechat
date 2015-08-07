@@ -19,12 +19,11 @@ function wechat_qr2_schema() {
         'length' => 255,
         'not null' => TRUE,
       ),
-      'ticket' => array(
-        'description' => '二维码ticket',
+      'qr_key' => array(
+        'description' => '二维码KEY',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
-        'default' => '',
       ),
       'qr_type' => array(
         'description' => '二维码类型，永久1 临时0',
@@ -32,17 +31,18 @@ function wechat_qr2_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'qr_key' => array(
-        'description' => '二维码KEY',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
       'expire' => array(
         'description' => '过期时间',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
+      ),
+      'ticket' => array(
+        'description' => '二维码ticket',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
       ),
       'create_time' => array(
         'description' => '创建时间',

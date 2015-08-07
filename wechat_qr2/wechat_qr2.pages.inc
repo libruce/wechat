@@ -30,13 +30,30 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
   }
 
 
-  $form['title'] = array(
-    '#title' => t('Title'),
+  $form['qr_key'] = array(
+    '#title' => t('二维码KEY'),
     '#type' => 'textfield',
-    '#default_value' => $entity->title,
-    //'#required' => TRUE,
+    '#default_value' => $entity->qr_key,
+    '#required' => TRUE,
     '#size' => 30,
-    '#weight' => -40,
+    '#weight' => 1,
+  );
+  $form['qr_type'] = array(
+    '#title' => t('二维码类型'),
+    '#type' => 'radios',
+    '#default_value' => isset($entity->qr_type) ? $entity->qr_type : 0,
+    '#options' => array(
+      '0' => t('临时'),
+      '1' => t('永久')
+    ),
+    '#weight' => 1,
+  );
+  $form['expire'] = array(
+    '#title' => t('过期时间'),
+    '#type' => 'textfield',
+    '#default_value' => isset($entity->expire) ? $entity->expire : 0,
+    '#size' => 30,
+    '#weight' => 1,
   );
 
   field_attach_form('wechat_qr2', $entity, $form, $form_state, $langcode);
@@ -62,7 +79,7 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
 }
 
 
-function wechat_reply_form_submit(&$form, &$form_state) {
+function wechat_qr2_form_submit(&$form, &$form_state) {
   global $user;
   $entity = &$form_state['wechat_qr2'];
 
