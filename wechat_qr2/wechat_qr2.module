@@ -254,14 +254,16 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
     $properties['bundle'] = array(
-        'label' => t('消息类型'),
-        'type' => 'wechat_qr2_type',
-        'getter callback' => 'entity_property_getter_method',
-        'setter callback' => 'entity_property_verbatim_set',
-        'setter permission' => 'administer profiles',
-        'required' => TRUE,
-        'description' => t('The profile type.'),
-      ) + $properties['bundle'];
+      'label' => t('消息类型'),
+      'type' => 'token',
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_verbatim_set',
+      'options list' => 'wechat_qr2_get_types',
+      'setter permission' => 'administer profiles',
+      'schema field' => 'bundle',
+      'required' => TRUE,
+      'description' => t('The profile type.'),
+    );
 
     $properties['title'] = array(
       'label' => t('标题'),
