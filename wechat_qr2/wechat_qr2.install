@@ -19,6 +19,12 @@ function wechat_qr2_schema() {
         'length' => 255,
         'not null' => TRUE,
       ),
+      'title' => array(
+        'description' => 'title，用来标记二维码。方便查找管理',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
       'uid' => array(
         'description' => '作者',
         'type' => 'int',
@@ -37,7 +43,6 @@ function wechat_qr2_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-
       'qr_key' => array(
         'description' => '二维码KEY',
         'type' => 'varchar',
@@ -57,7 +62,7 @@ function wechat_qr2_schema() {
         'default' => 0,
       ),
       'ticket' => array(
-        'description' => '二维码ticket',
+        'description' => '二维码ticket，用来换二维码图片',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,

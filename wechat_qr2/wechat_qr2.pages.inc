@@ -15,12 +15,14 @@ function wechat_qr2_view_page($entity) {
   $output = '';
   $ticket = UrlEncode($entity->ticket);
 //  dpm($entity);
+  $output .= "<div><b>标题:</b> {$entity->title}</div>";
   $expire = FALSE;
+  $output .= "<div><b>二维码:</b></div>";
   if (time() > $entity->create_time + $entity->expire) {
     $expire = TRUE;
   }
   if ($expire) {
-    $output .= "<div><b>过期状态:</b>已过期</div>";
+    $output .= "已过期";
   }
   else {
     $output .= '<img src="' . 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=' . $ticket . '"/>';
@@ -60,6 +62,15 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
   if ($op == 'edit') {
     $disabled = TRUE;
   }
+  $form['title'] = array(
+    '#title' => t('标题'),
+    '#type' => 'textfield',
+    '#default_value' => $entity->title,
+    '#required' => TRUE,
+    '#size' => 30,
+    '#weight' => -1,
+  );
+
   $form['qr_key'] = array(
     '#title' => t('二维码KEY'),
     '#description' => t('
@@ -130,6 +141,7 @@ function wechat_qr2_form_submit(&$form, &$form_state) {
   $entity = &$form_state['wechat_qr2'];
   field_attach_submit('wechat_qr2', $entity, $form, $form_state);
   $entity->uid = $user->uid;
+  $entity->title = $form_state['values']['title'];
   $entity->qr_key = $form_state['values']['qr_key'];
   $entity->qr_type = $form_state['values']['qr_type'];
   $entity->expire = $form_state['values']['expire'];

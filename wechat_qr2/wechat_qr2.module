@@ -72,6 +72,11 @@ function wechat_qr2_field_extra_fields() {
   foreach (wechat_qr2_get_types() as $type) {
     $extra['wechat_qr2'][$type->type] = array(
       'form' => array(
+        'title' => array(
+          'label' => t('标题'),
+          'description' => t('由Wechat Qr2模块提供'),
+          'weight' => -7,
+        ),
         'qr_key' => array(
           'label' => t('二维码KEY'),
           'description' => t('由Wechat Qr2模块提供'),
@@ -209,6 +214,7 @@ function wechat_qr2_get_types($type_name = NULL) {
 class WechatQr2 extends Entity {
   public $id;
   public $bundle;
+  public $title;
   public $uid;
   public $update_time;
   public $create_time;
@@ -256,6 +262,17 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
         'required' => TRUE,
         'description' => t('The profile type.'),
       ) + $properties['bundle'];
+
+    $properties['title'] = array(
+      'label' => t('标题'),
+      'type' => 'text',
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer profiles',
+      'schema field' => 'title',
+      'required' => TRUE,
+      'description' => t('The profile type.'),
+    );
 
     $properties['uid'] = array(
       'label' => t('UID'),
@@ -326,4 +343,3 @@ class WechatQr2Type extends Entity {
     field_info_cache_clear();
   }
 }
-
