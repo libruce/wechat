@@ -4,12 +4,21 @@
  */
 function wechat_qr2_menu() {
   $items['qr/add'] = array(
-    'title' => '微信回复消息',
+    'title' => '微信二维码',
     'access callback' => 'wechat_qr2_access',
     'access arguments' => array('add_all'),
-    'description' => 'Add a new property.',
+    'description' => '选择添加二维码.',
     'page callback' => 'wechat_qr2_add_page',
     'weight' => 10,
+    'file' => 'wechat_qr2.pages.inc',
+  );
+  $items['qr/%wechat_qr2'] = array(
+    'page callback' => 'wechat_qr2_view_page',
+    'page arguments' => array(1),
+    'access callback' => 'wechat_qr2_access',
+    'access arguments' => array('view', 1),
+    'weight' => 0,
+    'type' => MENU_LOCAL_TASK,
     'file' => 'wechat_qr2.pages.inc',
   );
   $items['qr/%wechat_qr2/edit'] = array(
@@ -45,6 +54,7 @@ function wechat_qr2_menu() {
  */
 function wechat_qr2_admin_paths() {
   $paths = array(
+    'qr/*' => TRUE,
     'qr/*/edit' => TRUE,
     'qr/*/delete' => TRUE,
     'qr/add' => TRUE,
@@ -67,7 +77,7 @@ function wechat_qr2_field_extra_fields() {
           'weight' => -7,
         ),
         'qr_type' => array(
-          'label' => t('临时二维码'),
+          'label' => t('二维码类型'),
           'description' => t('由Wechat Qr2模块提供'),
           'weight' => -6,
         ),
@@ -77,6 +87,13 @@ function wechat_qr2_field_extra_fields() {
           'weight' => -5,
         ),
       ),
+      'display' => array(
+        'image' => array(
+          'label' => t('二维码图片'),
+          'description' => t('二维码图片'),
+          'weight' => 0,
+        ),
+      )
     );
   }
   return $extra;
@@ -134,9 +151,9 @@ function wechat_qr2_entity_info() {
   }
 
   $return['wechat_qr2_type'] = array(
-    'label' => t('微信二维码类型'),
-    'plural label' => t('微信二维码类型'),
-    'description' => t('微信二维码类型，按使用场景区分.'),
+    'label' => t('二维码使用场景'),
+    'plural label' => t('二维码使用场景'),
+    'description' => t('二维码使用场景.'),
     'entity class' => 'WechatQr2Type',
     'controller class' => 'EntityAPIControllerExportable',
     'base table' => 'wechat_qr2_type',
@@ -226,7 +243,53 @@ class WechatQr2 extends Entity {
 }
 
 class WechatQr2MetadataController extends EntityDefaultMetadataController {
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info['wechat_qr2']['properties'];
+    $properties['bundle'] = array(
+        'label' => t('消息类型'),
+        'type' => 'wechat_qr2_type',
+        'getter callback' => 'entity_property_getter_method',
+        'setter callback' => 'entity_property_verbatim_set',
+        'setter permission' => 'administer profiles',
+        'required' => TRUE,
+        'description' => t('The profile type.'),
+      ) + $properties['bundle'];
 
+    $properties['uid'] = array(
+      'label' => t('UID'),
+      'type' => 'user',
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'uid',
+      'required' => TRUE,
+      'description' => t('Create time of wechat response message.'),
+    );
+
+    $properties['update_time'] = array(
+      'label' => t('Update time'),
+      'type' => 'date',
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'update_time',
+      'required' => TRUE,
+      'description' => t('Create time of wechat response message.'),
+    );
+    $properties['create_time'] = array(
+      'label' => t('Create time'),
+      'type' => 'date',
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'create_time',
+      'required' => TRUE,
+      'description' => t('Create time of wechat response message.'),
+    );
+
+    return $info;
+  }
 }
 
 class WechatQr2Type extends Entity {
