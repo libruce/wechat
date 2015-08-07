@@ -76,6 +76,8 @@ function wechat_qr2_type_form($form, &$form_state, $entity_type, $op = 'edit') {
 function wechat_qr2_type_form_submit(&$form, &$form_state) {
   $entity_type = entity_ui_form_submit_build_entity($form, $form_state);
   // Save and go back.
+  $entity_type->status = 1;
   $entity_type->save();
 
+  $form_state['redirect'] = 'admin/structure/wechat_qr2';
 }

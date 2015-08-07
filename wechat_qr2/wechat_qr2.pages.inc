@@ -84,6 +84,7 @@ function wechat_qr2_form_submit(&$form, &$form_state) {
   global $user;
   $entity = &$form_state['wechat_qr2'];
   field_attach_submit('wechat_qr2', $entity, $form, $form_state);
+  $entity->uid = $user->uid;
   $entity->qr_key = $form_state['values']['qr_key'];
   $entity->qr_type = $form_state['values']['qr_type'];
   $entity->expire = $form_state['values']['expire'];

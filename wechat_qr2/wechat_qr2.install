@@ -19,6 +19,25 @@ function wechat_qr2_schema() {
         'length' => 255,
         'not null' => TRUE,
       ),
+      'uid' => array(
+        'description' => '作者',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'update_time' => array(
+        'description' => '更新时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'create_time' => array(
+        'description' => '创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+
       'qr_key' => array(
         'description' => '二维码KEY',
         'type' => 'varchar',
@@ -43,12 +62,6 @@ function wechat_qr2_schema() {
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-      ),
-      'create_time' => array(
-        'description' => '创建时间',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
       ),
     ),
     'primary key' => array('id'),
