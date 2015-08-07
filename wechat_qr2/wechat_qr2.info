@@ -1,4 +1,4 @@
-name = 微信二维码实体
+name = 微信二维码实体定义
 description = 微信二维码实体定义和添加表单。
 core = 7.x
 package = wechat
