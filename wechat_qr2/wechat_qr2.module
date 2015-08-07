@@ -306,6 +306,47 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
       'description' => t('Create time of wechat response message.'),
     );
 
+    $properties['qr_key'] = array(
+      'label' => t('标题'),
+      'type' => 'text',
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer profiles',
+      'schema field' => 'qr_key',
+      'required' => TRUE,
+      'description' => t('The profile type.'),
+    );
+    $properties['qr_type'] = array(
+      'label' => t('标题'),
+      'type' => 'text',
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer profiles',
+      'schema field' => 'qr_type',
+      'required' => TRUE,
+      'description' => t('The profile type.'),
+    );
+    $properties['expire'] = array(
+      'label' => t('标题'),
+      'type' => 'integer',
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer profiles',
+      'schema field' => 'expire',
+      'required' => TRUE,
+      'description' => t('The profile type.'),
+    );
+    $properties['ticket'] = array(
+      'label' => t('标题'),
+      'type' => 'text',
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer profiles',
+      'schema field' => 'ticket',
+      'required' => TRUE,
+      'description' => t('The profile type.'),
+    );
+
     return $info;
   }
 }
