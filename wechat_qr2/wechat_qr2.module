@@ -126,6 +126,7 @@ function wechat_qr2_entity_info() {
     ),
     'entity keys' => array(
       'id' => 'id',
+      'label' => 'title',
       'bundle' => 'bundle',
     ),
     'bundles' => array(),
@@ -228,10 +229,15 @@ class WechatQr2 extends Entity {
 
 
   public function __construct($values = array()) {
+    if (isset($values['bundle']) && is_object($values['bundle'])) {
+      $values['bundle'] = $values['bundle']->type;
+    }
     parent::__construct($values, 'wechat_qr2');
   }
 
   public function  save() {
+    //$this->bundle = $this->bundle->type;
+    dpm($this);
     $this->update_time = time();
 
     if (!isset($this->create_time)) {
@@ -253,17 +259,16 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
+    dpm($properties);
     $properties['bundle'] = array(
-      'label' => t('消息类型'),
-      'type' => 'token',
-      'getter callback' => 'entity_property_getter_method',
-      'setter callback' => 'entity_property_verbatim_set',
-      'options list' => 'wechat_qr2_get_types',
-      'setter permission' => 'administer profiles',
-      'schema field' => 'bundle',
-      'required' => TRUE,
-      'description' => t('The profile type.'),
-    );
+        'label' => t('消息类型'),
+        'type' => 'wechat_qr2_type',
+        'getter callback' => 'entity_property_getter_method',
+        'setter callback' => 'entity_property_setter_method',
+        'setter permission' => 'administer profiles',
+        'required' => TRUE,
+        'description' => t('The profile type.'),
+      ) + $properties['bundle'];
 
     $properties['title'] = array(
       'label' => t('标题'),
@@ -275,8 +280,8 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
       'required' => TRUE,
       'description' => t('The profile type.'),
     );
-
-    $properties['uid'] = array(
+//    unset($properties['uid']);
+    $properties['user'] = array(
       'label' => t('UID'),
       'type' => 'user',
       'getter callback' => 'entity_property_getter_method',
@@ -347,7 +352,7 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
       'schema field' => 'ticket',
       'description' => t('The profile type.'),
     );
-
+    dpm($info);
     return $info;
   }
 }
