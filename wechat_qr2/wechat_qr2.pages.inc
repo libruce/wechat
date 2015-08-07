@@ -17,6 +17,12 @@ function wechat_qr2_add_form($type) {
   return drupal_get_form('wechat_qr2_form', $entity, 'add');
 }
 
+
+function wechat_qr2_edit_form($entity) {
+  module_load_include('inc', 'wechat_qr2', 'wechat_reply.pages');
+  return drupal_get_form('wechat_qr2_form', $entity, 'edit');
+}
+
 function wechat_qr2_form($form, &$form_state, $entity, $op) {
 
   //dpm($entity);
@@ -28,8 +34,10 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
   if (empty($langcode)) {
     $langcode = LANGUAGE_NONE;
   }
-
-
+  $disabled = FALSE;
+  if ($op == 'edit') {
+    $disabled = TRUE;
+  }
   $form['qr_key'] = array(
     '#title' => t('二维码KEY'),
     '#type' => 'textfield',
@@ -37,6 +45,7 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
     '#required' => TRUE,
     '#size' => 30,
     '#weight' => 1,
+    '#disabled' => $disabled,
   );
   $form['qr_type'] = array(
     '#title' => t('二维码类型'),
@@ -47,13 +56,15 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
       '1' => t('永久')
     ),
     '#weight' => 1,
+    '#disabled' => $disabled,
   );
   $form['expire'] = array(
     '#title' => t('过期时间'),
     '#type' => 'textfield',
-    '#default_value' => isset($entity->expire) ? $entity->expire : 0,
+    '#default_value' => isset($entity->expire) ? $entity->expire : 604800,
     '#size' => 30,
     '#weight' => 1,
+    '#disabled' => $disabled,
   );
 
   field_attach_form('wechat_qr2', $entity, $form, $form_state, $langcode);
@@ -65,16 +76,6 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
     '#weight' => 40,
   );
 
-  if (!empty($entity->id)) {
-    $form['actions']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('删除'),
-      '#weight' => 45,
-      '#limit_validation_errors' => array(),
-      '#submit' => array('wechat_reply_form_submit_delete')
-    );
-  }
-  //wechat_response_message_edit_form_submit_delete
   return $form;
 }
 
@@ -82,15 +83,9 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
 function wechat_qr2_form_submit(&$form, &$form_state) {
   global $user;
   $entity = &$form_state['wechat_qr2'];
-
-  //$message->to_user_name = $form_state['values']['to_user_name'];
-  //dpm($form_state);
-//  // Notify field widgets.
   field_attach_submit('wechat_qr2', $entity, $form, $form_state);
-  //dpm($form_state);
-  $entity->title = $form_state['values']['title'];
-  $entity->uid = $user->uid;
-
-  drupal_set_message(t('%type reply add success.', array('%type' => $entity->msg_type)));
-
+  $entity->qr_key = $form_state['values']['qr_key'];
+  $entity->qr_type = $form_state['values']['qr_type'];
+  $entity->expire = $form_state['values']['expire'];
+  $entity->save();
 }

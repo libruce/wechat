@@ -12,7 +12,15 @@ function wechat_qr2_menu() {
     'weight' => 10,
     'file' => 'wechat_qr2.pages.inc',
   );
-
+  $items['qr/%wechat_qr2/edit'] = array(
+    'page callback' => 'wechat_qr2_edit_form',
+    'page arguments' => array(1),
+    'access callback' => 'wechat_qr2_access',
+    'access arguments' => array('edit', 1),
+    'weight' => 0,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_qr2.pages.inc',
+  );
   $types = wechat_qr2_get_types();
   foreach ($types as $type) {
     //$type_url_str = str_replace('_', '-', $type->type);
@@ -196,6 +204,14 @@ class WechatQr2 extends Entity {
   }
 
   public function  save() {
+    $this->create_time = time();
+    if (!isset($this->ticket)) {
+      $we_obj = wechat_api_init_wechatobj();
+      $ticket_array = $we_obj->getQRCode($this->qr_key, $this->qr_type, $this->expire);
+      if (!empty($ticket_array['ticket'])) {
+        $this->ticket = $ticket_array['ticket'];
+      }
+    }
     parent::save();
   }
 }
