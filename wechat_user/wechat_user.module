@@ -35,24 +35,6 @@ function wechat_user_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  //用户的微信信息
-  $items['user/%user/wechat_info'] = array(
-    'title' => 'Wechat User Info',
-    'page callback' => 'wechat_user_view_page',
-    'page arguments' => array(1),
-    'access callback' => 'user_view_access',
-    'access arguments' => array(1),
-    'type' => MENU_LOCAL_TASK,
-  );
-  $items['user/%user/wechat_info/%wechat_user/edit'] = array(
-    'title' => 'Edit Wechat Info',
-    'page callback' => 'wechat_user_edit_form',
-    'page arguments' => array(3),
-    'access callback' => 'wechat_user_edit_access',
-    'access arguments' => array(1, 'admin'),
-    'type' => MENU_CALLBACK,
-    'file' => 'wechat_user.forms.inc',
-  );
 
   $items['admin/structure/wechat_user'] = array(
     'title' => '微信用户设置',
@@ -92,22 +74,6 @@ function wechat_user_settings_page() {
 }
 
 
-function wechat_user_view_page($user) {
-
-  $wechat_user = wechat_user_load($user->uid);
-
-  //dpm($wechat_user);
-  $output = '';
-  if ($wechat_user) {
-    $output .= theme('wechat_user_view_page', array('wechat_user' => $wechat_user));
-  }
-  else {
-    $output .= '没有绑定微信';
-    $output .= theme('wechat_user_qr_create', array('user' => $user));
-  }
-
-  return $output;
-}
 
 /**
  * Implements hook_theme().
@@ -154,102 +120,6 @@ function wechat_user_login_two() {
     'query' => array('destination' => $goto, 'error' => $error)
   )), $state, $type);
   drupal_goto($auth_url);
-}
-
-
-///**
-// * Implements hook_field_extra_fields().
-// */
-//function wechat_user_field_extra_fields() {
-//  $extra['taxonomy_term']['wechat_user_group'] = array(
-//    'form' => array(
-//      'group_id' => array(
-//        'label' => t('Group Id'),
-//        'description' => t('微信分组ID'),
-//        'weight' => -4,
-//      ),
-//    ),
-//  );
-//  return $extra;
-//}
-
-
-/**
- * Implements hook_form_alter().
- */
-function wechat_user_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'taxonomy_overview_terms') {
-    if ($form['#vocabulary']->machine_name == 'wechat_user_group') {
-      if (!$form['#total_entries']) {
-        $form['actions']['pull_update'] = array(
-          '#type' => 'submit',
-          '#submit' => array('wechat_user_pull_user_group'),
-          '#value' => t('获取当前设置'),
-        );
-      }
-    }
-  }
-}
-
-
-/**
- * Implements hook_taxonomy_term_presave().
- */
-function wechat_user_taxonomy_term_presave($term) {
-  if ($term->vocabulary_machine_name == 'wechat_user_group') {
-
-    //watchdog('term_test', json_encode(array($term)));
-    $wechat_obj = wechat_api_init_wechatobj();
-    $term_wrapper = entity_metadata_wrapper('taxonomy_term', $term);
-    //创建，排除pull 更新操作
-    if (!isset($term->original) && $term->op != 'pull') {
-      dpm($term);
-      $term_wrapper->field_wechat_group_id->set($wechat_obj->createGroup($term->name)['group']['id']);
-    }
-    elseif (isset($term->original)) {
-      //更新，只检查name。Description在微信中不使用。
-      if ($term->name != $term->original->name) {
-        dpm($term);
-        $original_term_wrapper = entity_metadata_wrapper('taxonomy_term', $term->original);
-        $original_group_id = $original_term_wrapper->field_wechat_group_id->value();
-        $wechat_obj->updateGroup($original_group_id, $term->name);
-      }
-    }
-  }
-}
-
-/**
- * Implements hook_taxonomy_term_delete().
- */
-function wechat_user_taxonomy_term_delete($term) {
-//删除分组接口有问题，暂不使用
-  if ($term->vocabulary_machine_name == 'wechat_user_group') {
-//    $wechat_obj = wechat_api_init_wechatobj();
-//    $term_wrapper = entity_metadata_wrapper('taxonomy_term', $term);
-//    $value = $term_wrapper->field_wechat_group_id->value();
-//    $wechat_obj->deleteGroupById($value);
-  }
-}
-
-
-function wechat_user_pull_user_group($form, &$form_state) {
-
-  $wechat_obj = wechat_api_init_wechatobj();
-  $user_group = $wechat_obj->getGroup();
-  variable_set('wechat_group_data', $user_group);
-  //dpm($user_group);
-  $vid = taxonomy_vocabulary_machine_name_load('wechat_user_group')->vid;
-  foreach ($user_group['groups'] as $info) {
-    $term = new stdClass();
-    //$term->vocabulary_machine_name = 'wechat_user_group';
-    //添加操作类型，在hook_taxonomy_term_presave()排除掉
-    $term->op = 'pull';
-    $term->vid = $vid;
-    $term->name = $info['name'];
-    $term->field_wechat_group_id[LANGUAGE_NONE][0]['value'] = $info['id'];
-    taxonomy_term_save($term);
-  }
-
 }
 
 
@@ -349,20 +219,7 @@ function wechat_user_save(WechatUser $wechatUser) {
   return $wechatUser->save();
 }
 
-/**
- * Determines whether the given user has access to a wechat_response_message.
- *
- * @param $op
- *   The operation being performed. One of 'view', 'update', 'create', 'delete'
- *   or just 'edit' (being the same as 'create' or 'update').
- * @param $wechat_user
- *   Optionally a wechat_user to check access for. If nothing is
- *   given, access for all wechat_user is determined.
- * @param $account
- *   The user to check for. Leave it to NULL to check for the global user.
- * @return boolean
- *   Whether access is allowed or not.
- */
+
 function wechat_user_access($op, $wechat_user = NULL, $account = NULL) {
   if (user_access('administer wechat user', $account)) {
     return TRUE;
