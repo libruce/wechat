@@ -74,7 +74,6 @@ function wechat_user_settings_page() {
 }
 
 
-
 /**
  * Implements hook_theme().
  */
@@ -132,36 +131,40 @@ function wechat_user_pull_user_info() {
 }
 
 function wechat_user_user_registry($openid_list) {
-  $wechat_obj = wechat_api_init_wechatobj();
   foreach ($openid_list as $user_open_id) {
-    if (!wechat_user_get_user_by_openid($user_open_id)) {
-      $user_info = $wechat_obj->getUserInfo($user_open_id);
-      $wechat_user_entity = entity_create('wechat_user', array());
-      // auto register
-      $user_name = 'wechat_' . $user_open_id;
+    wechat_user_registry_user($user_open_id);
+  }
+}
 
-      $new_user = array(
-        'name' => $user_name,
-        'pass' => user_password(),
-        'status' => 1,
-      );
-      // $account returns user object
-      $account = user_save(NULL, $new_user);
+function wechat_user_registry_user($user_open_id) {
+  $wechat_obj = wechat_api_init_wechatobj();
+  if (!wechat_user_get_user_by_openid($user_open_id)) {
+    $user_info = $wechat_obj->getUserInfo($user_open_id);
+    $wechat_user_entity = entity_create('wechat_user', array());
+    // auto register
+    $user_name = 'wechat_' . $user_open_id;
 
-      $wechat_user_entity->uid = $account->uid;
+    $new_user = array(
+      'name' => $user_name,
+      'pass' => user_password(),
+      'status' => 1,
+    );
+    // $account returns user object
+    $account = user_save(NULL, $new_user);
 
-      $wechat_user_entity->openid = $user_info['openid'];
-      $wechat_user_entity->subscribe = $user_info['subscribe'];
-      $wechat_user_entity->nickname = $user_info['nickname'];
-      $wechat_user_entity->sex = $user_info['sex'];
-      $wechat_user_entity->province = $user_info['province'];
-      $wechat_user_entity->city = $user_info['city'];
-      $wechat_user_entity->country = $user_info['country'];
-      $wechat_user_entity->headimgurl = $user_info['headimgurl'];
-      $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
+    $wechat_user_entity->uid = $account->uid;
 
-      $wechat_user_entity->save();
-    }
+    $wechat_user_entity->openid = $user_info['openid'];
+    $wechat_user_entity->subscribe = $user_info['subscribe'];
+    $wechat_user_entity->nickname = $user_info['nickname'];
+    $wechat_user_entity->sex = $user_info['sex'];
+    $wechat_user_entity->province = $user_info['province'];
+    $wechat_user_entity->city = $user_info['city'];
+    $wechat_user_entity->country = $user_info['country'];
+    $wechat_user_entity->headimgurl = $user_info['headimgurl'];
+    $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
+
+    $wechat_user_entity->save();
   }
 }
 
@@ -398,5 +401,117 @@ class WechatUser extends Entity {
 
   public function save() {
     parent::save();
+  }
+}
+
+class WechatUserMetadataController extends EntityDefaultMetadataController {
+
+  public function entityPropertyInfo() {
+    $info = parent::entityPropertyInfo();
+    $properties = &$info[$this->type]['properties'];
+
+    $properties['user'] = array(
+      'label' => t('UID'),
+      'type' => 'user',
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'schema field' => 'uid',
+      'required' => TRUE,
+      'description' => t('Create time of wechat response message.'),
+    );
+
+    $properties['openid'] = array(
+      'type' => 'text',
+      'label' => t('Open id'),
+      'description' => t('Openid of wechat user.'),
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'openid',
+      'required' => TRUE,
+    );
+
+    $properties['subscribe'] = array(
+      'label' => t('subscribe'),
+      'description' => t('subscribe status of wechat user.'),
+      'type' => 'integer',
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'subscribe',
+    );
+
+    $properties['nickname'] = array(
+      'type' => 'text',
+      'label' => t('nickname'),
+      'description' => t('nickname of wechat user.'),
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'nickname',
+    );
+
+    $properties['sex'] = array(
+      'label' => t('sex'),
+      'description' => t('sex of wechat user.'),
+      'type' => 'token',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat user',
+      'options list' => 'wechat_wechatuser_sex_options_list',
+      'schema field' => 'sex',
+    );
+
+    $properties['province'] = array(
+      'type' => 'text',
+      'label' => t('province'),
+      'description' => t('province of wechat user.'),
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'province',
+    );
+
+    $properties['city'] = array(
+      'type' => 'text',
+      'label' => t('city'),
+      'description' => t('city of wechat user.'),
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'city',
+    );
+
+    $properties['country'] = array(
+      'type' => 'text',
+      'label' => t('country'),
+      'description' => t('country of wechat user.'),
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'country',
+    );
+
+    $properties['headimgurl'] = array(
+      'type' => 'text',
+      'label' => t('headimgurl'),
+      'description' => t('headimgurl of wechat user.'),
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'headimgurl',
+    );
+
+    $properties['subscribe_time'] = array(
+      'type' => 'date',
+      'label' => t('Subscribe time'),
+      'description' => t('Subscribe time of wechat user.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'subscribe_time',
+      'required' => TRUE,
+    );
+
+    return $info;
   }
 }

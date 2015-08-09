@@ -12,5 +12,4 @@ features[ctools][] = views:views_default:3.0
 features[features_api][] = api:2
 features[views_view][] = wechat_user
 features_exclude[dependencies][ctools] = ctools
-files[] = wechat_user.info.inc
 files[] = wechat_user.forms.inc

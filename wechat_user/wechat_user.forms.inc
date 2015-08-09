@@ -48,10 +48,8 @@ function wechat_user_form_submit(&$form, &$form_state) {
 //  // Notify field widgets.
   //dpm($form_state);
   field_attach_submit('wechat_user', $wechat_user, $form, $form_state);
-
-  wechat_user_save($wechat_user);
-
- // drupal_set_message(t('%type reply add success.', array('%type' => $wechat_user->msg_type)));
+  $wechat_user->save();
+  // drupal_set_message(t('%type reply add success.', array('%type' => $wechat_user->msg_type)));
   //$form_state['redirect'] = 'admin/content/reply';
 }
 
