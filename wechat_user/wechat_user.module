@@ -27,6 +27,7 @@ function wechat_user_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+
   //自定义登录回调
   $items['wechat/user/login'] = array(
     'title' => 'Wechat Login',
@@ -34,7 +35,6 @@ function wechat_user_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-
 
   $items['admin/structure/wechat_user'] = array(
     'title' => '微信用户设置',
@@ -514,4 +514,31 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
 
     return $info;
   }
+}
+
+
+/**
+ * Implements hook_rules_action_info().
+ */
+function wechat_user_rules_action_info() {
+  $action['wechat_user_login_open_id'] = array(
+    'parameter' => array(
+      'open_id' => array(
+        'type' => 'text',
+        'label' => t('消息实体WechatReply'),
+        'description' => t('The user whose roles should be changed.'),
+        'save' => TRUE,
+      )
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('使用微信OPENID登录'),
+    'base' => 'wechat_user_login_open_id',
+  );
+  return $action;
+}
+
+function wechat_user_login_open_id($openid) {
+  $uid = wechat_user_get_user_by_openid($openid);
+  _wechat_user_login($uid);
 }
