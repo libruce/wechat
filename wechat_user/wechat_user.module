@@ -556,6 +556,26 @@ function wechat_user_rules_action_info() {
     'label' => t('注册用户'),
     'base' => 'wechat_user_registry_user',
   );
+  $action['wechat_user_load_user'] = array(
+    'parameter' => array(
+      'open_id' => array(
+        'type' => 'text',
+        'label' => t('OpenId'),
+        'description' => t('The user whose roles should be changed.'),
+        'save' => TRUE,
+      )
+    ),
+    'provides' => array(
+      'user' => array(
+        'type' => 'user',
+        'label' => t('返回的用户实体'),
+      ),
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('使用OpenId提取用户实体'),
+    'base' => 'wechat_user_load_user',
+  );
   return $action;
 }
 
@@ -563,6 +583,11 @@ function wechat_user_login_open_id($openid) {
   $uid = wechat_user_get_user_by_openid($openid);
   watchdog('uid', json_encode($uid));
   _wechat_user_login($uid->uid);
+}
+
+function wechat_user_load_user($openid) {
+  $user = wechat_user_get_user_by_openid($openid);
+  return array('user' => $user);
 }
 
 /**
