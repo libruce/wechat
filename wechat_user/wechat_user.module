@@ -142,7 +142,7 @@ function wechat_user_registry_user($user_open_id) {
     $user_info = $wechat_obj->getUserInfo($user_open_id);
     $wechat_user_entity = entity_create('wechat_user', array());
     // auto register
-    $user_name = 'wechat_' . $user_open_id;
+    $user_name = 'wx_' . $user_open_id;
 
     $new_user = array(
       'name' => $user_name,
@@ -152,6 +152,7 @@ function wechat_user_registry_user($user_open_id) {
     // $account returns user object
     $account = user_save(NULL, $new_user);
     $account_wrapper = entity_metadata_wrapper('user', $account);
+    //user_info 模块提供
     $account_wrapper->field_user_name->set($user_info['nickname']);
     $account_wrapper->save();
 
