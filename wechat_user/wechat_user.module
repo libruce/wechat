@@ -540,5 +540,6 @@ function wechat_user_rules_action_info() {
 
 function wechat_user_login_open_id($openid) {
   $uid = wechat_user_get_user_by_openid($openid);
+  watchdog('uid',$uid);
   _wechat_user_login($uid);
 }
