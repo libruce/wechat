@@ -321,16 +321,16 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
 //      'required' => TRUE,
 //      'description' => t('Create time of wechat response message.'),
 //    );
-    $properties['create_time'] += array(
-      'label' => t('Create time'),
-      'type' => 'date',
-//      'getter callback' => 'entity_property_getter_method',
+//    $properties['create_time'] += array(
+//      'label' => t('Create time'),
+//      'type' => 'date',
+////      'getter callback' => 'entity_property_getter_method',
 //      'setter callback' => 'entity_property_verbatim_set',
-//      'setter permission' => 'administer wechat response message',
-//      'schema field' => 'create_time',
-      'required' => TRUE,
-      'description' => t('Create time of wechat response message.'),
-    );
+////      'setter permission' => 'administer wechat response message',
+////      'schema field' => 'create_time',
+//      'required' => TRUE,
+//      'description' => t('Create time of wechat response message.'),
+//    );
 
     $properties['qr_key'] = array(
       'label' => t('QR Key'),
