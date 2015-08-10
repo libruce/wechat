@@ -48,6 +48,7 @@ function wechat_qr2_menu() {
 
   return $items;
 }
+
 /**
  * Implements hook_menu_local_tasks_alter().
  */
@@ -289,16 +290,16 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
         'description' => t('The profile type.'),
       ) + $properties['bundle'];
 
-//    $properties['title'] = array(
-//      'label' => t('标题'),
-//      'type' => 'text',
+    $properties['title'] = array(
+      'label' => t('标题'),
+      'type' => 'text',
 //      'getter callback' => 'entity_property_getter_method',
-//      'setter callback' => 'entity_property_verbatim_set',
-//      'setter permission' => 'administer profiles',
-//      'schema field' => 'title',
-//      'required' => TRUE,
-//      'description' => t('The profile type.'),
-//    );
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer profiles',
+      'schema field' => 'title',
+      'required' => TRUE,
+      'description' => t('The profile type.'),
+    );
 //    unset($properties['uid']);
     $properties['user'] = array(
       'label' => t('UID'),
@@ -388,6 +389,7 @@ function entity_metadata_wechat_qr2_get_properties($entity, array $options, $nam
     case 'qr_type':
       return $entity->qr_type;
   }
+  return FALSE;
 }
 
 class WechatQr2Type extends Entity {
