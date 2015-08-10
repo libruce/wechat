@@ -138,7 +138,8 @@ function wechat_user_user_registry($openid_list) {
 
 function wechat_user_registry_user($user_open_id) {
   $wechat_obj = wechat_api_init_wechatobj();
-  if (!wechat_user_get_user_by_openid($user_open_id)) {
+  $user = wechat_user_get_user_by_openid($user_open_id);
+  if (!$user) {
     $user_info = $wechat_obj->getUserInfo($user_open_id);
     $wechat_user_entity = entity_create('wechat_user', array());
     // auto register
@@ -170,8 +171,10 @@ function wechat_user_registry_user($user_open_id) {
 
     $wechat_user_entity->save();
 
-    unset($account_wrapper);
-    unset($wechat_user_entity);
+    return $account;
+  }
+  else {
+    return $user;
   }
 }
 
