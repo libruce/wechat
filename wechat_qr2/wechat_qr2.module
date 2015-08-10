@@ -293,18 +293,15 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
     $properties['title'] = array(
       'label' => t('标题'),
       'type' => 'text',
-//      'getter callback' => 'entity_property_getter_method',
       'setter callback' => 'entity_property_verbatim_set',
       'setter permission' => 'administer profiles',
       'schema field' => 'title',
       'required' => TRUE,
       'description' => t('The profile type.'),
     );
-//    unset($properties['uid']);
     $properties['user'] = array(
       'label' => t('UID'),
       'type' => 'user',
-//      'getter callback' => 'entity_property_getter_method',
       'setter callback' => 'entity_property_verbatim_set',
       'setter permission' => 'administer wechat response message',
       'schema field' => 'uid',
@@ -312,31 +309,9 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
       'description' => t('Create time of wechat response message.'),
     );
 
-//    $properties['update_time'] = array(
-//      'label' => t('Update time'),
-//      'type' => 'date',
-//      'getter callback' => 'entity_property_getter_method',
-//      'setter callback' => 'entity_property_verbatim_set',
-//      'setter permission' => 'administer wechat response message',
-//      'schema field' => 'update_time',
-//      'required' => TRUE,
-//      'description' => t('Create time of wechat response message.'),
-//    );
-//    $properties['create_time'] += array(
-//      'label' => t('Create time'),
-//      'type' => 'date',
-////      'getter callback' => 'entity_property_getter_method',
-//      'setter callback' => 'entity_property_verbatim_set',
-////      'setter permission' => 'administer wechat response message',
-////      'schema field' => 'create_time',
-//      'required' => TRUE,
-//      'description' => t('Create time of wechat response message.'),
-//    );
-
     $properties['qr_key'] = array(
       'label' => t('QR Key'),
       'type' => 'text',
-//      'getter callback' => 'entity_metadata_verbatim_get',
       'setter callback' => 'entity_property_verbatim_set',
       'setter permission' => 'administer profiles',
       'schema field' => 'qr_key',
@@ -344,42 +319,23 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
       'description' => t('QR Key.'),
     );
     $properties['qr_type'] = array(
-      'label' => t('QR Key'),
+      'label' => t('二维码类型'),
       'type' => 'boolean',
-      'description' => t('二维码类型.'),
+      'description' => t('是否为永久二维码.'),
+      'required' => TRUE,
       'getter callback' => 'entity_metadata_wechat_qr2_get_properties',
     );
-//    $properties['qr_type'] = array(
-//      'label' => t('类型'),
-//      'type' => 'text',
-//      'getter callback' => 'entity_property_getter_method',
-//      'setter callback' => 'entity_property_verbatim_set',
-//      'setter permission' => 'administer profiles',
-//      'schema field' => 'qr_type',
-//      'required' => TRUE,
-//      'description' => t('The profile type.'),
-//    );
 
-//    $properties['expire'] = array(
-//      'label' => t('过期时间'),
-//      'type' => 'integer',
-//      'getter callback' => 'entity_property_getter_method',
-//      'setter callback' => 'entity_property_verbatim_set',
-//      'setter permission' => 'administer profiles',
-//      'schema field' => 'expire',
-//      'required' => TRUE,
-//      'description' => t('The profile type.'),
-//    );
-//    $properties['ticket'] = array(
-//      'label' => t('Ticket'),
-//      'type' => 'text',
-//      'getter callback' => 'entity_property_getter_method',
-//      'setter callback' => 'entity_property_verbatim_set',
-//      'setter permission' => 'administer profiles',
-//      'schema field' => 'ticket',
-//      'description' => t('The profile type.'),
-//    );
-    dpm($info);
+    $properties['expire'] = array(
+      'label' => t('过期时间'),
+      'type' => 'integer',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer profiles',
+      'schema field' => 'expire',
+      'description' => t('临时二维码过期时间.'),
+    );
+
+
     return $info;
   }
 }
