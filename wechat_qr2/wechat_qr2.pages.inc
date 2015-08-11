@@ -18,7 +18,7 @@ function wechat_qr2_view_page($entity) {
   $output .= "<div><b>标题:</b> {$entity->title}</div>";
   $expire = FALSE;
   $output .= "<div><b>二维码:</b></div>";
-  if (time() > $entity->create_time + $entity->expire) {
+  if ($entity->qr_type || time() > $entity->create_time + $entity->expire) {
     $expire = TRUE;
   }
   if ($expire) {
