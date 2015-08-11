@@ -1,0 +1,10 @@
+name = wechat_rules
+description = 微信默认rules示例
+core = 7.x
+package = Features
+dependencies[] = entity
+dependencies[] = rules
+dependencies[] = wechat_messages
+dependencies[] = wechat_request
+features[features_api][] = api:2
+features[rules_config][] = rules_subscribe_send_welcome_message
