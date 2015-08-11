@@ -187,8 +187,6 @@ function wechat_session_callback() {
   $echo_callback = $status_info['echo_callback'];
 
 
-  $function_callback($wechat_obj);
-
   $send_modal = variable_get('wechat_session_send_modal', 'asynchrony');
   if ($send_modal == 'asynchrony') {
     echo $echo_callback($wechat_obj);
@@ -196,6 +194,7 @@ function wechat_session_callback() {
   if ($send_modal == 'silent') {
     echo 'success';
   }
+  $function_callback($wechat_obj);
 }
 
 function wechat_session_set_default_status($openid) {
