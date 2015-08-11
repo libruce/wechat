@@ -200,7 +200,7 @@ function wechat_session_callback() {
 
 function wechat_session_set_default_status($openid) {
   $wechat_session = wechat_session_load($openid);
-  $status = variable_get('wechat_session_default_status', '');
+  $status = variable_get('wechat_session_default_status', 'default');
   if (empty($wechat_session)) {
     $wechat_session = entity_create('wechat_session', array(
       'openid' => $openid,
