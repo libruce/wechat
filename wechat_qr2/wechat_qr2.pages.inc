@@ -14,7 +14,7 @@ function wechat_qr2_add_page() {
 function wechat_qr2_view_page($entity) {
   $output = '';
   $ticket = UrlEncode($entity->ticket);
-//  dpm($entity);
+  dpm($entity);
   $output .= "<div><b>标题:</b> {$entity->title}</div>";
   $expire = FALSE;
   $output .= "<div><b>二维码:</b></div>";
