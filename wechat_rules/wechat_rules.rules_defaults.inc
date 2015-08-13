@@ -46,7 +46,7 @@ function wechat_rules_default_rules_configuration() {
         },
         { "component_rules_from_null_add_info" : {
             "user" : [ "site:current-user" ],
-            "info" : "[user:name]\\u4e8c\\u7ef4\\u7801\\u63a8\\u5e7f\\u3002"
+            "info" : "\\u003Ca href=\\u0022[user:url]\\u0022\\u003E[user:name]\\u003C\\/a\\u003E\\u4e8c\\u7ef4\\u7801\\u63a8\\u5e7f\\u3002"
           }
         }
       ]
@@ -62,7 +62,7 @@ function wechat_rules_default_rules_configuration() {
         "info" : { "label" : "info", "type" : "text" }
       },
       "IF" : [
-        { "data_is_empty" : { "data" : [ "site:current-user:profile-spread-qr-profile:field-form-spread" ] } }
+        { "data_is_empty" : { "data" : [ "site:current-user:profile-spread-qr-profile" ] } }
       ],
       "DO" : [
         { "entity_create" : {
@@ -74,11 +74,7 @@ function wechat_rules_default_rules_configuration() {
             "PROVIDE" : { "entity_created" : { "entity_created" : "\\u521b\\u5efa\\u7684\\u5b9e\\u4f53" } }
           }
         },
-        { "data_set" : {
-            "data" : [ "entity-created:field-form-spread" ],
-            "value" : "lllllllllllllllllllllll"
-          }
-        },
+        { "data_set" : { "data" : [ "entity-created:field-form-spread" ], "value" : [ "info" ] } },
         { "entity_save" : { "data" : [ "entity-created" ], "immediate" : "1" } }
       ]
     }
