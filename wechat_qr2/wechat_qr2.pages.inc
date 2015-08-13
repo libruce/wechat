@@ -28,11 +28,11 @@ function wechat_qr2_view_page($entity) {
   else {
     $output .= '<img src="' . 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=' . $ticket . '"/>';
   }
-  $output .= "<div><b>KEY:</b> {$entity->qr_key}</div>";
-  $username = format_username(user_load($entity->uid));
-  $output .= "<div><b>创建者:</b>{$username}</div>";
-  $output .= '<div><b>创建时间:</b>' . format_date($entity->create_time) . '</div>';
-  $output .= '<div><b>过期时间:</b>' . format_date($entity->create_time + $entity->expire) . '</div>';
+//  $output .= "<div><b>KEY:</b> {$entity->qr_key}</div>";
+//  $username = format_username(user_load($entity->uid));
+//  $output .= "<div><b>创建者:</b>{$username}</div>";
+//  $output .= '<div><b>创建时间:</b>' . format_date($entity->create_time) . '</div>';
+//  $output .= '<div><b>过期时间:</b>' . format_date($entity->create_time + $entity->expire) . '</div>';
   return $output;
 }
 
