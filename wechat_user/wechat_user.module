@@ -160,19 +160,19 @@ function wechat_user_registry_user($user_open_id) {
     $account_wrapper->field_user_name->set($nickname);
     $account_wrapper->save();
 
-    $wechat_user_entity->uid = $account->uid;
-
-    $wechat_user_entity->openid = $user_info['openid'];
-    $wechat_user_entity->subscribe = $user_info['subscribe'];
-    $wechat_user_entity->nickname = $user_info['nickname'];
-    $wechat_user_entity->sex = $user_info['sex'];
-    $wechat_user_entity->province = $user_info['province'];
-    $wechat_user_entity->city = $user_info['city'];
-    $wechat_user_entity->country = $user_info['country'];
-    $wechat_user_entity->headimgurl = $user_info['headimgurl'];
-    $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
-
-    $wechat_user_entity->save();
+//    $wechat_user_entity->uid = $account->uid;
+//
+//    $wechat_user_entity->openid = $user_info['openid'];
+//    $wechat_user_entity->subscribe = $user_info['subscribe'];
+//    $wechat_user_entity->nickname = $user_info['nickname'];
+//    $wechat_user_entity->sex = $user_info['sex'];
+//    $wechat_user_entity->province = $user_info['province'];
+//    $wechat_user_entity->city = $user_info['city'];
+//    $wechat_user_entity->country = $user_info['country'];
+//    $wechat_user_entity->headimgurl = $user_info['headimgurl'];
+//    $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
+//
+//    $wechat_user_entity->save();
 
     return $account;
   }
