@@ -139,6 +139,8 @@ function wechat_user_user_registry($openid_list) {
 function wechat_user_registry_user($user_open_id) {
   $wechat_obj = wechat_api_init_wechatobj();
   $user = wechat_user_get_user_by_openid($user_open_id);
+  $user_name = 'wx_' . $user_open_id;
+  $user += user_load_by_name($user_name);
   if (!$user) {
     $user_info = $wechat_obj->getUserInfo($user_open_id);
     dpm($user_info);
