@@ -1,5 +1,6 @@
 <?php
 include_once 'wechat_user.features.inc';
+define('WUUPRE', 'wx_');
 /**
  * Implements hook_menu().
  */
@@ -137,16 +138,15 @@ function wechat_user_user_registry($openid_list) {
 }
 
 function wechat_user_registry_user($user_open_id) {
-  $wechat_obj = wechat_api_init_wechatobj();
-  $user = wechat_user_get_user_by_openid($user_open_id);
   $user_name = 'wx_' . $user_open_id;
-  $user += user_load_by_name($user_name);
+  $user = user_load_by_name($user_name);
   if (!$user) {
+    $wechat_obj = wechat_api_init_wechatobj();
     $user_info = $wechat_obj->getUserInfo($user_open_id);
-    dpm($user_info);
+    //dpm($user_info);
     $wechat_user_entity = entity_create('wechat_user', array());
     // auto register
-    $user_name = 'wx_' . $user_open_id;
+    $user_name = WUUPRE . $user_open_id;
 
     $new_user = array(
       'name' => $user_name,
@@ -155,142 +155,142 @@ function wechat_user_registry_user($user_open_id) {
     );
     // $account returns user object
     $account = user_save(NULL, $new_user);
-    $account_wrapper = entity_metadata_wrapper('user', $account);
-//    oOwdxuOH5x7IJ90IBEB58lChYBVs
-    $nickname = $user_info['nickname'];
-    dpm($nickname);
-    //user_info 模块提供
-    $account_wrapper->field_user_name->set($nickname);
-    $account_wrapper->save();
+    //$account_wrapper = entity_metadata_wrapper('user', $account);
 
-//    $wechat_user_entity->uid = $account->uid;
-//
-//    $wechat_user_entity->openid = $user_info['openid'];
-//    $wechat_user_entity->subscribe = $user_info['subscribe'];
-//    $wechat_user_entity->nickname = $user_info['nickname'];
-//    $wechat_user_entity->sex = $user_info['sex'];
-//    $wechat_user_entity->province = $user_info['province'];
-//    $wechat_user_entity->city = $user_info['city'];
-//    $wechat_user_entity->country = $user_info['country'];
-//    $wechat_user_entity->headimgurl = $user_info['headimgurl'];
-//    $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
-//
-//    $wechat_user_entity->save();
+
+    //user_info 模块提供
+    //$account_wrapper->field_user_name->set($user_name);
+    //$account_wrapper->save();
+
+    $wechat_user_entity->uid = $account->uid;
+
+    $wechat_user_entity->openid = $user_info['openid'];
+    $wechat_user_entity->subscribe = $user_info['subscribe'];
+    $wechat_user_entity->nickname = $user_name;//utf8_encode($user_info['nickname']);//暂时无法处理特殊字符，不自动使用昵称。$user_info['nickname'];
+    $wechat_user_entity->sex = $user_info['sex'];
+    $wechat_user_entity->province = $user_info['province'];
+    $wechat_user_entity->city = $user_info['city'];
+    $wechat_user_entity->country = $user_info['country'];
+    $wechat_user_entity->headimgurl = $user_info['headimgurl'];
+    $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
+
+    $wechat_user_entity->save();
 
     return $account;
   }
   else {
+
     return $user;
   }
 }
 
-
-/**
- * Implements hook_field_presave().
- */
-function wechat_user_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  dpm($field);
-}
-
-/**
- * Implements hook_field_attach_presave().
- */
-function wechat_user_field_attach_presave($entity_type, $entity) {
-  if ($entity_type == 'user') {
-    $entity_metadata_wrapper = entity_metadata_wrapper('user', $entity);
-    $value = $entity_metadata_wrapper->field_user_name->value();
-    $entity_metadata_wrapper->field_user_name->set(utf8_encode($value));
-  }
-}
-
-/**
- * Implements hook_field_load().
- */
-function wechat_user_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
-  dpm($field);
-}
-
-/**
- * Implements hook_field_prepare_view().
- */
-function wechat_user_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
-  dpm($entity_type);
-}
-
-/**
- * Implements hook_field_prepare_translation().
- */
-function wechat_user_field_prepare_translation($entity_type, $entity, $field, $instance, $langcode, &$items, $source_entity, $source_langcode) {
-  dpm($entity_type);
-}
-
-/**
- * Implements hook_field_attach_prepare_translation_alter().
- */
-function wechat_user_field_attach_prepare_translation_alter(&$entity, $context) {
-  dpm($entity);
-}
-
-/**
- * Implements hook_entity_load().
- */
-function wechat_user_entity_load($entities, $type) {
-  if ($type == 'user') {
-    foreach ($entities as $entity) {
-      $value = $entity->field_user_name['und'][0]['value'];
-      $entity->field_user_name['und'][0]['value'] = utf8_decode($value);
-      $entity->field_user_name['und'][0]['safe_value'] = utf8_decode($value);
-    }
-  }
-}
-
-
-/**
- * Implements hook_realname_alter().
- */
-function wechat_user_realname_alter(&$realname, $account) {
-  dpm($account);
-}
-
-/**
- * Implements hook_field_attach_preprocess_alter().
- */
-function wechat_user_field_attach_preprocess_alter(&$variables, $context) {
-  dpm($variables);
-  dpm($context);
-}
-
-/**
- * Implements hook_field_attach_load().
- */
-function wechat_user_field_attach_load($entity_type, $entities, $age, $options) {
+//
+///**
+// * Implements hook_field_presave().
+// */
+//function wechat_user_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+//  dpm($field);
+//}
+//
+///**
+// * Implements hook_field_attach_presave().
+// */
+//function wechat_user_field_attach_presave($entity_type, $entity) {
+//  if ($entity_type == 'user') {
+//    $entity_metadata_wrapper = entity_metadata_wrapper('user', $entity);
+//    $value = $entity_metadata_wrapper->field_user_name->value();
+//    $entity_metadata_wrapper->field_user_name->set(utf8_encode($value));
+//  }
+//}
+//
+///**
+// * Implements hook_field_load().
+// */
+//function wechat_user_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
+//  dpm($field);
+//}
+//
+///**
+// * Implements hook_field_prepare_view().
+// */
+//function wechat_user_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
 //  dpm($entity_type);
-//  dpm($entities);
-//  dpm($age);
-//  dpm($options);
-//  $entity = reset($entities);
-//  $entity_metadata_wrapper = entity_metadata_wrapper('user', $entity);
-//  $value = $entity_metadata_wrapper->field_user_name->value();
-//  $entity_metadata_wrapper->field_user_name->set(utf8_decode($value));
-}
-
-/**
- * Implements hook_field_attach_view_alter().
- */
-function wechat_user_field_attach_view_alter(&$output, $context) {
-  dpm($output);
-  dpm($context);
-}
-
-/**
- * Implements hook_form_alter().
- */
-function wechat_user_form_alter(&$form, &$form_state, $form_id) {
-  dpm($form_id);
-  if ($form_id == 'user_profile_form') {
-    dpm($form);
-  }
-}
+//}
+//
+///**
+// * Implements hook_field_prepare_translation().
+// */
+//function wechat_user_field_prepare_translation($entity_type, $entity, $field, $instance, $langcode, &$items, $source_entity, $source_langcode) {
+//  dpm($entity_type);
+//}
+//
+///**
+// * Implements hook_field_attach_prepare_translation_alter().
+// */
+//function wechat_user_field_attach_prepare_translation_alter(&$entity, $context) {
+//  dpm($entity);
+//}
+//
+///**
+// * Implements hook_entity_load().
+// */
+//function wechat_user_entity_load($entities, $type) {
+//  if ($type == 'user') {
+//    foreach ($entities as $entity) {
+//      $value = $entity->field_user_name['und'][0]['value'];
+//      $entity->field_user_name['und'][0]['value'] = utf8_decode($value);
+//      $entity->field_user_name['und'][0]['safe_value'] = utf8_decode($value);
+//    }
+//  }
+//}
+//
+//
+///**
+// * Implements hook_realname_alter().
+// */
+//function wechat_user_realname_alter(&$realname, $account) {
+//  dpm($account);
+//}
+//
+///**
+// * Implements hook_field_attach_preprocess_alter().
+// */
+//function wechat_user_field_attach_preprocess_alter(&$variables, $context) {
+//  dpm($variables);
+//  dpm($context);
+//}
+//
+///**
+// * Implements hook_field_attach_load().
+// */
+//function wechat_user_field_attach_load($entity_type, $entities, $age, $options) {
+////  dpm($entity_type);
+////  dpm($entities);
+////  dpm($age);
+////  dpm($options);
+////  $entity = reset($entities);
+////  $entity_metadata_wrapper = entity_metadata_wrapper('user', $entity);
+////  $value = $entity_metadata_wrapper->field_user_name->value();
+////  $entity_metadata_wrapper->field_user_name->set(utf8_decode($value));
+//}
+//
+///**
+// * Implements hook_field_attach_view_alter().
+// */
+//function wechat_user_field_attach_view_alter(&$output, $context) {
+//  dpm($output);
+//  dpm($context);
+//}
+//
+///**
+// * Implements hook_form_alter().
+// */
+//function wechat_user_form_alter(&$form, &$form_state, $form_id) {
+//  dpm($form_id);
+//  if ($form_id == 'user_profile_form') {
+//    dpm($form);
+//  }
+//}
 
 
 /**
@@ -341,6 +341,11 @@ function wechat_user_load($id, $reset = FALSE) {
 
 function wechat_user_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('wechat_user', $ids, $conditions, $reset);
+}
+
+function wechat_user_load_by_openid($openid) {
+  $entity = wechat_user_load_multiple(array(), array('openid' => $openid));
+  return reset($entity);
 }
 
 function wechat_user_save(WechatUser $wechatUser) {
@@ -440,7 +445,7 @@ function wechat_user_auth() {
 
 
   // auto register
-  $user_name = 'wechat_' . $access_data['openid'];
+  $user_name = WUUPRE . $access_data['openid'];
 
   $new_user = array(
     'name' => $user_name,
@@ -467,12 +472,13 @@ function wechat_user_auth() {
   $wechat_user_entity->openid = $access_data['openid'];
   $user_info = $wechat_obj->getOauthUserinfo($access_data['access_token'], $access_data['openid']);
   if (!empty($user_info)) {
-    $user_wrapper = entity_metadata_wrapper('user', $account);
-    $user_wrapper->field_user_name->set($user_info['nickname']);
-    $user_wrapper->save();
+
+//    $user_wrapper = entity_metadata_wrapper('user', $account);
+//    $user_wrapper->field_user_name->set($user_info['nickname']);
+//    $user_wrapper->save();
 
     //$wechat_user_entity->subscribe = $user_info['subscribe'];
-    $wechat_user_entity->nickname = $user_info['nickname'];
+    $wechat_user_entity->nickname = $user_name;//utf8_encode($user_info['nickname']);
     $wechat_user_entity->sex = $user_info['sex'];
     $wechat_user_entity->province = $user_info['province'];
     $wechat_user_entity->city = $user_info['city'];
@@ -515,6 +521,14 @@ class WechatUser extends Entity {
     return array('path' => 'wechat_user/' . $this->uid);
   }
 
+  public function  nickname() {
+    return $this->nickname;
+  }
+
+  public function  openid() {
+    return $this->openid;
+  }
+
   public function __construct($values = array()) {
     parent::__construct($values, 'wechat_user');
   }
@@ -550,7 +564,7 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
       'type' => 'text',
       'label' => t('Open id'),
       'description' => t('Openid of wechat user.'),
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_property_getter_method',
       'setter callback' => 'entity_property_verbatim_set',
       'setter permission' => 'administer wechat user',
       'schema field' => 'openid',
@@ -571,7 +585,7 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
       'type' => 'text',
       'label' => t('nickname'),
       'description' => t('nickname of wechat user.'),
-      'getter callback' => 'entity_property_verbatim_get',
+      'getter callback' => 'entity_property_getter_method',
       'setter callback' => 'entity_property_verbatim_set',
       'setter permission' => 'administer wechat user',
       'schema field' => 'nickname',
