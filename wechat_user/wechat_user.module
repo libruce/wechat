@@ -156,7 +156,8 @@ function wechat_user_registry_user($user_open_id) {
     // $account returns user object
     $account = user_save(NULL, $new_user);
     $account_wrapper = entity_metadata_wrapper('user', $account);
-    $nickname = format_string($user_info['nickname']);
+
+    $nickname = utf8_encode($user_info['nickname']);;
     dpm($nickname);
     //user_info 模块提供
     $account_wrapper->field_user_name->set($nickname);
