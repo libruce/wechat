@@ -140,9 +140,9 @@ function wechat_user_user_registry($openid_list) {
 function wechat_user_registry_user($user_open_id) {
   $user_name = 'wx_' . $user_open_id;
   $user = user_load_by_name($user_name);
-  if (!$user) {
-    $wechat_obj = wechat_api_init_wechatobj();
-    $user_info = $wechat_obj->getUserInfo($user_open_id);
+  $wechat_obj = wechat_api_init_wechatobj();
+  $user_info = $wechat_obj->getUserInfo($user_open_id);
+  if (!$user) {//不存在则创建
     //dpm($user_info);
     $wechat_user_entity = entity_create('wechat_user', array());
     // auto register
@@ -155,18 +155,18 @@ function wechat_user_registry_user($user_open_id) {
     );
     // $account returns user object
     $account = user_save(NULL, $new_user);
-    //$account_wrapper = entity_metadata_wrapper('user', $account);
+    $account_wrapper = entity_metadata_wrapper('user', $account);
+    $nickname = utf8_encode($user_info['nickname']);
 
-
-    //user_info 模块提供
-    //$account_wrapper->field_user_name->set($user_name);
-    //$account_wrapper->save();
+//    user_info 模块提供
+    $account_wrapper->field_user_name->set($nickname);
+    $account_wrapper->save();
 
     $wechat_user_entity->uid = $account->uid;
 
     $wechat_user_entity->openid = $user_info['openid'];
     $wechat_user_entity->subscribe = $user_info['subscribe'];
-    $wechat_user_entity->nickname = $user_name;//utf8_encode($user_info['nickname']);//暂时无法处理特殊字符，不自动使用昵称。$user_info['nickname'];
+    $wechat_user_entity->nickname = $nickname;//暂时无法处理特殊字符，不自动使用昵称。$user_info['nickname'];
     $wechat_user_entity->sex = $user_info['sex'];
     $wechat_user_entity->province = $user_info['province'];
     $wechat_user_entity->city = $user_info['city'];
@@ -178,8 +178,19 @@ function wechat_user_registry_user($user_open_id) {
 
     return $account;
   }
-  else {
+  else {//存在则更新
 
+    $account_wrapper = entity_metadata_wrapper('user', $user);
+    $nickname = utf8_encode($user_info['nickname']);
+
+    $wechat_user_entity = wechat_user_load($user->uid);
+    $wechat_user_entity->nickname = $nickname;
+    $wechat_user_entity->save();
+
+
+    //    user_info 模块提供
+    $account_wrapper->field_user_name->set($nickname);
+    $account_wrapper->save();
     return $user;
   }
 }
