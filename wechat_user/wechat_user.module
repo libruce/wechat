@@ -400,6 +400,7 @@ function wechat_user_entity_info() {
     'description' => t('Wechat users.'),
     'entity class' => 'WechatUser',
     'controller class' => 'EntityAPIController',
+    'views controller class' => 'WechatUserViewsController',
     'base table' => 'wechat_user',
     'fieldable' => TRUE,
     'uri callback' => 'entity_class_uri',
@@ -602,6 +603,7 @@ function wechat_user_enable() {
   variable_set('wechat_visitors', $role->rid);
 }
 
+
 class WechatUser extends Entity {
   public $uid;
   public $openid;
@@ -619,7 +621,7 @@ class WechatUser extends Entity {
   }
 
   public function  nickname() {
-    return $this->nickname;
+    return utf8_decode($this->nickname);
   }
 
   public function  openid() {
@@ -749,6 +751,20 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
     );
 
     return $info;
+  }
+}
+
+class WechatUserViewsController extends EntityDefaultViewsController {
+  public function views_data() {
+    $data = parent::views_data();
+    $data['wechat_user']['nickname']['field']['handler'] = 'views_handler_field_nickname';
+    return $data;
+  }
+}
+
+class views_handler_field_nickname extends views_handler_field {
+  public function  render($values) {
+    return utf8_decode($values->wechat_user_nickname);
   }
 }
 
