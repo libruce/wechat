@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function wechat_messages_schema() {
+  $schema['wechat_messages_request_reply_status'] = array(
+    'description' => '微信回应消息管理表.',
+    'fields' => array(
+      'openid' => array(
+        'description' => 'Open Id',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => '状态',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('openid'),
+  );
+  return $schema;
+}

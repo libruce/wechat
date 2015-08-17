@@ -51,19 +51,16 @@ function wechat_messages_rules_action_info() {
         'type' => 'text',
         'label' => t('接收者'),
         'description' => t('选择或填写接收消息的用户 <a href="/admin/help/wechat_messages"><b>点击查看详细</b></a>.'),
-        'save' => TRUE,
       ),
       'type' => array(
         'type' => 'text',
         'label' => t('消息类型'),
         'description' => t('选择或填写一个消息类型 <a href="/admin/help/wechat_messages"><b>点击查看详细</b></a>.'),
-        'save' => TRUE,
       ),
       'body' => array(
         'type' => 'text',
         'label' => t('消息内容'),
         'description' => t('json格式 <a href="/admin/help/wechat_messages"><b>点击查看详细</b></a>.'),
-        'save' => TRUE,
       )
     ),
     'group' => t('微信'),
@@ -71,7 +68,50 @@ function wechat_messages_rules_action_info() {
     'label' => t('微信发送消息（使用客服接口）'),
     'base' => 'wechat_messages_action_send_message',
   );
+  $action['wechat_messages_change_reply_status'] = array(
+    'parameter' => array(
+      'openid' => array(
+        'type' => 'text',
+        'label' => t('OpenId'),
+        'description' => t('需要修改的OpenId.'),
+      ),
+      'status' => array(
+        'type' => 'integer',
+        'label' => t('状态'),
+        'description' => t('需要切换到的状态.'),
+      ),
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('改变微信请求消息回复状态'),
+    'base' => 'wechat_messages_action_change_reply_status',
+  );
   return $action;
+}
+
+function wechat_messages_action_change_reply_status($openid, $status) {
+  $result = db_select('wechat_messages_request_reply_status', 'wmrrs')
+    ->fields('wmrrs')
+    ->condition('openid', $openid)
+    ->execute()
+    ->fetchAssoc();
+
+  $fields = array(
+    'openid' => (string) $openid,
+    'status' => (int) $status,
+  );
+
+  if (empty($result)) {
+    db_insert('wechat_messages_request_reply_status')
+      ->fields($fields)
+      ->execute();
+  }
+  else {
+    db_update('wechat_messages_request_reply_status')
+      ->fields($fields)
+      ->condition('openid', $openid)
+      ->execute();
+  }
 }
 
 function wechat_messages_action_send_message($user, $type, $body) {
@@ -96,26 +136,52 @@ function wechat_messages_action_send_message($user, $type, $body) {
  * Implements hook_rules_condition_info().
  */
 function wechat_messages_rules_condition_info() {
-  $condition = array(
-    'wechat_messages_keyword_search' => array(
-      'label' => t('微信消息关键字查询'),
-      'parameter' => array(
-        'text' => array(
-          'type' => 'text',
-          'label' => t('Text'),
-          'restriction' => 'selector',
-        ),
-        'match' => array(
-          'type' => 'text',
-          'label' => t('Matching text'),
-          'description' => t('多个关键字用英文逗号 “,” 隔开。'),
-        ),
+  $condition['wechat_messages_keyword_search'] = array(
+    'label' => t('微信消息关键字查询'),
+    'parameter' => array(
+      'text' => array(
+        'type' => 'text',
+        'label' => t('Text'),
+        'restriction' => 'selector',
       ),
-      'group' => t('微信'),
-      'base' => 'wechat_messages_condition_keyword_search',
+      'match' => array(
+        'type' => 'text',
+        'label' => t('Matching text'),
+        'description' => t('多个关键字用英文逗号 “,” 隔开。'),
+      ),
     ),
+    'group' => t('微信'),
+    'base' => 'wechat_messages_condition_keyword_search',
+  );
+  $condition['wechat_messages_request_reply_status'] = array(
+    'label' => t('判断此条消息是否需要回复'),
+    'parameter' => array(
+      'openid' => array(
+        'type' => 'text',
+        'label' => t('OpenId'),
+        'restriction' => 'selector',
+      ),
+    ),
+    'group' => t('微信'),
+    'base' => 'wechat_messages_condition_request_reply_status',
   );
   return $condition;
+}
+
+function wechat_messages_condition_request_reply_status($openid) {
+  $table = 'wechat_messages_request_reply_status';
+  $result = db_select($table)
+    ->fields($table)
+    ->condition('openid', $openid)
+    ->execute()
+    ->fetchAssoc();
+  if (empty($result)) {
+    return FALSE;
+  }
+  if ($result['status']) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 function wechat_messages_condition_keyword_search($text, $match) {
@@ -129,4 +195,31 @@ function wechat_messages_condition_keyword_search($text, $match) {
     }
   }
   return $return;
+}
+
+/**
+ * Implements hook_update_N().
+ * 添加请求消息回复状态管理
+ */
+function wechat_messages_update_7100(&$sandbox) {
+  $schema['wechat_messages_request_reply_status'] = array(
+    // table definition array goes here
+    'description' => '微信回应消息管理表.',
+    'fields' => array(
+      'openid' => array(
+        'description' => 'Open Id',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => '状态',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('openid'),
+  );
+  db_create_table('wechat_messages_request_reply_status', $schema['wechat_messages_request_reply_status']);
 }
