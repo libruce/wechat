@@ -75,8 +75,8 @@ function wechat_reply_delete_confirm($form, &$form_state, WechatReply $wechatRep
 
 function wechat_reply_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
-    wechat_reply_delete($form['id']);
-    dpm($form_state);
+
+//    wechat_reply_delete($form['id']);
   }
   $form_state['redirect'] = 'admin/content/reply';
 }
