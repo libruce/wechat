@@ -73,8 +73,10 @@ function wechat_reply_form_submit(&$form, &$form_state) {
   drupal_set_message(t('%type reply add success.', array('%type' => $wechat_reply->msg_type)));
   $form_state['redirect'] = 'admin/content/reply';
 }
-function wechat_reply_form_submit_delete($form, &$form_state){
-  $form_state['redirect'] = 'admin/content/reply';
+
+function wechat_reply_form_submit_delete($form, &$form_state) {
+  $wechat_reply = &$form_state['wechat_reply'];
+  $form_state['redirect'] = 'reply/' . $wechat_reply->id . '/delete';
 }
 
 function wechat_reply_delete_form_wrapper($wechatReply) {
