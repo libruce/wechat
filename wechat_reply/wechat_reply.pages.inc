@@ -57,8 +57,9 @@ function wechat_reply_delete_confirm($form, &$form_state, WechatReply $wechatRep
   $form['id'] = array('#type' => 'value', '#value' => $wechatReply->id);
   return confirm_form($form,
     //消息
-    t('您确定要删除这个消息:ID:%id 类型:%type', array(
+    t('您确定要删除这个消息:ID:%id 标题:%title 类型:%type', array(
       '%id' => $wechatReply->id,
+      '%title' => $wechatReply->title,
       '%type' => $wechatReply->msg_type
     )),
     //点取消返回地址
@@ -74,7 +75,7 @@ function wechat_reply_delete_confirm($form, &$form_state, WechatReply $wechatRep
 
 function wechat_reply_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
-
+    dpm($form_state);
   }
-  $form_state['redirect'] = '<front>';
+  $form_state['redirect'] = 'admin/content/reply';
 }
