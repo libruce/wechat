@@ -78,7 +78,7 @@ function wechat_messages_rules_action_info() {
       'status' => array(
         'type' => 'integer',
         'label' => t('状态'),
-        'description' => t('需要切换到的状态.'),
+        'description' => t('需要切换到的状态，0 表示需要回复。1 表示不需要回复'),
       ),
     ),
     'group' => t('微信'),
@@ -176,12 +176,12 @@ function wechat_messages_condition_request_reply_status($openid) {
     ->execute()
     ->fetchAssoc();
   if (empty($result)) {
-    return FALSE;
-  }
-  if ($result['status']) {
     return TRUE;
   }
-  return FALSE;
+  if ($result['status']) {
+    return FALSE;
+  }
+  return TRUE;
 }
 
 function wechat_messages_condition_keyword_search($text, $match) {
