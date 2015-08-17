@@ -10,7 +10,7 @@
 function wechat_rules_example_default_rules_configuration() {
   $items = array();
   $items['rules_components_mclm_name_phone_send_qr'] = entity_import('rules_config', '{ "rules_components_mclm_name_phone_send_qr" : {
-      "LABEL" : "\\u6162\\u57ce\\u8054\\u76df+\\u59d3\\u540d+\\u7535\\u8bdd\\uff0c\\u56de\\u590d\\u4e8c\\u7ef4\\u7801",
+      "LABEL" : "Hello + Name + Phone",
       "PLUGIN" : "rule",
       "OWNER" : "rules",
       "REQUIRES" : [ "wechat_messages", "rules", "wechat_reply" ],
@@ -29,7 +29,7 @@ function wechat_rules_example_default_rules_configuration() {
         },
         { "text_matches" : {
             "text" : [ "request:field-content" ],
-            "match" : "^(\\u6162\\u57ce\\u8054\\u76df)\\\\+.*\\\\+[0-9]",
+            "match" : "^(hello)\\\\+.*\\\\+[0-9]",
             "operation" : "regex"
           }
         }
