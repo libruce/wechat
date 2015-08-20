@@ -189,7 +189,27 @@ function wechat_session_callback() {
 
   $send_modal = variable_get('wechat_session_send_modal', 'asynchrony');
   if ($send_modal == 'asynchrony') {
-    echo $echo_callback($wechat_obj);
+    if (variable_get('wechat_session_dkf', 0)) {
+      $send_to_user_name = $wechat_obj->getRevFrom();
+      $send_from_user_name = $wechat_obj->getRevTo();
+      $request_time = time();
+
+      $return_template = "
+<xml>
+     <ToUserName><![CDATA[%s]]></ToUserName>
+     <FromUserName><![CDATA[%s]]></FromUserName>
+     <CreateTime>%s</CreateTime>
+     <MsgType><![CDATA[transfer_customer_service]]></MsgType>
+     </xml>
+";
+
+      $result_str = sprintf($return_template, $send_to_user_name, $send_from_user_name, $request_time);
+
+      echo $result_str;
+    }
+    else {
+      echo $echo_callback($wechat_obj);
+    }
   }
   if ($send_modal == 'silent') {
     echo 'success';
@@ -280,6 +300,11 @@ function wechat_session_settings_form($form, &$form_state) {
       'silent' => '静默（不回复任何消息）',
     ),
     '#required' => TRUE,
+  );
+  $form['required']['wechat_session_dkf'] = array(
+    '#default_value' => variable_get('wechat_session_dkf', 0),
+    '#type' => 'checkbox',
+    '#title' => t('是否打开多客服.'),
   );
   return system_settings_form($form);
 }
