@@ -535,8 +535,7 @@ function wechat_reply_new($type = '') {
 }
 
 function wechat_reply_access($op, $wechat_reply = NULL, $account = NULL) {
-  //dpm($op);
-  return TRUE;
+  return user_access('administer wechat reply type', $account);
 }
 
 function wechat_reply_type_access($op, $wechat_reply_type = NULL, $account = NULL) {
