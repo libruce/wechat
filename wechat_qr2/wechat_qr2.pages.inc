@@ -14,7 +14,7 @@ function wechat_qr2_add_page() {
 function wechat_qr2_view_page($entity) {
   $output = '';
   $ticket = UrlEncode($entity->ticket);
-  dpm($entity);
+//  dpm($entity);
   $output .= "<div><b>标题:</b> {$entity->title}</div>";
   $expire = TRUE;
   $output .= "<div><b>二维码:</b></div>";
@@ -126,7 +126,7 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
 }
 
 function wechat_qr2_form_validate($form, &$form_state) {
-  dpm($form_state);
+//  dpm($form_state);
   $qr_type = $form_state['values']['qr_type'];
   $qr_key = $form_state['values']['qr_key'];
   if ($qr_type == 0 && !is_numeric($qr_key)) {

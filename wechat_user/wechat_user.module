@@ -383,7 +383,7 @@ function wechat_user_registry_user($user_open_id) {
  * Implements hook_form_alter().
  */
 function wechat_user_form_alter(&$form, &$form_state, $form_id) {
-  dpm($form_id);
+//  dpm($form_id);
   if ($form_id == 'user_profile_form') {
 //    dpm($form_state);
 //    dpm($form);

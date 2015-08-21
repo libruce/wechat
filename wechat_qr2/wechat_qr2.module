@@ -283,7 +283,7 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
-    dpm($properties);
+//    dpm($properties);
     $properties['bundle'] = array(
         'label' => t('消息类型'),
         'type' => 'wechat_qr2_type',
