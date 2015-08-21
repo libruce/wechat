@@ -200,12 +200,80 @@ function wechat_qr2_entity_info() {
   return $return;
 }
 
-function wechat_qr2_access() {
-  return TRUE;
+function wechat_qr2_access($op, $entity = NULL, $account = NULL) {
+  if (user_access('administer wecaht qr2', $account)) {
+    return TRUE;
+  }
+  if ($op == 'create' || $op == 'update') {
+    $op = 'edit';
+  }
+  // Allow modules to grant / deny access.
+  $access = module_invoke_all('wechat_qr2_access', $op, $entity, $account);
+
+  // Only grant access if at least one module granted access and no one denied
+  // access.
+  if (in_array(FALSE, $access, TRUE)) {
+    return FALSE;
+  }
+  elseif (in_array(TRUE, $access, TRUE)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_wechat_qr2_access().
+ */
+function wechat_qr2_wechat_qr2_access($op, $entity = NULL, $account = NULL) {
+  if (isset($entity) && ($type_name = $entity->bundle) && $op != 'delete') {
+    if (user_access("$op any $type_name wecaht qr2", $account)) {
+      return TRUE;
+    }
+    $account = isset($account) ? $account : $GLOBALS['user'];
+    if (isset($entity->uid) && $entity->uid == $account->uid && user_access("$op own $type_name wecaht qr2", $account)) {
+      return TRUE;
+    }
+  }
 }
 
 function wechat_qr2_type_access() {
-  return TRUE;
+  return user_access('administer wecaht qr2 type');
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function wechat_qr2_permission() {
+  $permissions = array(
+    'administer wecaht qr2' => array(
+      'title' => t('管理所有二维码'),
+      'description' => t('管理员权限.'),
+    ),
+    'administer wecaht qr2 type' => array(
+      'title' => t('管理二维码类型'),
+      'description' => t('管理员权限.'),
+    ),
+  );
+  // Generate per profile type permissions.
+  foreach (wechat_qr2_get_types() as $type) {
+    $type_name = check_plain($type->type);
+    $permissions += array(
+      "edit own $type_name wecaht qr2" => array(
+        'title' => t('%type_name: 编辑自己的二维码', array('%type_name' => $type->label)),
+      ),
+      "edit any $type_name wecaht qr2" => array(
+        'title' => t('%type_name: 编辑所有二维码', array('%type_name' => $type->label)),
+      ),
+      "view own $type_name wecaht qr2" => array(
+        'title' => t('%type_name: 查看自己的二维码', array('%type_name' => $type->label)),
+      ),
+      "view any $type_name wecaht qr2" => array(
+        'title' => t('%type_name: 查看所有二维码', array('%type_name' => $type->label)),
+      ),
+    );
+  }
+  return $permissions;
 }
 
 
