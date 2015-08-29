@@ -445,7 +445,7 @@ function wechat_user_load_multiple($ids = array(), $conditions = array(), $reset
 }
 
 function wechat_user_load_by_openid($openid) {
-  $entity = wechat_user_load_multiple(array(), array('openid' => $openid));
+  $entity = wechat_user_load_multiple(FALSE, array('openid' => $openid));
   return reset($entity);
 }
 
