@@ -242,7 +242,7 @@ function wechat_user_registry_user($user_open_id) {
       $account_wrapper = entity_metadata_wrapper('user', $account);
       $nickname = utf8_encode($user_info['nickname']);
 
-//    user_info 模块提供
+//    user_info 模块提供，此处不使用utf8转码。转码操作在其它位置进行
       $account_wrapper->field_user_name->set($user_info['nickname']);
       $account_wrapper->save();
 
@@ -272,7 +272,7 @@ function wechat_user_registry_user($user_open_id) {
       $wechat_user_entity->save();
 
 
-      //    user_info 模块提供
+      //    user_info 模块提供，此处不使用utf8转码。转码操作在其它位置进行
       $account_wrapper->field_user_name->set($user_info['nickname']);
       $account_wrapper->save();
       return $user;
