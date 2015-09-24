@@ -15,7 +15,7 @@ function wechat_qr2_view_page($entity) {
   $output = '';
   $ticket = UrlEncode($entity->ticket);
 //  dpm($entity);
-  $output .= "<div><b>标题:</b> {$entity->title}</div>";
+  $output .= "<div><b>该二维码是个人推荐码</b></div>";
   $expire = TRUE;
   $output .= "<div><b>二维码:</b></div>";
   if (($entity->qr_type) || time() < $entity->create_time + $entity->expire) {
