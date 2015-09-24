@@ -15,9 +15,8 @@ function wechat_qr2_view_page($entity) {
   $output = '';
   $ticket = UrlEncode($entity->ticket);
 //  dpm($entity);
-  $output .= "<div><b>该二维码是个人推荐码</b></div>";
+  $output .= "<div style='font-size: 20px'><b>该二维码是个人推荐码</b></div>";
   $expire = TRUE;
-  $output .= "<div><b>二维码:</b></div>";
   if (($entity->qr_type) || time() < $entity->create_time + $entity->expire) {
     $expire = FALSE;
   }
@@ -29,7 +28,7 @@ function wechat_qr2_view_page($entity) {
     $output .= '<img src="' . 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=' . $ticket . '"/>';
     $output .= '
     <div style="padding: 15px">
-    <div>该二维码是个人推荐码</div>
+
      <div>点击右上方发送给好友，好友长按二维码识别关注【慢城联盟】，则你推荐好友成功，系统将自动统计你推荐好友数量。</div>
     <div>累计一定数量，将成为本平台忠实粉丝，盟主将邀约你参与线下粉丝聚会活动，欢迎你的加入！</div>
     <div>———————————————————</div>
