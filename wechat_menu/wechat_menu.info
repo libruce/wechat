@@ -3,3 +3,4 @@ description = 微信自定义菜单管理。
 core = 7.x
 package = wechat
 dependencies[] = wechat_api
+dependencies[] = menu
