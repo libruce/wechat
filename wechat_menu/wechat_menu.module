@@ -18,66 +18,23 @@ function wechat_menu_pull_menu() {
   menu_delete_links('wechat-custom-menu');
   $wechat = wechat_api_init_wechatobj();
   $menu = $wechat->getMenu();
-  foreach ($menu['menu']['button'] as $item) {
-    $menu = array(
-      'link_path' => 'node',
-      'menu_name' => 'wechat-custom-menu',
-    );
-    if (empty($item['sub_button'])) {
-      $menu += array(
-        'link_title' => $item['name'],
-        'options' => array(
-          'attributes' => array(
-            'wechat_type' => $item['type'],
-          )
-        ),
+  if (!empty($menu)) {
+    foreach ($menu['menu']['button'] as $item) {
+      $menu = array(
+        'link_path' => 'node',
+        'menu_name' => 'wechat-custom-menu',
       );
-
-      switch ($item['type']) {
-        case 'click':
-        case 'scancode_waitmsg':
-        case 'scancode_push':
-        case 'pic_sysphoto':
-        case 'pic_photo_or_album':
-        case 'pic_weixin':
-        case 'location_select': {
-          $menu['options']['attributes']['wechat_key'] = $item['key'];
-          break;
-        }
-        case 'view': {
-          $menu['options']['attributes']['wechat_url'] = $item['url'];
-          break;
-        }
-        case 'media_id':
-        case 'view_limited': {
-          $menu['options']['attributes']['wechat_media_id'] = $item['media_id'];
-          break;
-        }
-      }
-      menu_link_save($menu);
-    }
-    else {
-      $menu += array(
-        'link_title' => $item['name'],
-      );
-      $pmlid = menu_link_save($menu);
-      foreach ($item['sub_button'] as $sub_item) {
-        $menu = array(
-          'link_path' => 'node',
-          'menu_name' => 'wechat-custom-menu',
-        );
+      if (empty($item['sub_button'])) {
         $menu += array(
-          'link_title' => $sub_item['name'],
-          'plid' => $pmlid,
-        );
-        $menu += array(
+          'link_title' => $item['name'],
           'options' => array(
             'attributes' => array(
-              'wechat_type' => $sub_item['type'],
+              'wechat_type' => $item['type'],
             )
           ),
         );
-        switch ($sub_item['type']) {
+
+        switch ($item['type']) {
           case 'click':
           case 'scancode_waitmsg':
           case 'scancode_push':
@@ -85,24 +42,72 @@ function wechat_menu_pull_menu() {
           case 'pic_photo_or_album':
           case 'pic_weixin':
           case 'location_select': {
-            $menu['options']['attributes']['wechat_key'] = $sub_item['key'];
+            $menu['options']['attributes']['wechat_key'] = $item['key'];
             break;
           }
           case 'view': {
-            $menu['options']['attributes']['wechat_url'] = $sub_item['url'];
+            $menu['options']['attributes']['wechat_url'] = $item['url'];
             break;
           }
           case 'media_id':
           case 'view_limited': {
-            $menu['options']['attributes']['wechat_media_id'] = $sub_item['media_id'];
+            $menu['options']['attributes']['wechat_media_id'] = $item['media_id'];
             break;
           }
         }
-
         menu_link_save($menu);
       }
-    }
+      else {
+        $menu += array(
+          'link_title' => $item['name'],
+        );
+        $pmlid = menu_link_save($menu);
+        foreach ($item['sub_button'] as $sub_item) {
+          $menu = array(
+            'link_path' => 'node',
+            'menu_name' => 'wechat-custom-menu',
+          );
+          $menu += array(
+            'link_title' => $sub_item['name'],
+            'plid' => $pmlid,
+          );
+          $menu += array(
+            'options' => array(
+              'attributes' => array(
+                'wechat_type' => $sub_item['type'],
+              )
+            ),
+          );
+          switch ($sub_item['type']) {
+            case 'click':
+            case 'scancode_waitmsg':
+            case 'scancode_push':
+            case 'pic_sysphoto':
+            case 'pic_photo_or_album':
+            case 'pic_weixin':
+            case 'location_select': {
+              $menu['options']['attributes']['wechat_key'] = $sub_item['key'];
+              break;
+            }
+            case 'view': {
+              $menu['options']['attributes']['wechat_url'] = $sub_item['url'];
+              break;
+            }
+            case 'media_id':
+            case 'view_limited': {
+              $menu['options']['attributes']['wechat_media_id'] = $sub_item['media_id'];
+              break;
+            }
+          }
 
+          menu_link_save($menu);
+        }
+      }
+
+    }
+  }
+  else {
+    drupal_set_message('未设置自定义菜单！');
   }
 }
 
