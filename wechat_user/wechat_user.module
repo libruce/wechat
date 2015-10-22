@@ -271,7 +271,7 @@ function wechat_user_registry_user($user_open_id) {
       $wechat_user_entity->nickname = $nickname;
       $wechat_user_entity->save();
 
-//      watchdog('$account_wrapper->field_user_name->set', drupal_json_encode($user_open_id));
+      watchdog('$account_wrapper->field_user_name->set', drupal_json_encode($user_open_id));
 
       //    user_info 模块提供，此处不使用utf8转码。转码操作在其它位置进行
       $account_wrapper->field_user_name->set($user_info['nickname']);
