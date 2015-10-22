@@ -268,8 +268,19 @@ function wechat_user_registry_user($user_open_id) {
       $nickname = utf8_encode($user_info['nickname']);
 
       $wechat_user_entity = wechat_user_load($user->uid);
-      $wechat_user_entity->nickname = $nickname;
+
+      $wechat_user_entity->openid = $user_info['openid'];
+      $wechat_user_entity->subscribe = $user_info['subscribe'];
+      $wechat_user_entity->nickname = $nickname;//暂时无法处理特殊字符，不自动使用昵称。$user_info['nickname'];
+      $wechat_user_entity->sex = $user_info['sex'];
+      $wechat_user_entity->province = $user_info['province'];
+      $wechat_user_entity->city = $user_info['city'];
+      $wechat_user_entity->country = $user_info['country'];
+      $wechat_user_entity->headimgurl = $user_info['headimgurl'];
+      $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
+
       $wechat_user_entity->save();
+
 
 //      watchdog('$account_wrapper->field_user_name->set', drupal_json_encode($user_open_id));
 
@@ -281,6 +292,8 @@ function wechat_user_registry_user($user_open_id) {
   }
   return FALSE;
 }
+
+
 
 //
 ///**
