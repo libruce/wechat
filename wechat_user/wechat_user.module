@@ -382,7 +382,6 @@ function wechat_user_registry_user($user_open_id) {
 //
 
 
-
 /**
  * Implements hook_entity_info().
  */
@@ -534,51 +533,12 @@ function wechat_user_auth() {
     drupal_goto($destination);
   }
 
-
-  // auto register
-  $user_name = WUUPRE . $access_data['openid'];
-
-  $new_user = array(
-    'name' => $user_name,
-    'pass' => user_password(),
-    'status' => 1,
-  );
-  $role_id = variable_get('wechat_visitors', 0);
-  if ($role_id) {
-    $new_user['roles'] = array($role_id => $role_id);
+  $account = wechat_user_registry_user($access_data['openid']);
+  if (!empty($account)) {
+    _wechat_user_login($account->uid);
+    drupal_goto($destination);
   }
-  // $account returns user object
-  $account = user_save(NULL, $new_user);
-
-
-  if (!$account) {
-    drupal_goto($error);
-  }
-
-  _wechat_user_login($account->uid);
-
-  //创建wechat_user实体
-  $wechat_user_entity = entity_create('wechat_user', array());
-  $wechat_user_entity->uid = $account->uid;
-  $wechat_user_entity->openid = $access_data['openid'];
-  $user_info = $wechat_obj->getOauthUserinfo($access_data['access_token'], $access_data['openid']);
-  if (!empty($user_info)) {
-
-//    $user_wrapper = entity_metadata_wrapper('user', $account);
-//    $user_wrapper->field_user_name->set($user_info['nickname']);
-//    $user_wrapper->save();
-
-    //$wechat_user_entity->subscribe = $user_info['subscribe'];
-    $wechat_user_entity->nickname = $user_name;//utf8_encode($user_info['nickname']);
-    $wechat_user_entity->sex = $user_info['sex'];
-    $wechat_user_entity->province = $user_info['province'];
-    $wechat_user_entity->city = $user_info['city'];
-    $wechat_user_entity->country = $user_info['country'];
-    $wechat_user_entity->headimgurl = $user_info['headimgurl'];
-    $wechat_user_entity->subscribe_time = time();
-  }
-  $wechat_user_entity->save();
-  drupal_goto($destination);
+  drupal_goto($error);
 }
 
 
