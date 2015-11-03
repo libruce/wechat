@@ -294,7 +294,6 @@ function wechat_user_registry_user($user_open_id) {
 }
 
 
-
 //
 ///**
 // * Implements hook_field_presave().
@@ -728,6 +727,31 @@ class WechatUserViewsController extends EntityDefaultViewsController {
   }
 }
 
+/**
+ * Implements hook_views_data().
+ */
+function wechat_user_views_data() {
+  $data['wechat_user']['send_message'] = array(
+    'title' => t('发送消息'),
+    'real field' => 'openid',
+    'help' => t('The node ID.'), // The help that appears on the UI,
+    // Information for displaying the nid
+    'field' => array(
+      'handler' => 'views_handler_field_send_message',
+    ),
+  );
+  return $data;
+}
+class views_handler_field_send_message extends views_handler_field {
+  public function  render($values) {
+//    dpm($values);
+    drupal_add_library('system', 'drupal.ajax');
+    return '  <a
+    href="/rules/ajax/add/1/2?token=caCpDfTIW4oA9J0lw2BlcqUMBioYKuQlNBM1bV9iAX8"
+    class="use-ajax">test</a>
+';
+  }
+}
 class views_handler_field_nickname extends views_handler_field {
   public function  render($values) {
     return utf8_decode($values->wechat_user_nickname);
