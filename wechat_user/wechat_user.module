@@ -767,7 +767,7 @@ function wechat_user_rules_action_info() {
     'parameter' => array(
       'open_id' => array(
         'type' => 'text',
-        'label' => t('消息实体WechatReply'),
+        'label' => t('OpenId'),
         'description' => t('The user whose roles should be changed.'),
         'save' => TRUE,
       )
@@ -781,7 +781,7 @@ function wechat_user_rules_action_info() {
     'parameter' => array(
       'open_id' => array(
         'type' => 'text',
-        'label' => t('消息实体WechatReply'),
+        'label' => t('OpenId'),
         'description' => t('The user whose roles should be changed.'),
         'save' => TRUE,
       )
