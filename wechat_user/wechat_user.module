@@ -294,106 +294,6 @@ function wechat_user_registry_user($user_open_id) {
 }
 
 
-//
-///**
-// * Implements hook_field_presave().
-// */
-//function wechat_user_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
-//  dpm($field);
-//}
-//
-///**
-// * Implements hook_field_attach_presave().
-// */
-//function wechat_user_field_attach_presave($entity_type, $entity) {
-//  if ($entity_type == 'user') {
-//    $entity_metadata_wrapper = entity_metadata_wrapper('user', $entity);
-//    $value = $entity_metadata_wrapper->field_user_name->value();
-//    $entity_metadata_wrapper->field_user_name->set(utf8_encode($value));
-//  }
-//}
-//
-///**
-// * Implements hook_field_load().
-// */
-//function wechat_user_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
-//  dpm($field);
-//}
-//
-///**
-// * Implements hook_field_prepare_view().
-// */
-//function wechat_user_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
-//  dpm($entity_type);
-//}
-//
-///**
-// * Implements hook_field_prepare_translation().
-// */
-//function wechat_user_field_prepare_translation($entity_type, $entity, $field, $instance, $langcode, &$items, $source_entity, $source_langcode) {
-//  dpm($entity_type);
-//}
-//
-///**
-// * Implements hook_field_attach_prepare_translation_alter().
-// */
-//function wechat_user_field_attach_prepare_translation_alter(&$entity, $context) {
-//  dpm($entity);
-//}
-//
-///**
-// * Implements hook_entity_load().
-// */
-//function wechat_user_entity_load($entities, $type) {
-//  if ($type == 'user') {
-//    foreach ($entities as $entity) {
-//      $value = $entity->field_user_name['und'][0]['value'];
-//      $entity->field_user_name['und'][0]['value'] = utf8_decode($value);
-//      $entity->field_user_name['und'][0]['safe_value'] = utf8_decode($value);
-//    }
-//  }
-//}
-//
-//
-///**
-// * Implements hook_realname_alter().
-// */
-//function wechat_user_realname_alter(&$realname, $account) {
-//  dpm($account);
-//}
-//
-///**
-// * Implements hook_field_attach_preprocess_alter().
-// */
-//function wechat_user_field_attach_preprocess_alter(&$variables, $context) {
-//  dpm($variables);
-//  dpm($context);
-//}
-//
-///**
-// * Implements hook_field_attach_load().
-// */
-//function wechat_user_field_attach_load($entity_type, $entities, $age, $options) {
-////  dpm($entity_type);
-////  dpm($entities);
-////  dpm($age);
-////  dpm($options);
-////  $entity = reset($entities);
-////  $entity_metadata_wrapper = entity_metadata_wrapper('user', $entity);
-////  $value = $entity_metadata_wrapper->field_user_name->value();
-////  $entity_metadata_wrapper->field_user_name->set(utf8_decode($value));
-//}
-//
-///**
-// * Implements hook_field_attach_view_alter().
-// */
-//function wechat_user_field_attach_view_alter(&$output, $context) {
-//  dpm($output);
-//  dpm($context);
-//}
-//
-
-
 /**
  * Implements hook_entity_info().
  */
@@ -816,7 +716,7 @@ function wechat_user_rules_action_info() {
 
 function wechat_user_login_open_id($openid) {
   $uid = wechat_user_get_user_by_openid($openid);
-  watchdog('uid', json_encode($uid));
+  watchdog('wechat_user_login', json_encode($uid));
   _wechat_user_login($uid->uid);
 }
 
