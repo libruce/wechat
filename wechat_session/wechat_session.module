@@ -22,9 +22,7 @@ function _wechat_session_status_build($rebuild = FALSE) {
   foreach (module_implements('wechat_session_status') as $module) {
     $info_array = module_invoke($module, 'wechat_session_status');
     foreach ($info_array as $type => $info) {
-
       $info['status'] = $type;
-      //dpm($info);
       wechat_session_status_save($info);
     }
   }
@@ -81,10 +79,19 @@ function wechat_session_wechat_session_status() {
   );
 }
 
+/**
+ * @param $wechat_obj
+ * 默认消息回调
+ */
 function wechat_session_default_status_callback($wechat_obj) {
 
 }
 
+/**
+ * @param $wechat_obj
+ * @return string
+ * 默认消息回调回复
+ */
 function wechat_session_default_status_echo($wechat_obj) {
   $wechat_obj = wechat_api_init_wechatobj();
   $wechat_obj->valid(variable_get('wechat_api_debug', FALSE));
@@ -131,6 +138,9 @@ function wechat_session_menu_alter(&$items) {
   );
 }
 
+/**
+ * wechat_session 覆写的wechat_api 微信接口回调
+ */
 function wechat_session_callback() {
   $wechat_obj = wechat_api_init_wechatobj();
   $wechat_obj->valid(variable_get('wechat_api_debug', FALSE));
@@ -188,7 +198,9 @@ function wechat_session_callback() {
 
 
   $send_modal = variable_get('wechat_session_send_modal', 'asynchrony');
+  //判断消息回复模式，同步 | 异步。同步回复暂未开发完成
   if ($send_modal == 'asynchrony') {
+    //判断是否开启多客服
     if (variable_get('wechat_session_dkf', 0)) {
       $send_to_user_name = $wechat_obj->getRevFrom();
       $send_from_user_name = $wechat_obj->getRevTo();
@@ -217,6 +229,11 @@ function wechat_session_callback() {
   $function_callback($wechat_obj);
 }
 
+/**
+ * @param $openid
+ * @return mixed
+ * 根据openid取默认的回复回调
+ */
 function wechat_session_set_default_status($openid) {
   $wechat_session = wechat_session_load($openid);
   $status = variable_get('wechat_session_default_status', 'default');
@@ -241,10 +258,10 @@ function wechat_session_set_default_status($openid) {
  * 微信session状态切换
  */
 function wechat_session_openid_to_status($openid, $status) {
-  watchdog('wechat_session_openid_to_status', json_encode(array(
-    $openid,
-    $status
-  )));
+//  watchdog('wechat_session_openid_to_status', json_encode(array(
+//    $openid,
+//    $status
+//  )));
   $wechat_session = wechat_session_load($openid);
   if (empty($wechat_session)) {
     $wechat_session = entity_create('wechat_session', array(

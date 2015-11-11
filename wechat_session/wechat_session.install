@@ -43,11 +43,6 @@ function wechat_session_schema() {
   $schema['wechat_session'] = array(
     'description' => '微信用户session.',
     'fields' => array(
-//      'id' => array(
-//        'type' => 'serial',
-//        'not null' => TRUE,
-//        'description' => 'Primary Key: Unique profile type ID.',
-//      ),
       'openid' => array(
         'description' => '微信用户openid.',
         'type' => 'varchar',

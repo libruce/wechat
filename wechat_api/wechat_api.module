@@ -102,8 +102,6 @@ function wechat_api_settings_form($form, &$form_state) {
     '#default_value' => variable_get('wechat_api_debug', FALSE),
   );
   $form['#submit'][] = 'wechat_api_access_token_refresh';
-
-  //dpm(variable_get('wechat_api_debug', FALSE));
   return system_settings_form($form);
 }
 
@@ -124,8 +122,6 @@ function wechat_api_access_token_refresh($form, &$form_state) {
   }
   variable_set("wechat_api_access_token", $access_token);
   variable_set("wechat_api_access_token_time", time());
-
-  //dpm($form_state);
 }
 
 function wechat_api_init_wechatobj() {
@@ -191,28 +187,5 @@ function wechat_api_callback() {
   $result_str = sprintf($return_template, $to_user_name, $from_user_name, $request_time, $content);
 
   echo $result_str;
-
-
-//  //@todo 如果客服模块启用，客服模块优先处理消息
-//  $kf_massage = FALSE;
-//  if (module_exists('wechat_kf')) {
-//    //@todo 客服模块预处理消息，如消息是客服消息返回true。
-//    //功能需完善
-//    $kf_massage = wechat_kf_process_massage($wechat_obj);
-//    if ($kf_massage) {
-//      wechat_kf_save_request_messages($wechat_obj);
-//    }
-//  }
-//  //$kf_massage = FALSE;
-//  if (!$kf_massage) {
-//    //@todo 将消息对象交给“消息管理”模块操作
-//    if (module_exists('wechat_messages')) {
-//      wechat_messages_save_request_messages($wechat_obj);
-//    }
-//  }
-//  module_invoke_all('wechat_api_callback');
-//
-//  $array = array();
-
 }
 

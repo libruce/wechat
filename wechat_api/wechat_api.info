@@ -2,5 +2,4 @@ name = 微信API引入
 description = 微信sdk引入，提供基础认证 https://github.com/sosyuki/wechat_bag 修改过的drupal sdk包。
 core = 7.x
 package = wechat
-dependencies[] = rules
 dependencies[] = libraries (>= 2.0)
