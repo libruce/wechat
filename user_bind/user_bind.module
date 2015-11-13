@@ -1,0 +1,50 @@
+<?php
+/**
+ * Implements hook_menu().
+ */
+function user_bind_menu() {
+  //用户的微信信息
+  $items['user/%user/wechat-info'] = array(
+    'title' => '微信绑定',
+    'page callback' => 'user_bind_wechat_info',
+    'page arguments' => array(1),
+    'access callback' => 'user_view_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+function user_bind_wechat_info($user) {
+  $output = '';
+  $wechat_user = wechat_user_load($user->uid);
+  if (empty($wechat_user)) {
+    $output .= theme('user_bind_wechat', array('user' => $user));
+    return $output;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function user_bind_theme($existing, $type, $theme, $path) {
+  return array(
+    'user_bind_wechat' => array(
+      'render element' => 'content',
+      'template' => 'user_bind_wechat',
+      'path' => $path,
+    ),
+  );
+}
+
+/**
+ * Implements hook_install().
+ */
+function user_bind_install() {
+  if (!drupal_installation_attempted()) {
+    $qr_type = new WechatQr2Type();
+    $qr_type->type = 'user_bind_qr';
+    $qr_type->label = t('用户绑定专用码');
+    $qr_type->save();
+  }
+}
