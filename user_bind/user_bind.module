@@ -72,6 +72,7 @@ function user_bind_action_bind($openid, $key) {
   if (!empty($qr)) {
     $qr = reset($qr);
     $user = user_load($qr->uid);
+    watchdog('uid', $qr->uid);
     user_bind_bind_user($openid, $user);
   }
 }
