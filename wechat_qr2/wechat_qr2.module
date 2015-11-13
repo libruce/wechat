@@ -120,6 +120,52 @@ function wechat_qr2_field_extra_fields() {
   return $extra;
 }
 
+/**
+ * Implements hook_rules_action_info().
+ */
+function wechat_qr2_rules_action_info() {
+  $action['wechat_qr2_action_get_key'] = array(
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('返回二维码的真实KEY'),
+    'base' => 'user_bind_action_bind',
+    'parameter' => array(
+      'event' => array(
+        'type' => 'text',
+        'label' => t('事件类型'),
+        'description' => t('事件类型.'),
+        'save' => TRUE,
+      ),
+      'qr_key' => array(
+        'type' => 'text',
+        'label' => t('二维码KEY'),
+        'description' => t('二维码KEY.'),
+        'save' => TRUE,
+      ),
+    ),
+    'provides' => array(
+      'key' => array(
+        'type' => 'text',
+        'label' => t('二维码KEY'),
+        'save' => TRUE,
+      ),
+    ),
+  );
+  return $action;
+}
+
+function wechat_qr2_action_get_key($event, $qr_key) {
+  switch ($event) {
+    case 'SCAN': {
+      break;
+    }
+    case 'subscribe': {
+      $qr_key = substr($qr_key, 8);
+      break;
+    }
+  }
+  return array('key' => $qr_key);
+}
 
 /**
  * Implements hook_entity_info().
