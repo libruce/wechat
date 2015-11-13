@@ -128,7 +128,7 @@ function wechat_qr2_rules_action_info() {
     'group' => t('微信'),
     'access callback' => user_access('administer permissions'),
     'label' => t('返回二维码的真实KEY'),
-    'base' => 'user_bind_action_bind',
+    'base' => 'wechat_qr2_action_get_key',
     'parameter' => array(
       'event' => array(
         'type' => 'text',
