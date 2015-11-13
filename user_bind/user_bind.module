@@ -84,6 +84,8 @@ function user_bind_bind_user($openid, $user) {
     $wechat_user = wechat_user_load_multiple(FALSE, array('openid' => $openid));
     if (!empty($wechat_user)) {
       $wechat_user_entity = reset($wechat_user);
+      entity_delete('wechat_user', $wechat_user_entity->uid);
+      $wechat_user_entity = entity_create('wechat_user', array());
     }
     else {
       $wechat_user_entity = entity_create('wechat_user', array());
@@ -102,6 +104,7 @@ function user_bind_bind_user($openid, $user) {
     $wechat_user_entity->country = $user_info['country'];
     $wechat_user_entity->headimgurl = $user_info['headimgurl'];
     $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
+
     $wechat_user_entity->save();
     $account_wrapper->field_user_name->set($user_info['nickname']);
     $account_wrapper->save();
