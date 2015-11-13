@@ -83,6 +83,7 @@ function user_bind_bind_user($openid, $user) {
     $account_wrapper = entity_metadata_wrapper('user', $user);
     $nickname = utf8_encode($user_info['nickname']);
     $wechat_user_entity = entity_create('wechat_user', array());
+    $wechat_user_entity->uid = $user->uid;
     $wechat_user_entity->openid = $user_info['openid'];
     $wechat_user_entity->subscribe = $user_info['subscribe'];
     $wechat_user_entity->nickname = $nickname;//暂时无法处理特殊字符，不自动使用昵称。$user_info['nickname'];
