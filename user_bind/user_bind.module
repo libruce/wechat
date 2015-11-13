@@ -12,16 +12,150 @@ function user_bind_menu() {
     'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
   );
+  $items['admin/config/wechat/user-bind'] = array(
+    'title' => '微信绑定设置',
+    'description' => '微信绑定设置.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('user_bind_settings_form'),
+    'access arguments' => array('administer user bind configuration'),
+  );
+
+  $items['user/bind/status'] = array(
+    'title' => '微信绑定状态',
+    'page callback' => 'user_bind_status',
+    'access arguments' => array('access user bind wechat'),
+    'type' => MENU_CALLBACK,
+  );
   return $items;
+}
+
+function user_bind_status() {
+  $uid = isset($_POST['uid']) ? $_POST['uid'] : '';
+  $wechat_user = wechat_user_load($uid);
+  if (!empty($wechat_user)) {
+    drupal_json_output(array(
+      'status' => 1
+    ));
+  }
+  drupal_json_output(array('status' => 0));
+}
+
+/**
+ * Implements hook_rules_action_info().
+ */
+function user_bind_rules_action_info() {
+  $action['user_bind_action_bind'] = array(
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('绑定微信用户'),
+    'base' => 'user_bind_action_bind',
+    'parameter' => array(
+      'open_id' => array(
+        'type' => 'text',
+        'label' => t('OpenId'),
+      ),
+      'key' => array(
+        'type' => 'text',
+        'label' => t('Qr Key'),
+      ),
+    ),
+  );
+  return $action;
+}
+
+function user_bind_action_bind($openid, $key) {
+  $qr = wechat_qr_load_multiple(FALSE, array(
+    'qr_key' => $key,
+    'bundle' => 'user_bind_qr',
+    'qr_type' => 0,
+  ));
+  if (!empty($qr)) {
+    $qr = reset($qr);
+    $user = user_load($qr->uid);
+    user_bind_bind_user($openid, $user);
+  }
+}
+
+function user_bind_bind_user($openid, $user) {
+  $wechat_obj = wechat_api_init_wechatobj();
+  $user_info = $wechat_obj->getUserInfo($openid);
+  if ($user_info['subscribe']) {//判断是否关注
+    $account_wrapper = entity_metadata_wrapper('user', $user);
+    $nickname = utf8_encode($user_info['nickname']);
+    $wechat_user_entity = wechat_user_load($user->uid);
+    $wechat_user_entity->openid = $user_info['openid'];
+    $wechat_user_entity->subscribe = $user_info['subscribe'];
+    $wechat_user_entity->nickname = $nickname;//暂时无法处理特殊字符，不自动使用昵称。$user_info['nickname'];
+    $wechat_user_entity->sex = $user_info['sex'];
+    $wechat_user_entity->province = $user_info['province'];
+    $wechat_user_entity->city = $user_info['city'];
+    $wechat_user_entity->country = $user_info['country'];
+    $wechat_user_entity->headimgurl = $user_info['headimgurl'];
+    $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
+    $wechat_user_entity->save();
+    $account_wrapper->field_user_name->set($user_info['nickname']);
+    $account_wrapper->save();
+    return $user;
+  }
+  return FALSE;
+}
+
+function user_bind_settings_form($form, &$form_state) {
+  $form['required']['user_bind_key_start'] = array(
+    '#type' => 'textfield',
+    '#title' => t('二维码KEY开始的值'),
+    '#default_value' => variable_get('user_bind_key_start', ''),
+    '#required' => TRUE,
+  );
+  $form['required']['user_bind_key_end'] = array(
+    '#type' => 'textfield',
+    '#title' => t('二维码KEY结束的值'),
+    '#default_value' => variable_get('user_bind_key_end', ''),
+    '#required' => TRUE,
+  );
+  return system_settings_form($form);
 }
 
 function user_bind_wechat_info($user) {
   $output = '';
   $wechat_user = wechat_user_load($user->uid);
   if (empty($wechat_user)) {
-    $output .= theme('user_bind_wechat', array('user' => $user));
+    $form = drupal_get_form('user_bind_form', $user);
+    $output .= render($form);
     return $output;
   }
+  return '已绑定微信！';
+}
+
+function user_bind_form($form, &$form_state, $user) {
+
+  $qr = new WechatQr2();
+  $qr->bundle = 'user_bind_qr';
+  $qr->qr_type = '0';
+  $qr->qr_key = user_bind_get_key();
+  $qr->uid = $user->uid;
+  $qr->expire = '300';
+  $qr->save();
+
+  $form['qr'] = array(
+    '#type' => 'item',
+    '#markup' => "<div>使用微信扫描下面的二维码进行绑定！</div>" . $qr->getUrl(),
+  );
+
+  global $base_url;
+  $settings = array(
+    'statusUrl' => $base_url . '/user/bind/status',
+    'uid' => $user->uid
+  );
+  $form['qr']['#attached']['js'] = array(
+    drupal_get_path('module', 'user_bind') . '/user_bind.js',
+  );
+  $form['qr']['#attached']['js'][] = array(
+    'data' => array('userbind' => $settings),
+    'type' => 'setting',
+  );
+
+  return $form;
 }
 
 /**
@@ -35,6 +169,18 @@ function user_bind_theme($existing, $type, $theme, $path) {
       'path' => $path,
     ),
   );
+}
+
+function user_bind_get_key() {
+  $key_current = variable_get('user_bind_key_current', variable_get('user_bind_key_start', 0));
+  if ($key_current > variable_get('user_bind_key_end', 100)) {
+    $new_key = variable_get('user_bind_key_start', 0);
+  }
+  else {
+    $new_key = $key_current + 1;
+  }
+  variable_set('user_bind_key_current', $new_key);
+  return $key_current;
 }
 
 /**
