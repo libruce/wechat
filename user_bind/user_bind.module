@@ -64,9 +64,9 @@ function user_bind_rules_action_info() {
 }
 
 function user_bind_action_bind($openid, $key) {
-  $qr = wechat_qr_load_multiple(FALSE, array(
+  $qr = wechat_qr2_load_multiple(FALSE, array(
     'qr_key' => $key,
-    'type' => 'user_bind_qr',
+    'bundle' => 'user_bind_qr',
     'qr_type' => 0,
   ));
   if (!empty($qr)) {
