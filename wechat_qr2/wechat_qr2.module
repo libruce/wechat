@@ -164,6 +164,7 @@ function wechat_qr2_action_get_key($event, $qr_key) {
       break;
     }
   }
+  watchdog('key',$qr_key);
   return array('key' => $qr_key);
 }
 
