@@ -143,33 +143,46 @@ function user_bind_wechat_info($user) {
 
 function user_bind_form($form, &$form_state, $user) {
 
-  $qr = new WechatQr2();
-  $qr->bundle = 'user_bind_qr';
-  $qr->qr_type = '0';
-  $qr->qr_key = user_bind_get_key();
-  $qr->uid = $user->uid;
-  $qr->expire = '300';
-  $qr->save();
-
-  $form['qr'] = array(
-    '#type' => 'item',
-    '#markup' => "<div>使用微信扫描下面的二维码进行绑定！</div>" . $qr->getUrl(),
-  );
-
-  global $base_url;
-  $settings = array(
-    'statusUrl' => $base_url . '/user/bind/status',
-    'uid' => $user->uid
-  );
-  $form['qr']['#attached']['js'] = array(
-    drupal_get_path('module', 'user_bind') . '/user_bind.js',
-  );
-  $form['qr']['#attached']['js'][] = array(
-    'data' => array('userbind' => $settings),
-    'type' => 'setting',
-  );
-
+//  $qr = new WechatQr2();
+//  $qr->bundle = 'user_bind_qr';
+//  $qr->qr_type = '0';
+//  $qr->qr_key = user_bind_get_key();
+//  $qr->uid = $user->uid;
+//  $qr->expire = '300';
+//  $qr->save();
+//
+//  $form['qr'] = array(
+//    '#type' => 'item',
+//    '#markup' => "<div>使用微信扫描下面的二维码进行绑定！</div>" . $qr->getUrl(),
+//  );
+//
+//  global $base_url;
+//  $settings = array(
+//    'statusUrl' => $base_url . '/user/bind/status',
+//    'uid' => $user->uid
+//  );
+//  $form['qr']['#attached']['js'] = array(
+//    drupal_get_path('module', 'user_bind') . '/user_bind.js',
+//  );
+//  $form['qr']['#attached']['js'][] = array(
+//    'data' => array('userbind' => $settings),
+//    'type' => 'setting',
+//  );
+  $form_state['user'] = $user;
+  $form['submit'] = array('#type' => 'submit', '#value' => t('点击绑定'));
   return $form;
+}
+
+function user_bind_form_submit($form, &$form_state) {
+  drupal_goto('wechat/user/login', array(
+    'query' => array(
+      'goto' => 'user/' . $form_state['user']->uid,
+      'error' => 'node',
+      'state' => 1,
+      'type' => 'snsapi_base',
+    )
+  ));
+  //http://wsc.demo.sosyuki.com/wechat/user/login?goto=product/home&error=node&state=1&type=snsapi_base
 }
 
 /**
