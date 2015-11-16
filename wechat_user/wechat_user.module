@@ -417,10 +417,6 @@ function wechat_user_auth() {
   $destination = isset($_GET['destination']) ? $_GET['destination'] : '';
   $code = isset($_GET['code']) ? $_GET['code'] : '';
 
-  // user has logined
-  if ($user->uid) {
-    drupal_goto($destination);
-  }
 
   // error
   if ((!$state) || (!$code)) { // error
@@ -441,6 +437,14 @@ function wechat_user_auth() {
     // todo update user info
     if (empty($destination)) {
       $destination = 'user/' . $current_user->uid;
+    }
+    drupal_goto($destination);
+  }
+
+  // user has logined
+  if ($user->uid) {
+    if (module_exists('user_bind')) {
+      user_bind_bind_user($access_data['openid'], $user);
     }
     drupal_goto($destination);
   }
@@ -642,6 +646,7 @@ function wechat_user_views_data() {
   );
   return $data;
 }
+
 class views_handler_field_send_message extends views_handler_field {
   public function  render($values) {
 //    dpm($values);
@@ -652,6 +657,7 @@ class views_handler_field_send_message extends views_handler_field {
 ';
   }
 }
+
 class views_handler_field_nickname extends views_handler_field {
   public function  render($values) {
     return utf8_decode($values->wechat_user_nickname);
