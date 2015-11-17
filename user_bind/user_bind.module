@@ -23,7 +23,7 @@ function user_bind_menu() {
   $items['user/wechat-user-bind'] = array(
     'title' => '微信绑定',
     'page callback' => 'user_bind_page',
-    'access arguments' => array('access user bind wechat'),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   return $items;
