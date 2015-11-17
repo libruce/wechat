@@ -20,25 +20,32 @@ function user_bind_menu() {
     'access arguments' => array('administer user bind configuration'),
   );
 
-  $items['user/bind/status'] = array(
-    'title' => '微信绑定状态',
-    'page callback' => 'user_bind_status',
+  $items['user/wechat-user-bind'] = array(
+    'title' => '微信绑定',
+    'page callback' => 'user_bind_page',
     'access arguments' => array('access user bind wechat'),
     'type' => MENU_CALLBACK,
   );
   return $items;
 }
 
-function user_bind_status() {
-  $uid = isset($_POST['uid']) ? $_POST['uid'] : '';
-  $wechat_user = wechat_user_load($uid);
-  if (!empty($wechat_user)) {
-    drupal_json_output(array(
-      'status' => 1
-    ));
+function user_bind_page() {
+  $output = '';
+  global $user;
+  if ($user->uid) {
+    drupal_goto('user/' . $user->uid . '/wechat-info');
   }
-  drupal_json_output(array('status' => 0));
+  else {
+    $link = l(t('登录'), 'user/login', array(
+      'query' => array(
+        'destination' => 'user/wechat-user-bind'
+      ),
+    ));
+    $output .= "<div>请先{$link}！</div>";
+    return $output;
+  }
 }
+
 
 /**
  * Implements hook_rules_action_info().
