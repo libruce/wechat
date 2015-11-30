@@ -4,14 +4,13 @@ class JSSDK {
   private $appId;
   private $appSecret;
 
-  public function __construct($appId, $appSecret) {
-    $this->appId = $appId;
-    $this->appSecret = $appSecret;
+  public function __construct($appId = NULL, $appSecret = NULL) {
+    $this->appId = isset($appId) ? $appId : variable_get('wechat_api_appid', '');
+    $this->appSecret = isset($appSecret) ? $appSecret : variable_get('wechat_api_appsecret', '');
   }
 
   public function getSignPackage() {
-    $wechat_obj = wechat_api_init_wechatobj();
-    $jsapiTicket = $wechat_obj->getJsTicket();
+    $jsapiTicket = $this->getJsApiTicket();
 
     // 注意 URL 一定要动态获取，不能 hardcode.
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
@@ -45,4 +44,66 @@ class JSSDK {
     return $str;
   }
 
+  private function getJsApiTicket() {
+
+    $data = json_decode(variable_get('jssdk_jsapi_ticket', '{"expire_time":0}'));
+
+    if ($data->expire_time < time()) {
+      $accessToken = $this->getAccessToken();
+      // 如果是企业号用以下 URL 获取 ticket
+      // $url = "https://qyapi.weixin.qq.com/cgi-bin/get_jsapi_ticket?access_token=$accessToken";
+      $url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=$accessToken";
+      $res = json_decode($this->httpGet($url));
+      $ticket = $res->ticket;
+
+      if ($ticket) {
+        $data->expire_time = time() + 7000;
+        $data->jsapi_ticket = $ticket;
+        variable_set('jssdk_jsapi_ticket', json_encode($data));
+      }
+    }
+    else {
+      $ticket = $data->jsapi_ticket;
+    }
+
+    return $ticket;
+  }
+
+  private function getAccessToken() {
+    $wechat_obj = wechat_api_init_wechatobj();
+    return $wechat_obj->get_access_token();
+  }
+
+  private function httpGet($url) {
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 500);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+    curl_setopt($curl, CURLOPT_URL, $url);
+
+    $res = curl_exec($curl);
+    curl_close($curl);
+
+    return $res;
+  }
+}
+
+/**
+ * Implements hook_page_build().
+ */
+function wechat_jssdk_page_build(&$page) {
+  $JSSDK = new JSSDK();
+  $getSignPackage = $JSSDK->getSignPackage();
+
+  $settings = array(
+    'appId' => $getSignPackage['appId'],
+    'timestamp' => $getSignPackage['timestamp'],
+    'nonceStr' => $getSignPackage['nonceStr'],
+    'signature' => $getSignPackage['signature'],
+  );
+  drupal_add_js(array('wechatJSSDK' => $settings), 'setting');
+
+  drupal_add_js(drupal_get_path('module', 'wechat_jssdk') . "/lib/jweixin-1.0.0.js");
+  drupal_add_js(drupal_get_path('module', 'wechat_jssdk') . "/wechat_jssdk.js");
 }
