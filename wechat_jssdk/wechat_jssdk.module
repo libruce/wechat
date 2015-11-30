@@ -71,7 +71,8 @@ class JSSDK {
 
   private function getAccessToken() {
     $wechat_obj = wechat_api_init_wechatobj();
-    return $wechat_obj->get_access_token();
+    $access_token = $wechat_obj->get_access_token();
+    return $access_token;
   }
 
   private function httpGet($url) {

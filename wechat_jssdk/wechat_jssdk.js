@@ -4,8 +4,7 @@
 (function ($) {
     Drupal.behaviors.wechatJSSDK = {
         attach: function () {
-            Drupal.wechatJSSDK = wx || {};
-            Drupal.wechatJSSDK.config({
+            wx.config({
                 debug: true,
                 appId: Drupal.settings.wechatJSSDK.appId,
                 timestamp: Drupal.settings.wechatJSSDK.timestamp,
