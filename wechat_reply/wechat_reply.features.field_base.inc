@@ -22,7 +22,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'target_id',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'entityreference',
     'settings' => array(
       'handler' => 'base',
@@ -58,7 +58,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(
       
@@ -79,7 +79,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(),
     'translatable' => 0,
@@ -98,7 +98,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'fid',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'image',
     'settings' => array(
       'default_image' => 0,
@@ -120,7 +120,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'fid',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'file',
     'settings' => array(
       'display_default' => 0,
@@ -144,7 +144,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(),
     'translatable' => 0,
@@ -163,7 +163,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(
       'max_length' => 255,
@@ -184,7 +184,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(
       'max_length' => 255,
@@ -205,7 +205,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(
       'max_length' => 255,
@@ -226,7 +226,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(),
     'translatable' => 0,
@@ -245,7 +245,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'fid',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'image',
     'settings' => array(
       'default_image' => 0,
@@ -268,7 +268,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(
       'max_length' => 255,
@@ -289,7 +289,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(
       'max_length' => 255,
@@ -310,7 +310,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'fid',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'image',
     'settings' => array(
       'default_image' => 0,
@@ -333,7 +333,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'fid',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'file',
     'settings' => array(
       'display_default' => 0,
@@ -357,7 +357,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(),
     'translatable' => 0,
@@ -376,7 +376,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'format',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'text',
     'settings' => array(
       'max_length' => 255,
@@ -397,7 +397,7 @@ function wechat_reply_field_default_field_bases() {
         0 => 'fid',
       ),
     ),
-    'locked' => 1,
+    'locked' => 0,
     'module' => 'file',
     'settings' => array(
       'display_default' => 0,
