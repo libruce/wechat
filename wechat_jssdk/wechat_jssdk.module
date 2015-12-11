@@ -103,13 +103,11 @@ class JSSDK {
 
     $afterData = array(
       "addrSign" => $addrSign,
-      "signType" => "sha1",
-      "scope" => "jsapi_address",
       "appId" => $data["appid"],
       "timeStamp" => $data["timestamp"],
       "nonceStr" => $data["noncestr"]
     );
-    $parameters = json_encode($afterData);
+    $parameters = $afterData;
     return $parameters;
   }
 
@@ -148,6 +146,17 @@ function wechat_jssdk_page_build(&$page) {
     'signature' => $getSignPackage['signature'],
     'editAddress' => $JSSDK->GetEditAddressParameters(),
   );
+
+
+  $editAddressData = $JSSDK->GetEditAddressParameters();
+  $editAddress = array(
+    "addrSign" => $editAddressData['addrSign'],
+    "appId" => $editAddressData['appId'],
+    "timeStamp" => $editAddressData['timeStamp'],
+    "nonceStr" => $editAddressData['nonceStr'],
+  );
+  drupal_add_js(array('editAddress' => $editAddress), 'setting');
+
   drupal_add_js(array('wechatJSSDK' => $settings), 'setting');
 
   drupal_add_js(drupal_get_path('module', 'wechat_jssdk') . "/lib/jweixin-1.0.0.js");
