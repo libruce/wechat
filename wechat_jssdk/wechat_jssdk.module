@@ -69,6 +69,50 @@ class JSSDK {
     return $ticket;
   }
 
+  private function ToUrlParams($urlObj) {
+    $buff = "";
+    foreach ($urlObj as $k => $v) {
+      if ($k != "sign") {
+        $buff .= $k . "=" . $v . "&";
+      }
+    }
+    $buff = trim($buff, "&");
+    return $buff;
+  }
+
+  /**
+   *
+   * 获取地址js参数
+   *
+   * @return 获取共享收货地址js函数需要的参数，json格式可以直接做参数使用
+   */
+  public function GetEditAddressParameters() {
+
+    $data = array();
+
+    $data["appid"] = variable_get('wechat_api_appid', '');
+    $data["url"] = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $time = time();
+    $data["timestamp"] = "$time";
+    $data["noncestr"] = drupal_random_key(10);
+    $data["accesstoken"] = variable_get('wechat_api_access_token', '');
+
+    ksort($data);
+    $params = $this->ToUrlParams($data);
+    $addrSign = sha1($params);
+
+    $afterData = array(
+      "addrSign" => $addrSign,
+      "signType" => "sha1",
+      "scope" => "jsapi_address",
+      "appId" => $data["appid"],
+      "timeStamp" => $data["timestamp"],
+      "nonceStr" => $data["noncestr"]
+    );
+    $parameters = json_encode($afterData);
+    return $parameters;
+  }
+
   private function getAccessToken() {
     $wechat_obj = wechat_api_init_wechatobj();
     $access_token = $wechat_obj->get_access_token();
