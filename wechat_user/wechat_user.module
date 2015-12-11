@@ -54,6 +54,10 @@ function wechat_user_menu() {
   return $items;
 }
 
+function wechat_user_create_login_url($goto, $error = 'node') {
+  return "/wechat/user/login?goto={$goto}&error={$error}&state=1&type=snsapi_base";
+}
+
 function wechat_user_edit_access($current_user) {
   global $user;
   if ($user->uid == $current_user->uid) {
