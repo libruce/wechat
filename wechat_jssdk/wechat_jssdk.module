@@ -146,6 +146,7 @@ function wechat_jssdk_page_build(&$page) {
     'timestamp' => $getSignPackage['timestamp'],
     'nonceStr' => $getSignPackage['nonceStr'],
     'signature' => $getSignPackage['signature'],
+    'editAddress' => $JSSDK->GetEditAddressParameters(),
   );
   drupal_add_js(array('wechatJSSDK' => $settings), 'setting');
 
