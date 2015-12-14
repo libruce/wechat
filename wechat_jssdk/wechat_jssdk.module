@@ -147,20 +147,20 @@ function wechat_jssdk_page_build(&$page) {
     'editAddress' => $JSSDK->GetEditAddressParameters(),
   );
 
-  $OAuth = new OAuthClient('CfRGN558nrHrgCTPFj8fGZDNUDPZjRiS', 'qCotH45C4XKhkbwq2UPbP7npVAKAcHYh', 'http://api.ugreat.net/services/wx-pay-services/get-address-parameter.json', 'POST', array());
-  $body = $OAuth->get_body();
-  $data = $body->data;
-  $data = json_decode($data);
-  $data = (array) $data;
-
-//  $editAddressData = $JSSDK->GetEditAddressParameters();
-  $editAddress = array(
-    "addrSign" => $data['addrSign'],
-    "appId" => $data['appId'],
-    "timeStamp" => $data['timeStamp'],
-    "nonceStr" => $data['nonceStr'],
-  );
-  drupal_add_js(array('editAddress' => $editAddress), 'setting');
+//  $OAuth = new OAuthClient('CfRGN558nrHrgCTPFj8fGZDNUDPZjRiS', 'qCotH45C4XKhkbwq2UPbP7npVAKAcHYh', 'http://api.ugreat.net/services/wx-pay-services/get-address-parameter.json', 'POST', array());
+//  $body = $OAuth->get_body();
+//  $data = $body->data;
+//  $data = json_decode($data);
+//  $data = (array) $data;
+//
+////  $editAddressData = $JSSDK->GetEditAddressParameters();
+//  $editAddress = array(
+//    "addrSign" => $data['addrSign'],
+//    "appId" => $data['appId'],
+//    "timeStamp" => $data['timeStamp'],
+//    "nonceStr" => $data['nonceStr'],
+//  );
+//  drupal_add_js(array('editAddress' => $editAddress), 'setting');
 
   drupal_add_js(array('wechatJSSDK' => $settings), 'setting');
 
