@@ -151,7 +151,7 @@ function wechat_jssdk_page_build(&$page) {
   $body = $OAuth->get_body();
   $data = $body->data;
   $data = json_decode($data);
-
+  $data = (array) $data;
 
 //  $editAddressData = $JSSDK->GetEditAddressParameters();
   $editAddress = array(
