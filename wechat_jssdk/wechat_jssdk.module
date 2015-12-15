@@ -341,8 +341,8 @@ function wechat_jssdk_page_build(&$page) {
 
   $redirect_uri = 'http://dining2.demo.sosyuki.com/foodshopcunt/5';
   $tools = new JsApiPay();
-  $tools->GetOpenid();
   $tools->Set_redirect_uri($redirect_uri);
+  $tools->GetOpenid();
   $editAddress = $tools->GetEditAddressParameters();
 
 //$tools->GetOpenid();
