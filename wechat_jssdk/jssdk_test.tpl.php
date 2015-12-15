@@ -22,7 +22,7 @@ $editAddress = $tools->GetEditAddressParameters();
           var value2 = res.addressCitySecondStageName;
           var value3 = res.addressCountiesThirdStageName;
           var value4 = res.addressDetailInfo;
-          var tel = res.telNumber;
+          var tel = res.nationalCode;
 
           alert(value1 + value2 + value3 + value4 + ":" + tel);
         }
