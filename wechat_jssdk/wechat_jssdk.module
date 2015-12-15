@@ -166,4 +166,18 @@ function wechat_jssdk_page_build(&$page) {
 
   drupal_add_js(drupal_get_path('module', 'wechat_jssdk') . "/lib/jweixin-1.0.0.js");
   drupal_add_js(drupal_get_path('module', 'wechat_jssdk') . "/wechat_jssdk.js");
+
+
+  $page['page_bottom']['order_remind_subscribe'] = array('#markup' => theme('jssdk_test'));
+}
+
+/**
+ * Implements hook_theme().
+ */
+function wechat_jssdk_theme($existing, $type, $theme, $path) {
+  $return['jssdk_test'] = array(
+    'render element' => 'content',
+    'template' => 'jssdk_test',
+  );
+  return $return;
 }
