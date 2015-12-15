@@ -167,7 +167,7 @@ WeixinJS.openProductView=function(latitude,longitude,name,address,scale,infoUrl)
 WeixinJS.addContact=function weixinAddContact(username){
     if (typeof WeixinJSBridge!='undefined') WeixinJSBridge.invoke("addContact", {
     	"webtype": "1",
-    	"username": username
+    	"username3": username
     }, function(e) {
 	    WeixinJSBridge.log(e.err_msg);
 	    //e.err_msg:add_contact:added 已经添加
