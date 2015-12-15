@@ -138,6 +138,7 @@ class JsApiPay {
     $data["timestamp"] = "$time";
     $data["noncestr"] = "1234568";
     $data["accesstoken"] = $getData["access_token"];
+    var_dump($getData);
     ksort($data);
     $params = $this->ToUrlParams($data);
     $addrSign = sha1($params);
@@ -195,8 +196,8 @@ class JSSDK {
   private $appSecret;
 
   public function __construct($appId = NULL, $appSecret = NULL) {
-    $this->appId = !empty($appId) ? $appId : variable_get('wechat_api_appid', '');
-    $this->appSecret = !empty($appSecret) ? $appSecret : variable_get('wechat_api_appsecret', '');
+    $this->appId = isset($appId) ? $appId : variable_get('wechat_api_appid', '');
+    $this->appSecret = isset($appSecret) ? $appSecret : variable_get('wechat_api_appsecret', '');
   }
 
   public function getSignPackage() {
@@ -285,7 +286,7 @@ class JSSDK {
     $time = time();
     $data["timestamp"] = "$time";
     $data["noncestr"] = drupal_random_key(10);
-    $data["accesstoken"] = $this->getAccessToken();
+    $data["accesstoken"] = variable_get('wechat_api_access_token', '');
 
     ksort($data);
     $params = $this->ToUrlParams($data);
