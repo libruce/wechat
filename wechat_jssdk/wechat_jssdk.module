@@ -361,7 +361,8 @@ function wechat_jssdk_page_build(&$page) {
   drupal_add_js(drupal_get_path('module', 'wechat_jssdk') . "/wechat_jssdk.js");
 
 
-  $page['page_bottom']['order_remind_subscribe'] = array('#markup' => theme('jssdk_test'));
+//  $page['page_bottom']['order_remind_subscribe'] = array('#markup' => theme('jssdk_test'));
+
 }
 
 /**
