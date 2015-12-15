@@ -195,8 +195,8 @@ class JSSDK {
   private $appSecret;
 
   public function __construct($appId = NULL, $appSecret = NULL) {
-    $this->appId = isset($appId) ? $appId : variable_get('wechat_api_appid', '');
-    $this->appSecret = isset($appSecret) ? $appSecret : variable_get('wechat_api_appsecret', '');
+    $this->appId = !empty($appId) ? $appId : variable_get('wechat_api_appid', '');
+    $this->appSecret = !empty($appSecret) ? $appSecret : variable_get('wechat_api_appsecret', '');
   }
 
   public function getSignPackage() {
@@ -285,7 +285,7 @@ class JSSDK {
     $time = time();
     $data["timestamp"] = "$time";
     $data["noncestr"] = drupal_random_key(10);
-    $data["accesstoken"] = variable_get('wechat_api_access_token', '');
+    $data["accesstoken"] = $this->getAccessToken();
 
     ksort($data);
     $params = $this->ToUrlParams($data);
