@@ -1,5 +1,6 @@
 <?php
 require_once "WxPay.Api.php";
+
 class JsApiPay {
   /**
    *
@@ -151,7 +152,7 @@ class JsApiPay {
       "timeStamp" => $data["timestamp"],
       "nonceStr" => $data["noncestr"]
     );
-    $parameters = json_encode($afterData);
+    $parameters = $afterData;
     return $parameters;
   }
 
@@ -338,6 +339,14 @@ function wechat_jssdk_page_build(&$page) {
     'editAddress' => $JSSDK->GetEditAddressParameters(),
   );
 
+  $redirect_uri = 'http://dining2.demo.sosyuki.com/foodshopcunt/5';
+  $tools = new JsApiPay();
+  $tools->GetOpenid();
+  $tools->Set_redirect_uri($redirect_uri);
+  $editAddress = $tools->GetEditAddressParameters();
+
+//$tools->GetOpenid();
+  $editAddress = $tools->GetEditAddressParameters();
 //  $OAuth = new OAuthClient('CfRGN558nrHrgCTPFj8fGZDNUDPZjRiS', 'qCotH45C4XKhkbwq2UPbP7npVAKAcHYh', 'http://api.ugreat.net/services/wx-pay-services/get-address-parameter.json', 'POST', array());
 //  $body = $OAuth->get_body();
 //  $data = $body->data;
@@ -345,13 +354,13 @@ function wechat_jssdk_page_build(&$page) {
 //  $data = (array) $data;
 //
 ////  $editAddressData = $JSSDK->GetEditAddressParameters();
-//  $editAddress = array(
-//    "addrSign" => $data['addrSign'],
-//    "appId" => $data['appId'],
-//    "timeStamp" => $data['timeStamp'],
-//    "nonceStr" => $data['nonceStr'],
-//  );
-//  drupal_add_js(array('editAddress' => $editAddress), 'setting');
+  $editAddress = array(
+    "addrSign" => $editAddress['addrSign'],
+    "appId" => $editAddress['appId'],
+    "timeStamp" => $editAddress['timeStamp'],
+    "nonceStr" => $editAddress['nonceStr'],
+  );
+  drupal_add_js(array('editAddress' => $editAddress), 'setting');
 
   drupal_add_js(array('wechatJSSDK' => $settings), 'setting');
 
