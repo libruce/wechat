@@ -339,27 +339,21 @@ function wechat_jssdk_page_build(&$page) {
     'editAddress' => $JSSDK->GetEditAddressParameters(),
   );
 
-  $redirect_uri = 'http://dining2.demo.sosyuki.com/foodshopcunt/5';
-  $tools = new JsApiPay();
-  $tools->Set_redirect_uri($redirect_uri);
-  $tools->GetOpenid();
-  $editAddress = $tools->GetEditAddressParameters();
-
-//$tools->GetOpenid();
-//  $OAuth = new OAuthClient('CfRGN558nrHrgCTPFj8fGZDNUDPZjRiS', 'qCotH45C4XKhkbwq2UPbP7npVAKAcHYh', 'http://api.ugreat.net/services/wx-pay-services/get-address-parameter.json', 'POST', array());
-//  $body = $OAuth->get_body();
-//  $data = $body->data;
-//  $data = json_decode($data);
-//  $data = (array) $data;
-//
-////  $editAddressData = $JSSDK->GetEditAddressParameters();
-  $editAddress = array(
-    "addrSign" => $editAddress['addrSign'],
-    "appId" => $editAddress['appId'],
-    "timeStamp" => $editAddress['timeStamp'],
-    "nonceStr" => $editAddress['nonceStr'],
-  );
-  drupal_add_js(array('editAddress' => $editAddress), 'setting');
+  if (current_path() == 'foodshopcunt') {
+    global $base_url;
+    $redirect_uri = $base_url . '/foodshopcunt';
+    $tools = new JsApiPay();
+    $tools->Set_redirect_uri($redirect_uri);
+    $tools->GetOpenid();
+    $editAddress = $tools->GetEditAddressParameters();
+    $editAddress = array(
+      "addrSign" => $editAddress['addrSign'],
+      "appId" => $editAddress['appId'],
+      "timeStamp" => $editAddress['timeStamp'],
+      "nonceStr" => $editAddress['nonceStr'],
+    );
+    drupal_add_js(array('editAddress' => $editAddress), 'setting');
+  }
 
   drupal_add_js(array('wechatJSSDK' => $settings), 'setting');
 
