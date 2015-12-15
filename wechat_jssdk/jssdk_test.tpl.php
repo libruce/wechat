@@ -1,13 +1,13 @@
 <button class="btn btn-default jssdk-test">JSSDK TEST</button>
 <?php
 
-$redirect_uri = 'http://dining2.demo.sosyuki.com/foodshopcunt/5';
-
-
-$tools = new JsApiPay();
-$tools->Set_redirect_uri($redirect_uri);
-//$tools->GetOpenid();
-$editAddress = $tools->GetEditAddressParameters();
+//$redirect_uri = 'http://dining2.demo.sosyuki.com/foodshopcunt/5';
+//
+//
+//$tools = new JsApiPay();
+//$tools->Set_redirect_uri($redirect_uri);
+////$tools->GetOpenid();
+//$editAddress = $tools->GetEditAddressParameters();
 ?>
 <script type="text/javascript">
 //

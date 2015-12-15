@@ -346,7 +346,6 @@ function wechat_jssdk_page_build(&$page) {
   $editAddress = $tools->GetEditAddressParameters();
 
 //$tools->GetOpenid();
-  $editAddress = $tools->GetEditAddressParameters();
 //  $OAuth = new OAuthClient('CfRGN558nrHrgCTPFj8fGZDNUDPZjRiS', 'qCotH45C4XKhkbwq2UPbP7npVAKAcHYh', 'http://api.ugreat.net/services/wx-pay-services/get-address-parameter.json', 'POST', array());
 //  $body = $OAuth->get_body();
 //  $data = $body->data;
