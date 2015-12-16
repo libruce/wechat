@@ -339,21 +339,21 @@ function wechat_jssdk_page_build(&$page) {
     'editAddress' => $JSSDK->GetEditAddressParameters(),
   );
 
-//  if (current_path() == 'foodshopcunt') {
-//    global $base_url;
-//    $redirect_uri = $base_url . '/foodshopcunt';
-//    $tools = new JsApiPay();
-//    $tools->Set_redirect_uri($redirect_uri);
-//    $tools->GetOpenid();
-//    $editAddress = $tools->GetEditAddressParameters();
-//    $editAddress = array(
-//      "addrSign" => $editAddress['addrSign'],
-//      "appId" => $editAddress['appId'],
-//      "timeStamp" => $editAddress['timeStamp'],
-//      "nonceStr" => $editAddress['nonceStr'],
-//    );
-//    drupal_add_js(array('editAddress' => $editAddress), 'setting');
-//  }
+  if (current_path() == 'foodshopcunt') {
+    global $base_url;
+    $redirect_uri = $base_url . '/foodshopcunt';
+    $tools = new JsApiPay();
+    $tools->Set_redirect_uri($redirect_uri);
+    $tools->GetOpenid();
+    $editAddress = $tools->GetEditAddressParameters();
+    $editAddress = array(
+      "addrSign" => $editAddress['addrSign'],
+      "appId" => $editAddress['appId'],
+      "timeStamp" => $editAddress['timeStamp'],
+      "nonceStr" => $editAddress['nonceStr'],
+    );
+    drupal_add_js(array('editAddress' => $editAddress), 'setting');
+  }
 
   drupal_add_js(array('wechatJSSDK' => $settings), 'setting');
 
