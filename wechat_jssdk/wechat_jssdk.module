@@ -276,7 +276,7 @@ class JSSDK {
    *
    * 获取地址js参数
    *
-   * @return 获取共享收货地址js函数需要的参数，json格式可以直接做参数使用
+   * @return 获取共享收货地址 js 函数需要的参数，json格式可以直接做参数使用
    */
   public function GetEditAddressParameters() {
 
@@ -328,6 +328,16 @@ class JSSDK {
  * Implements hook_page_build().
  */
 function wechat_jssdk_page_build(&$page) {
+
+
+  global $user;
+  $order = commerce_cart_order_load($user->uid);
+  $Address = Address::loadFromOrder($order);
+$Address->setUsername('asdfsadf');
+  $Address->setCode('sdvasdfa');
+
+  $Address->save();
+
   $JSSDK = new JSSDK();
   $getSignPackage = $JSSDK->getSignPackage();
 
