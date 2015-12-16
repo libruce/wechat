@@ -137,9 +137,9 @@ class JsApiPay {
     $data["url"] = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     $time = time();
     $data["timestamp"] = "$time";
-    $data["noncestr"] = "1234568";
+    $data["noncestr"] = drupal_random_key(10);
     $data["accesstoken"] = $getData["access_token"];
-    var_dump($getData);
+//    var_dump($getData);
     ksort($data);
     $params = $this->ToUrlParams($data);
     $addrSign = sha1($params);
@@ -328,17 +328,6 @@ class JSSDK {
  * Implements hook_page_build().
  */
 function wechat_jssdk_page_build(&$page) {
-
-
-  global $user;
-  $order = commerce_cart_order_load($user->uid);
-  dpm($order);
-
-//  $Address = Address::loadFromOrder($order);
-//$Address->setUsername('asdfsadf');
-//  $Address->setCode('sdvasdfa');
-//
-//  $Address->save();
 
   $JSSDK = new JSSDK();
   $getSignPackage = $JSSDK->getSignPackage();
