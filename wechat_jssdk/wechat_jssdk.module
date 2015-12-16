@@ -330,8 +330,10 @@ class JSSDK {
 function wechat_jssdk_page_build(&$page) {
 
 
-//  global $user;
-//  $order = commerce_cart_order_load($user->uid);
+  global $user;
+  $order = commerce_cart_order_load($user->uid);
+  dpm($order);
+
 //  $Address = Address::loadFromOrder($order);
 //$Address->setUsername('asdfsadf');
 //  $Address->setCode('sdvasdfa');
