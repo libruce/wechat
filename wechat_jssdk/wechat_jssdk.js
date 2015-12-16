@@ -5,7 +5,7 @@
     Drupal.behaviors.wechatJSSDK = {
         attach: function () {
             wx.config({
-                debug: true,
+                debug: false,
                 appId: Drupal.settings.wechatJSSDK.appId,
                 timestamp: Drupal.settings.wechatJSSDK.timestamp,
                 nonceStr: Drupal.settings.wechatJSSDK.nonceStr,
