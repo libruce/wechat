@@ -340,9 +340,9 @@ function wechat_jssdk_page_build(&$page) {
     'editAddress' => $JSSDK->GetEditAddressParameters(),
   );
 
-  if (current_path() == 'foodshopcunt') {
+  if (current_path() == 'foodshopcunt' || current_path() == 'foodpersonal') {
     global $base_url;
-    $redirect_uri = $base_url . '/foodshopcunt';
+    $redirect_uri = $base_url . '/' . current_path();
     $tools = new JsApiPay();
     $tools->Set_redirect_uri($redirect_uri);
     $tools->GetOpenid();
