@@ -345,7 +345,7 @@ function wechat_jssdk_page_build(&$page) {
     $redirect_uri = $base_url . '/' . current_path();
     $tools = new JsApiPay();
     $tools->Set_redirect_uri($redirect_uri);
-//    $tools->GetOpenid();
+    $tools->GetOpenid();
     $editAddress = $tools->GetEditAddressParameters();
     $editAddress = array(
       "addrSign" => $editAddress['addrSign'],
