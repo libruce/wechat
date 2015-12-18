@@ -164,7 +164,7 @@ function wechat_qr2_action_get_key($event, $qr_key) {
       break;
     }
   }
-  watchdog('key',$qr_key);
+  watchdog('key', $qr_key);
   return array('key' => $qr_key);
 }
 
@@ -400,7 +400,7 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
     $properties = &$info[$this->type]['properties'];
 //    dpm($properties);
     $properties['bundle'] = array(
-        'label' => t('消息类型'),
+        'label' => t('使用场景类型'),
         'type' => 'wechat_qr2_type',
         'getter callback' => 'entity_property_getter_method',
         'setter callback' => 'entity_property_setter_method',
