@@ -332,7 +332,7 @@ function wechat_request_save_request_messages(Wechat $wechat) {
 
   $request_wrapper->subscription->set($xml_obj->ToUserName);
   $request_wrapper->openid->set($xml_obj->FromUserName);
-  $request_wrapper->create_time->set(time());
+  $request_wrapper->create_time->set($xml_obj->CreateTime);
 
   if ($xml_obj->MsgType == 'event') {
     $request_wrapper->msg_id->set('');
