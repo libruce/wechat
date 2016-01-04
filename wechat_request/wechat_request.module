@@ -202,7 +202,7 @@ class WechatRequest extends Entity {
     parent::save();
   }
 
-  //@todo 检查消息是否唯一,唯一返回TRUE
+  //@todo 检查消息是否唯一,存在返回TRUE
   function  checkOnly(WechatRequest $request) {
     if (!empty($request->msg_id)) {
       return !empty(entity_load('wechat_request', FALSE, array(
