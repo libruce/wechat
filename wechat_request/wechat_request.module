@@ -205,11 +205,11 @@ class WechatRequest extends Entity {
   //@todo 检查消息是否唯一,唯一返回TRUE
   function  checkOnly(WechatRequest $request) {
     if (!empty($request->msg_id)) {
-      return empty(entity_load('wechat_request', FALSE, array(
+      return !empty(entity_load('wechat_request', FALSE, array(
         'msg_id' => $request->msg_id
       )));
     }
-    return empty(entity_load('wechat_request', FALSE, array(
+    return !empty(entity_load('wechat_request', FALSE, array(
       'openid' => $request->openid,
       'create_time' => $request->create_time
     )));
