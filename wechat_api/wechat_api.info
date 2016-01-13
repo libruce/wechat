@@ -1,5 +1,5 @@
 name = 微信API引入
-description = 微信sdk引入，提供基础认证，第二版开始使用命名空间逐渐向Drupal8过渡。
+description = 微信sdk引入，提供基础认证，第二版开始使用命名空间逐渐向Drupal8过渡，项目源码：https://github.com/sosyuki/wechat。
 core = 7.x
 version = 7.x-2.0-dev
 php = 5.4
