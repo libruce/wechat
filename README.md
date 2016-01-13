@@ -11,3 +11,6 @@
 常见的业务逻辑都可以通过rules配置完成。
 
 附：rules  https://www.drupal.org/project/rules
+
+
+详细文档介绍请移步：http://sosyuki.com/book/wechat%E6%A8%A1%E5%9D%97%E7%BB%84%E6%89%8B%E5%86%8C
