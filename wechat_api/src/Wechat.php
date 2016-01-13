@@ -1670,7 +1670,7 @@ class Wechat {
    * @param array $data 消息结构{"articles":[{...}]}
    * @return boolean|array
    */
-  public function uploadForeverArticles($data) {
+  public function uploadForeverArticles(array $data) {
     if (!$this->access_token && !$this->checkAuth()) {
       return FALSE;
     }
