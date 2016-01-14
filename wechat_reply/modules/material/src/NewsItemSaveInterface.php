@@ -9,6 +9,8 @@
 namespace Drupal\wechat_replay_material;
 
 
-interface NewsItemSaveInterface {
+use Drupal\wechat_reply_material\NewsItem;
 
+interface NewsItemSaveInterface {
+  function save(NewsItem $newsItem);
 }
