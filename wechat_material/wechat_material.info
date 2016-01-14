@@ -2,5 +2,7 @@ name = 微信素材
 description = 微信素材管理，提供上传的函数，素材的管理交由各个模块自行完成。
 core = 7.x
 package = wechat
+version = 7.x-2.0-dev
+php = 5.5
 dependencies[] = entity
 dependencies[] = wechat_api
