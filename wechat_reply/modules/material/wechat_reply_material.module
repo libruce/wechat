@@ -22,6 +22,8 @@ function wechat_reply_material_menu() {
 
 }
 use Drupal\wechat_reply_material\NewsMaterial;
+use Drupal\wechat_reply_material\FileMaterial;
+use Drupal\wechat_reply_material\FileMaterialSave;
 
 function wechat_reply_material_update($form, &$form_state) {
   $form['update'] = array(
@@ -51,18 +53,90 @@ function wechat_reply_material_update($form, &$form_state) {
 }
 
 function wechat_reply_material_update_submit($form, &$form_state) {
-  dpm($form_state);
+  $type = $form_state['values']['update']['type'];
+  $wechatObj = wechat_api_init_wechatobj();
+
+  $ForeverCount = $wechatObj->getForeverCount();
+
+  $voice_count = $ForeverCount['voice_count'];
+  $video_count = $ForeverCount['video_count'];
+  $image_count = $ForeverCount['image_count'];
+  $news_count = $ForeverCount['news_count'];
+
+  switch ($type) {
+    case 'all': {
+
+      break;
+    }
+    case 'image': {
+      $offset = 0;
+      $count = $offset + 20;
+
+      do {
+        $imageForeverList = $wechatObj->getForeverList('image', $offset, $count);
+
+        foreach ($imageForeverList['item'] as $image) {
+          $fm = new FileMaterial($image);
+          $fs = new FileMaterialSave();
+          $fm->save($fs);
+        }
+
+        $offset = $offset + 20;
+        $count = $offset + 20;
+      } while ($offset < $image_count);
+
+
+      break;
+    }
+    case 'video': {
+
+      break;
+    }
+    case 'voice': {
+
+      break;
+    }
+    case 'news': {
+      $offset = 0;
+      $count = $offset + 20;
+
+      do {
+        $imageForeverList = $wechatObj->getForeverList('news', $offset, $count);
+
+        foreach ($imageForeverList['item'] as $item) {
+          dpm($item);
+          $nm = new NewsMaterial($item);
+          $ns = new \Drupal\wechat_reply_material\NewsMaterialSave();
+          $nm->save($ns);
+//          $fm = new FileMaterial($image);
+//          $fs = new FileMaterialSave();
+//          $fm->save($fs);
+        }
+
+        $offset = $offset + 20;
+        $count = $offset + 20;
+      } while ($offset < $image_count);
+      break;
+    }
+  }
+
+  $ForeverList = $wechatObj->getForeverList('news', 0, 10);
 }
 
 function wechat_reply_material_test() {
 
-  $wo = wechat_api_init_wechatobj();
-  $a = $wo->getForeverCount();
-  dpm($a);
-  $ForeverList = $wo->getForeverList('image', 0, 10);
-  dpm($ForeverList);
+//  $wo = wechat_api_init_wechatobj();
+//  $a = $wo->getForeverCount();
+
+//  dpm($a);
+//  $ForeverList = $wo->getForeverList('news', 0, 10);
+//  dpm($ForeverList);
+
 //  foreach ($ForeverList['item'] as $item) {
 //    dpm($item);
+//    $f = new FileMaterial;
+//    $fs = new FileMaterialSave();
+//    $f->save($fs);
 //    NewsMaterial::save($item);
 //  }
   return 'aa';

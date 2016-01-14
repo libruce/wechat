@@ -8,6 +8,7 @@
 
 namespace Drupal\wechat_reply_material;
 
+
 /**
  * Class FileMaterial
  * @package Drupal\wechat_reply_material
@@ -22,15 +23,17 @@ class FileMaterial {
   public $update_time;
   public $url;
 
-  public $save;
+  private $save;
 
-  function __construct(FileMaterialSaveInterface $fileMaterialSaveInterface) {
-    // TODO: Implement __construct() method.
-    $this->save = $fileMaterialSaveInterface;
+  function __construct($item) {
+    foreach ($item as $key => $value) {
+      $this->{$key} = $value;
+    }
     return $this;
   }
 
-  function save() {
+  function save(FileMaterialSaveInterface $fileMaterialSaveInterface) {
+    $this->save = $fileMaterialSaveInterface;
     return $this->save->save($this);
   }
 }

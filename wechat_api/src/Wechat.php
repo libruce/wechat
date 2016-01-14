@@ -1722,6 +1722,46 @@ class Wechat {
   }
 
   /**
+   * @param $media_id
+   * 获取素材文件，不支持获取视频素材
+   * 返回素材文件的素材的内容
+   */
+  public function  getFileMaterial($media_id) {
+    if (!$this->access_token && !$this->checkAuth()) {
+      return FALSE;
+    }
+    $data = array('media_id' => $media_id);
+    $result = $this->http_post(self::API_URL_PREFIX . self::MEDIA_FOREVER_GET_URL . 'access_token=' . $this->access_token, self::json_encode($data));
+    return $result;
+  }
+
+  /**
+   * 获取图文永久素材(认证后的订阅号可用)
+   * 返回图文消息数组，失败返回false
+   * @param string $media_id 媒体文件id
+   * @return boolean|array|
+   */
+  public function getNewsMaterial($media_id) {
+    if (!$this->access_token && !$this->checkAuth()) {
+      return FALSE;
+    }
+    $data = array('media_id' => $media_id);
+    $result = $this->http_post(self::API_URL_PREFIX . self::MEDIA_FOREVER_GET_URL . 'access_token=' . $this->access_token, self::json_encode($data));
+
+    if ($result) {
+      $json = json_decode($result, TRUE);
+      if (isset($json['errcode'])) {
+        $this->errCode = $json['errcode'];
+        $this->errMsg = $json['errmsg'];
+        return FALSE;
+      }
+      return $json;
+    }
+    return FALSE;
+  }
+
+  /**
+   * 存在BUG，获取到的文件内容无法处理，会自动作为字符串出来。弃用
    * 获取永久素材(认证后的订阅号可用)
    * 返回图文消息数组或二进制数据，失败返回false
    * @param string $media_id 媒体文件id
@@ -1798,7 +1838,6 @@ class Wechat {
       'count' => $count,
     );
     $result = $this->http_post(self::API_URL_PREFIX . self::MEDIA_FOREVER_BATCHGET_URL . 'access_token=' . $this->access_token, self::json_encode($data));
-    dpm($result);
     if ($result) {
       $json = json_decode($result, TRUE);
       if (isset($json['errcode'])) {

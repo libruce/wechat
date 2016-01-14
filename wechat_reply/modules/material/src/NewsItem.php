@@ -30,4 +30,14 @@ class NewsItem {
   public $content_source_url;
   //图文页的URL
   public $url;
+
+  function __construct(array $news_item) {
+    // TODO: Implement __construct() method.
+    foreach ($news_item as $key => $value) {
+      $this->{$key} = $value;
+    }
+    return $this;
+  }
+
+
 }
