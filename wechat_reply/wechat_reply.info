@@ -2,6 +2,7 @@ name = 微信回复消息管理
 description = 微信回复消息管理、添加、编辑、消息模版。
 core = 7.x
 package = wechat
+version = 7.x-2.0-dev
 dependencies[] = entity
 dependencies[] = entityreference
 dependencies[] = features

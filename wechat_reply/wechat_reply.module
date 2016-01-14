@@ -380,7 +380,7 @@ function wechat_reply_menu() {
     'access arguments' => array('edit', 1),
     'weight' => 0,
     'type' => MENU_LOCAL_TASK,
-    'file' => 'wechat_reply.forms.inc',
+    'file' => 'wechat_reply.pages.inc',
   );
   $items['reply/%wechat_reply/delete'] = array(
     'page callback' => 'drupal_get_form',
@@ -413,7 +413,7 @@ function wechat_reply_menu() {
       'access callback' => TRUE,
       'description' => $type->description,
       'weight' => $type->weight,
-      'file' => 'wechat_reply.forms.inc',
+      'file' => 'wechat_reply.pages.inc',
     );
   }
 
@@ -444,6 +444,7 @@ function wechat_reply_field_extra_fields() {
         'title' => array(
           'label' => t('标题'),
           'description' => t('由wechat reply模块提供'),
+          'weight' => -7,
         ),
       ),
     );
@@ -582,11 +583,11 @@ function wechat_reply_save(WechatReply $wechat_reply) {
 
 
 function wechat_reply_delete($wechat_reply_id) {
-  return wechat_reply_delete_multiple(array($wechat_reply_id));
+  wechat_reply_delete_multiple(array($wechat_reply_id));
 }
 
-function wechat_reply_delete_multiple($wechat_reply_ids) {
-  return entity_get_controller('wechat_reply')->delete($wechat_reply_ids);
+function wechat_reply_delete_multiple(array $wechat_reply_ids) {
+  entity_get_controller('wechat_reply')->delete($wechat_reply_ids);
 }
 
 

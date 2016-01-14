@@ -70,6 +70,12 @@ function wechat_reply_views_default_views() {
   $handler->display->display_options['fields']['id']['id'] = 'id';
   $handler->display->display_options['fields']['id']['table'] = 'wechat_reply';
   $handler->display->display_options['fields']['id']['field'] = 'id';
+  $handler->display->display_options['fields']['id']['label'] = 'ID';
+  /* Field: 微信回应消息: Label */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'wechat_reply';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['label'] = '标签';
   /* Field: 微信回应消息: 消息类型 */
   $handler->display->display_options['fields']['msg_type']['id'] = 'msg_type';
   $handler->display->display_options['fields']['msg_type']['table'] = 'wechat_reply';
@@ -121,9 +127,10 @@ function wechat_reply_views_default_views() {
     t('下一页 ›'),
     t('末页 »'),
     t('未找到内容！'),
-    t('微信回应消息 ID'),
+    t('ID'),
     t('.'),
     t(','),
+    t('标签'),
     t('消息类型'),
     t('添加/修改时间'),
     t('操作'),
