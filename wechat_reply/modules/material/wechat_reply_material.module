@@ -24,6 +24,7 @@ function wechat_reply_material_menu() {
 use Drupal\wechat_reply_material\NewsMaterial;
 use Drupal\wechat_reply_material\FileMaterial;
 use Drupal\wechat_reply_material\FileMaterialSave;
+use Drupal\wechat_reply_material\NewsMaterialSave;
 
 function wechat_reply_material_update($form, &$form_state) {
   $form['update'] = array(
@@ -106,7 +107,7 @@ function wechat_reply_material_update_submit($form, &$form_state) {
         foreach ($imageForeverList['item'] as $item) {
           dpm($item);
           $nm = new NewsMaterial($item);
-          $ns = new \Drupal\wechat_reply_material\NewsMaterialSave();
+          $ns = new NewsMaterialSave();
           $nm->save($ns);
 //          $fm = new FileMaterial($image);
 //          $fs = new FileMaterialSave();
