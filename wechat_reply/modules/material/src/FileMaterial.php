@@ -16,7 +16,7 @@ namespace Drupal\wechat_reply_material;
  */
 class FileMaterial {
   //素材存储在Drupal的fid
-  public $fid;
+  public $id;
 
   public $media_id;
   public $name;
@@ -30,6 +30,10 @@ class FileMaterial {
       $this->{$key} = $value;
     }
     return $this;
+  }
+
+  static function  load(FileMaterialLoadInterface $fileMaterialLoadInterface, $id) {
+    return $fileMaterialLoadInterface->load($id);
   }
 
   function save(FileMaterialSaveInterface $fileMaterialSaveInterface) {
