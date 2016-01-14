@@ -33,12 +33,51 @@ function wechat_reply_material_test() {
 //  $body = $OAuth->get_body();
 //  dpm($body);
 //  return 'bbbb';
-  $p = wx_pay_client_get_jspay_url(1, 100);
-  dpm($p);
-  return 'aaa';
+//  $p = wx_pay_client_get_jspay_url(1, 100);
+//  dpm($p);]
+//  return 'aaa';
+//  https://api.weixin.qq.com/cgi-bin/template/api_set_industry?access_token=ACCESS_TOKEN
   $wo = wechat_api_init_wechatobj();
-  dpm($wo->getForeverCount());
-  dpm($wo->getForeverList('news', 0, 10));
+//  $wo->setTMIndustry(2);
+//  "touser":"OPENID",
+//   * "template_id":"ngqIpbwh8bUfcSsECmogfXcV14J0tQlEpBO27izEYtY",
+//   * "url":"http://www.baidu.com",
+//   * "topcolor":"#FF0000",
+//   * "data":{
+//    * "参数名1": {
+//      * "value":"参数",
+//   * "color":"#173177"     //参数颜色
+//      * },
+//   * "Date":{
+//      * "value":"06月07日 19时24分",
+//   * "color":"#173177"
+//      * },
+//   * "CardNumber":{
+//      * "value":"0426",
+//   * "color":"#173177"
+//      * },
+//   * "Type":{
+//      * "value":"消费",
+//   * "color":"#173177"
+//      * }
+  //{{remark.DATA}}
+  $wo->sendTemplateMessage(array(
+    'template_id' => '9r7kUb4JHof9w8xlcgu78nR9p0q36IzcGQBC-VwU6w4',
+    'url' => 'http://weixin.qq.com/download',
+    'touser' => 'oXLV-s_Rwy52YryNW-PU3-OD5la0',
+    'data' => array(
+      'first' => array(
+        'value' => drupal_random_key(5) . '门店申请退款',
+        'color' => '#456789'
+      ),
+      'reason' => array('value' => '换货', 'color' => '#456123'),
+      'refund' => array('value' => '123', 'color' => '#123456'),
+      'remark' => array('value' => "申 请 人：123\n时  间：123456\n点击进入操作\n如有疑问请联系信息部"),
+    ),
+  ));
+//  dpm($wo->getForeverCount());
+//  dpm($wo->getForeverList('news', 0, 10));
+//  $wo->tem
   return 'aa';
 }
 

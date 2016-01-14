@@ -380,7 +380,7 @@ function wechat_reply_menu() {
     'access arguments' => array('edit', 1),
     'weight' => 0,
     'type' => MENU_LOCAL_TASK,
-    'file' => 'wechat_reply.pages.inc',
+    'file' => 'wechat_reply.forms.inc',
   );
   $items['reply/%wechat_reply/delete'] = array(
     'page callback' => 'drupal_get_form',
@@ -413,7 +413,7 @@ function wechat_reply_menu() {
       'access callback' => TRUE,
       'description' => $type->description,
       'weight' => $type->weight,
-      'file' => 'wechat_reply.pages.inc',
+      'file' => 'wechat_reply.forms.inc',
     );
   }
 

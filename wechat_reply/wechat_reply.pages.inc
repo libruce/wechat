@@ -14,16 +14,6 @@ function wechat_reply_add_page() {
   return theme('wechat_reply_add_list', array('content' => $content));
 }
 
-function wechat_reply_add_form($type) {
-  $wechat_reply = entity_create('wechat_reply', array('msg_type' => $type));
-  module_load_include('inc', 'wechat_reply', 'wechat_reply.forms');
-  return drupal_get_form('wechat_reply_form', $wechat_reply, 'add');
-}
-
-function wechat_reply_edit_form(WechatReply $wechatReply) {
-  module_load_include('inc', 'wechat_reply', 'wechat_reply.forms');
-  return drupal_get_form('wechat_reply_form', $wechatReply, 'edit');
-}
 
 /**
  * Returns HTML for a list of available node types for node creation.

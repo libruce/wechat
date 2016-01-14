@@ -126,9 +126,9 @@ function wechat_messages_action_send_message($user, $type, $body) {
     'msgtype' => $type,
     $type => $body,
   );
-  $wechat_obj->sendCustomMessage($data);
+  $r = $wechat_obj->sendCustomMessage($data);
 
-  watchdog('wechat_messages_send_message', json_encode($data, JSON_UNESCAPED_UNICODE));
+  watchdog('wechat_messages_send_message', json_encode($r, JSON_UNESCAPED_UNICODE));
 }
 
 
