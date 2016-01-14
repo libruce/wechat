@@ -10,12 +10,62 @@ function wechat_reply_material_menu() {
     'page callback' => 'wechat_reply_material_test',
   );
 
+  $items['admin/config/wechat/material-update'] = array(
+    'title' => '微信素材同步',
+    'description' => '微信素材同步.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_reply_material_update'),
+    'access arguments' => array('administer wechat configuration'),
+  );
 
   return $items;
 
 }
+use Drupal\wechat_reply_material\NewsMaterial;
+
+function wechat_reply_material_update($form, &$form_state) {
+  $form['update'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('数据同步'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+  );
+  $form['update']['type'] = array(
+    '#type' => 'select',
+    '#title' => t('素材类型'),
+    '#options' => array(
+      'all' => t('全部'),
+      'image' => t('图片'),
+      'video' => t('视频'),
+      'voice' => t('语音'),
+      'news' => t('图文'),
+    ),
+    '#description' => t('选择素材同步的类型.'),
+  );
+  $form['update']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('同步'),
+  );
+  return $form;
+}
+
+function wechat_reply_material_update_submit($form, &$form_state) {
+  dpm($form_state);
+}
 
 function wechat_reply_material_test() {
+
+  $wo = wechat_api_init_wechatobj();
+  $a = $wo->getForeverCount();
+  dpm($a);
+  $ForeverList = $wo->getForeverList('image', 0, 10);
+  dpm($ForeverList);
+//  foreach ($ForeverList['item'] as $item) {
+//    dpm($item);
+//    NewsMaterial::save($item);
+//  }
+  return 'aa';
 //  $key = variable_get('wx_pay_client_key', '');
 //  $secret = variable_get('wx_pay_client_secret', '');
 //  $url = variable_get('wx_pay_client_jspay_api', '');
@@ -61,26 +111,23 @@ function wechat_reply_material_test() {
 //   * "color":"#173177"
 //      * }
   //{{remark.DATA}}
-  $wo->sendTemplateMessage(array(
-    'template_id' => '9r7kUb4JHof9w8xlcgu78nR9p0q36IzcGQBC-VwU6w4',
-    'url' => 'http://weixin.qq.com/download',
-    'touser' => 'oXLV-s_Rwy52YryNW-PU3-OD5la0',
-    'data' => array(
-      'first' => array(
-        'value' => drupal_random_key(5) . '门店申请退款',
-        'color' => '#456789'
-      ),
-      'reason' => array('value' => '换货', 'color' => '#456123'),
-      'refund' => array('value' => '123', 'color' => '#123456'),
-      'remark' => array('value' => "申 请 人：123\n时  间：123456\n点击进入操作\n如有疑问请联系信息部"),
-    ),
-  ));
+//  $wo->sendTemplateMessage(array(
+//    'template_id' => '9r7kUb4JHof9w8xlcgu78nR9p0q36IzcGQBC-VwU6w4',
+//    'url' => 'http://weixin.qq.com/download',
+//    'touser' => 'oXLV-s_Rwy52YryNW-PU3-OD5la0',
+//    'data' => array(
+//      'first' => array(
+//        'value' => drupal_random_key(5) . '门店申请退款',
+//        'color' => '#456789'
+//      ),
+//      'reason' => array('value' => '换货', 'color' => '#456123'),
+//      'refund' => array('value' => '123', 'color' => '#123456'),
+//      'remark' => array('value' => "申 请 人：123\n时  间：123456\n点击进入操作\n如有疑问请联系信息部"),
+//    ),
+//  ));
 //  dpm($wo->getForeverCount());
-//  dpm($wo->getForeverList('news', 0, 10));
+  dpm($wo->getForeverList('news', 0, 10));
 //  $wo->tem
   return 'aa';
 }
 
-class ReplayNews {
-
-}
