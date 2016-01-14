@@ -6,10 +6,7 @@
  * Time: 17:57
  */
 
-namespace Drupal\wechat_replay_material;
-
-
-use Drupal\wechat_reply_material\NewsItem;
+namespace Drupal\wechat_reply_material;
 
 interface NewsItemSaveInterface {
   function save(NewsItem $newsItem);

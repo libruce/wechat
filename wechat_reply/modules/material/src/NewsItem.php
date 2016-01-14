@@ -8,9 +8,6 @@
 
 namespace Drupal\wechat_reply_material;
 
-
-use Drupal\wechat_replay_material\NewsItemSaveInterface;
-
 class NewsItem {
   //标题
   public $title;
