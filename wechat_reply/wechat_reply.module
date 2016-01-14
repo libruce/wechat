@@ -44,7 +44,7 @@ function wechat_reply_process_reply_music($wechatReply) {
  * 将reply对象转换为客服接口可以发送的json数据格式。
  * 由于素材管理现在由各模块自行管理，这里需要按照素材上传的格式写
  */
-function wechat_reply_entity_to_json( $wechatReply) {
+function wechat_reply_entity_to_json($wechatReply) {
   $body = array();
   $wechatReply_wrapper = entity_metadata_wrapper('wechat_reply', $wechatReply);
   $msg_type = $wechatReply_wrapper->msg_type->value();
@@ -184,7 +184,6 @@ function wechat_reply_entity_to_json( $wechatReply) {
 function wechat_reply_wechat_messages_type_repair_alter(&$type) {
   if ($type == 'multiple_news') {
     $type = 'news';
-    return $type;
   }
 }
 
@@ -432,6 +431,24 @@ function wechat_reply_theme() {
       'file' => 'wechat_reply.pages.inc',
     ),
   );
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function wechat_reply_field_extra_fields() {
+  $extra = array();
+  foreach (wechat_reply_get_types() as $type) {
+    $extra['wechat_reply'][$type->type] = array(
+      'form' => array(
+        'title' => array(
+          'label' => t('标题'),
+          'description' => t('由wechat reply模块提供'),
+        ),
+      ),
+    );
+  }
+  return $extra;
 }
 
 /**
