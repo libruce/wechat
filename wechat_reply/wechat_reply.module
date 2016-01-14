@@ -374,6 +374,7 @@ function wechat_reply_menu() {
   );
 
   $items['reply/%wechat_reply/edit'] = array(
+    'title' => '编辑',
     'page callback' => 'wechat_reply_edit_form',
     'page arguments' => array(1),
     'access callback' => 'wechat_reply_access',
@@ -393,7 +394,7 @@ function wechat_reply_menu() {
   );
 
   $items['reply/add'] = array(
-    'title' => '微信回复消息',
+    'title' => '添加微信回复消息',
     'access callback' => 'wechat_reply_access',
     'access arguments' => array('add_all'),
     'description' => 'Add a new property.',
@@ -407,11 +408,13 @@ function wechat_reply_menu() {
     //$type_url_str = str_replace('_', '-', $type->type);
     //参数看entity_info定义
     $items['reply/add/' . $type->type] = array(
-      'title' => $type->label,
+      'title' => '添加' . $type->label,
+      'title callback' => 'check_plain',
+      'description' => $type->description,
       'page callback' => 'wechat_reply_add_form',
       'page arguments' => array($type->type),
-      'access callback' => TRUE,
-      'description' => $type->description,
+      'access callback' => 'wechat_reply_access',
+      'access arguments' => array('create', $type->type),
       'weight' => $type->weight,
       'file' => 'wechat_reply.forms.inc',
     );
@@ -483,7 +486,6 @@ function wechat_reply_entity_info() {
     ),
     'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
-    'access callback' => 'wechat_reply_access',
     'module' => 'wechat_reply',
     'metadata controller class' => 'WechatReplyMetadataController'
   );
@@ -552,8 +554,8 @@ function wechat_reply_new($type = '') {
   return entity_get_controller('wechat_reply')->create(array('type' => $type));
 }
 
-function wechat_reply_access($op, $wechat_reply = NULL, $account = NULL) {
-  return user_access('administer wechat reply type', $account);
+function wechat_reply_access($op, $wechat_reply_type = NULL, $account = NULL) {
+  return user_access('administer wechat reply', $account);
 }
 
 function wechat_reply_type_access($op, $wechat_reply_type = NULL, $account = NULL) {
