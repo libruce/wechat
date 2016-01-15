@@ -3,12 +3,16 @@
  * Implements hook_schema().
  */
 function wechat_user_schema() {
-
   $schema['wechat_user'] = array(
-    'description' => 'wechat message.',
+    'description' => '微信用户实体表.',
     'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键，自增长',
+      ),
       'uid' => array(
-        'description' => 'userid.',
+        'description' => '站点UID.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -23,61 +27,66 @@ function wechat_user_schema() {
         'description' => 'subscribe',
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => 0,
       ),
       'nickname' => array(
         'description' => 'nickname',
         'type' => 'varchar',
         'length' => 255,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => '',
       ),
       'sex' => array(
         'description' => 'sex',
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => 0,
       ),
       'province' => array(
         'description' => 'province',
         'type' => 'varchar',
         'length' => 255,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => '',
       ),
       'city' => array(
         'description' => 'city',
         'type' => 'varchar',
         'length' => 255,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => '',
       ),
       'country' => array(
         'description' => 'country',
         'type' => 'varchar',
         'length' => 255,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => '',
       ),
       'headimgurl' => array(
         'description' => 'headimgurl',
         'type' => 'varchar',
         'length' => 255,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => '',
       ),
       'subscribe_time' => array(
         'description' => t('subscribe time.'),
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => 0,
       ),
     ),
-    'primary key' => array('openid'),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'user' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
   );
-
   return $schema;
 }

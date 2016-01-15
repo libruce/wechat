@@ -1,6 +1,12 @@
 <?php
-include_once 'wechat_user.features.inc';
 define('WUUPRE', 'wx_');
+/**
+ * Implements hook_views_api().
+ */
+function wechat_user_views_api($module = NULL, $api = NULL) {
+  return array("api" => "3.0");
+}
+
 /**
  * Implements hook_menu().
  */
@@ -9,22 +15,6 @@ function wechat_user_menu() {
   $items['wechat/auth'] = array(
     'title' => 'Wechat Login',
     'page callback' => 'wechat_user_auth',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-
-  //登录回调
-  $items['wechat/login'] = array(
-    'title' => 'Wechat Login',
-    'page callback' => 'wechat_user_login',
-    'page arguments' => array('user', 'error', '1'),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-  $items['wechat/userinfo'] = array(
-    'title' => 'Wechat Login',
-    'page callback' => 'wechat_user_login',
-    'page arguments' => array('user', 'error', '2', 'snsapi_userinfo'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -78,28 +68,6 @@ function wechat_user_settings_page() {
   return $output;
 }
 
-
-/**
- * Implements hook_theme().
- */
-function wechat_user_theme($existing, $type, $theme, $path) {
-  return array(
-    'wechat_user_view_page' => array(
-      'variables' => array(
-        'wechat_user' => NULL,
-      ),
-      'path' => $path . '/theme',
-      'template' => 'wechat_user_view_page',
-    ),
-    'wechat_user_qr_create' => array(
-      'variables' => array(
-        'user' => NULL,
-      ),
-      'path' => $path . '/theme',
-      'template' => 'wechat_user_qr_create',
-    ),
-  );
-}
 
 function wechat_user_op_user($form, &$form_state) {
   $form['openid'] = array(
@@ -198,8 +166,6 @@ function wechat_user_update_update_user_info($form, &$form_state) {
     'operations' => $operations,
     'title' => t('更新当前站点的微信用户信息'),
   ));
-//  dpm($entities);
-//  dpm($form_state);
 }
 
 function wechat_user_login_two() {
@@ -209,7 +175,6 @@ function wechat_user_login_two() {
   $state = $_GET['state'];
   $type = $_GET['type'];
 
-//return 'dsddddddddd';
   $we_obj = wechat_api_init_wechatobj();
   $auth_url = $we_obj->getOauthRedirect(url('wechat/auth', array(
     'absolute' => TRUE,
@@ -224,6 +189,12 @@ function wechat_user_user_registry($openid_list) {
   }
 }
 
+/**
+ * @param $user_open_id
+ * @return bool|mixed|\stdClass
+ * @throws \Exception
+ * 注册用户，没有关注不注册
+ */
 function wechat_user_registry_user($user_open_id) {
   $wechat_obj = wechat_api_init_wechatobj();
   $user_info = $wechat_obj->getUserInfo($user_open_id);
@@ -231,68 +202,32 @@ function wechat_user_registry_user($user_open_id) {
     $user_name = 'wx_' . $user_open_id;
     $user = user_load_by_name($user_name);
     if (!$user) {//不存在则创建
-      //dpm($user_info);
       $wechat_user_entity = entity_create('wechat_user', array());
       // auto register
       $user_name = WUUPRE . $user_open_id;
-
       $new_user = array(
         'name' => $user_name,
         'pass' => user_password(),
         'status' => 1,
       );
-      // $account returns user object
       $account = user_save(NULL, $new_user);
-      $account_wrapper = entity_metadata_wrapper('user', $account);
-      $nickname = utf8_encode($user_info['nickname']);
-
-//    user_info 模块提供，此处不使用utf8转码。转码操作在其它位置进行
-      $account_wrapper->field_user_name->set($user_info['nickname']);
-      $account_wrapper->save();
-
-      $wechat_user_entity->uid = $account->uid;
-
-      $wechat_user_entity->openid = $user_info['openid'];
-      $wechat_user_entity->subscribe = $user_info['subscribe'];
-      $wechat_user_entity->nickname = $nickname;//暂时无法处理特殊字符，不自动使用昵称。$user_info['nickname'];
-      $wechat_user_entity->sex = $user_info['sex'];
-      $wechat_user_entity->province = $user_info['province'];
-      $wechat_user_entity->city = $user_info['city'];
-      $wechat_user_entity->country = $user_info['country'];
-      $wechat_user_entity->headimgurl = $user_info['headimgurl'];
-      $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
-
-      $wechat_user_entity->save();
-
-      return $account;
     }
     else {//存在则更新
-
-      $account_wrapper = entity_metadata_wrapper('user', $user);
-      $nickname = utf8_encode($user_info['nickname']);
-
-      $wechat_user_entity = wechat_user_load($user->uid);
-
-      $wechat_user_entity->openid = $user_info['openid'];
-      $wechat_user_entity->subscribe = $user_info['subscribe'];
-      $wechat_user_entity->nickname = $nickname;//暂时无法处理特殊字符，不自动使用昵称。$user_info['nickname'];
-      $wechat_user_entity->sex = $user_info['sex'];
-      $wechat_user_entity->province = $user_info['province'];
-      $wechat_user_entity->city = $user_info['city'];
-      $wechat_user_entity->country = $user_info['country'];
-      $wechat_user_entity->headimgurl = $user_info['headimgurl'];
-      $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
-
-      $wechat_user_entity->save();
-
-
-//      watchdog('$account_wrapper->field_user_name->set', drupal_json_encode($user_open_id));
-
-      //    user_info 模块提供，此处不使用utf8转码。转码操作在其它位置进行
-      $account_wrapper->field_user_name->set($user_info['nickname']);
-      $account_wrapper->save();
-      return $user;
+      $account = $user;
+      $wechat_user_entity = WechatUser::loadByUid($user->uid);
     }
+    $wechat_user_entity->uid = $account->uid;
+    $wechat_user_entity->openid = $user_info['openid'];
+    $wechat_user_entity->subscribe = $user_info['subscribe'];
+    $wechat_user_entity->nickname = utf8_encode($user_info['nickname']);//特殊字符无法存储，需进行转码;
+    $wechat_user_entity->sex = $user_info['sex'];
+    $wechat_user_entity->province = $user_info['province'];
+    $wechat_user_entity->city = $user_info['city'];
+    $wechat_user_entity->country = $user_info['country'];
+    $wechat_user_entity->headimgurl = $user_info['headimgurl'];
+    $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
+    $wechat_user_entity->save();
+    return $account;
   }
   return FALSE;
 }
@@ -354,11 +289,6 @@ function wechat_user_load_by_openid($openid) {
   return reset($entity);
 }
 
-function wechat_user_save(WechatUser $wechatUser) {
-  return $wechatUser->save();
-}
-
-
 function wechat_user_access($op, $wechat_user = NULL, $account = NULL) {
   if (user_access('administer wechat user', $account)) {
     return TRUE;
@@ -376,15 +306,6 @@ function wechat_user_permission() {
       'description' => t('更新微信用户信息.'),
     ),
   );
-}
-
-function wechat_user_login($success, $error, $state = 1, $type = 'snsapi_base') {
-  $we_obj = wechat_api_init_wechatobj();
-  $auth_url = $we_obj->getOauthRedirect(url('wechat/auth', array(
-    'absolute' => TRUE,
-    'query' => array('destination' => $success, 'error' => $error)
-  )), $state, $type);
-  drupal_goto($auth_url);
 }
 
 function wechat_user_get_wechat_user_by_openid($openid) {
@@ -421,7 +342,6 @@ function wechat_user_auth() {
   $destination = isset($_GET['destination']) ? $_GET['destination'] : '';
   $code = isset($_GET['code']) ? $_GET['code'] : '';
 
-
   // error
   if ((!$state) || (!$code)) { // error
     drupal_goto($error);
@@ -433,7 +353,6 @@ function wechat_user_auth() {
   if (empty($access_data)) {
     drupal_goto($error);
   }
-
 
   // check if already connectted
   if ($current_user = wechat_user_get_user_by_openid($access_data['openid'])) {
@@ -461,23 +380,8 @@ function wechat_user_auth() {
   drupal_goto($error);
 }
 
-
-/**
- * Implements hook_enable().
- */
-function wechat_user_enable() {
-  $role = user_role_load_by_name('微信访客');
-  if (!$role) {
-    $role = new stdClass();
-    $role->name = '微信访客';
-    user_role_save($role);
-    $role = user_role_load_by_name('微信访客');
-  }
-  variable_set('wechat_visitors', $role->rid);
-}
-
-
 class WechatUser extends Entity {
+  public $id;
   public $uid;
   public $openid;
   public $subscribe;
@@ -489,12 +393,17 @@ class WechatUser extends Entity {
   public $headimgurl;
   public $subscribe_time;
 
-  protected function defaultUri() {
-    return array('path' => 'wechat_user/' . $this->uid);
-  }
-
   public function  nickname() {
     return utf8_decode($this->nickname);
+  }
+
+  /**
+   * @param $uid
+   * @return static
+   * 通过UID调取WechatUser
+   */
+  static function loadByUid($uid) {
+    return new static();
   }
 
   public function  openid() {
@@ -506,7 +415,7 @@ class WechatUser extends Entity {
   }
 
   protected function defaultLabel() {
-    return $this->nickname;
+    return utf8_decode($this->nickname);
   }
 
 
@@ -520,88 +429,6 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
-
-    $properties['user'] = array(
-      'label' => t('UID'),
-      'type' => 'user',
-      'getter callback' => 'entity_property_getter_method',
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat response message',
-      'schema field' => 'uid',
-      'required' => TRUE,
-      'description' => t('Create time of wechat response message.'),
-    );
-
-    $properties['openid'] = array(
-      'type' => 'text',
-      'label' => t('Open id'),
-      'description' => t('Openid of wechat user.'),
-      'getter callback' => 'entity_property_getter_method',
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat user',
-      'schema field' => 'openid',
-      'required' => TRUE,
-    );
-
-    $properties['subscribe'] = array(
-      'label' => t('subscribe'),
-      'description' => t('subscribe status of wechat user.'),
-      'type' => 'integer',
-      'getter callback' => 'entity_property_verbatim_get',
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat user',
-      'schema field' => 'subscribe',
-    );
-
-    $properties['nickname'] = array(
-      'type' => 'text',
-      'label' => t('nickname'),
-      'description' => t('nickname of wechat user.'),
-      'getter callback' => 'entity_property_getter_method',
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat user',
-      'schema field' => 'nickname',
-    );
-
-    $properties['sex'] = array(
-      'label' => t('sex'),
-      'description' => t('sex of wechat user.'),
-      'type' => 'token',
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat user',
-      'options list' => 'wechat_wechatuser_sex_options_list',
-      'schema field' => 'sex',
-    );
-
-    $properties['province'] = array(
-      'type' => 'text',
-      'label' => t('province'),
-      'description' => t('province of wechat user.'),
-      'getter callback' => 'entity_property_verbatim_get',
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat user',
-      'schema field' => 'province',
-    );
-
-    $properties['city'] = array(
-      'type' => 'text',
-      'label' => t('city'),
-      'description' => t('city of wechat user.'),
-      'getter callback' => 'entity_property_verbatim_get',
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat user',
-      'schema field' => 'city',
-    );
-
-    $properties['country'] = array(
-      'type' => 'text',
-      'label' => t('country'),
-      'description' => t('country of wechat user.'),
-      'getter callback' => 'entity_property_verbatim_get',
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat user',
-      'schema field' => 'country',
-    );
 
     $properties['headimgurl'] = array(
       'type' => 'text',
@@ -635,128 +462,8 @@ class WechatUserViewsController extends EntityDefaultViewsController {
   }
 }
 
-/**
- * Implements hook_views_data().
- */
-function wechat_user_views_data() {
-  $data['wechat_user']['send_message'] = array(
-    'title' => t('发送消息'),
-    'real field' => 'openid',
-    'help' => t('The node ID.'), // The help that appears on the UI,
-    // Information for displaying the nid
-    'field' => array(
-      'handler' => 'views_handler_field_send_message',
-    ),
-  );
-  return $data;
-}
-
-class views_handler_field_send_message extends views_handler_field {
-  public function  render($values) {
-//    dpm($values);
-    drupal_add_library('system', 'drupal.ajax');
-    return '  <a
-    href="/rules/ajax/add/1/2?token=caCpDfTIW4oA9J0lw2BlcqUMBioYKuQlNBM1bV9iAX8"
-    class="use-ajax">test</a>
-';
-  }
-}
-
 class views_handler_field_nickname extends views_handler_field {
   public function  render($values) {
     return utf8_decode($values->wechat_user_nickname);
   }
-}
-
-
-/**
- * Implements hook_rules_action_info().
- */
-function wechat_user_rules_action_info() {
-  $action['wechat_user_login_open_id'] = array(
-    'parameter' => array(
-      'open_id' => array(
-        'type' => 'text',
-        'label' => t('OpenId'),
-        'description' => t('The user whose roles should be changed.'),
-        'save' => TRUE,
-      )
-    ),
-    'group' => t('微信'),
-    'access callback' => user_access('administer permissions'),
-    'label' => t('使用微信OPENID登录'),
-    'base' => 'wechat_user_login_open_id',
-  );
-  $action['wechat_user_registry_user'] = array(
-    'parameter' => array(
-      'open_id' => array(
-        'type' => 'text',
-        'label' => t('OpenId'),
-        'description' => t('The user whose roles should be changed.'),
-        'save' => TRUE,
-      )
-    ),
-    'group' => t('微信'),
-    'access callback' => user_access('administer permissions'),
-    'label' => t('注册用户'),
-    'base' => 'wechat_user_registry_user',
-  );
-  $action['wechat_user_load_user'] = array(
-    'parameter' => array(
-      'open_id' => array(
-        'type' => 'text',
-        'label' => t('OpenId'),
-        'description' => t('The user whose roles should be changed.'),
-        'save' => TRUE,
-      )
-    ),
-    'provides' => array(
-      'user' => array(
-        'type' => 'user',
-        'label' => t('返回的用户实体'),
-      ),
-    ),
-    'group' => t('微信'),
-    'access callback' => user_access('administer permissions'),
-    'label' => t('使用OpenId提取用户实体'),
-    'base' => 'wechat_user_load_user',
-  );
-  return $action;
-}
-
-function wechat_user_login_open_id($openid) {
-  $uid = wechat_user_get_user_by_openid($openid);
-  watchdog('wechat_user_login', json_encode($uid));
-  _wechat_user_login($uid->uid);
-}
-
-function wechat_user_load_user($openid) {
-  $user = wechat_user_get_user_by_openid($openid);
-  return array('user' => $user);
-}
-
-/**
- * Implements hook_rules_condition_info().
- */
-function wechat_user_rules_condition_info() {
-  $condition['wechat_user_registry_status'] = array(
-    'label' => t('微信用户注册状态'),
-    'parameter' => array(
-      'openid' => array(
-        'type' => 'text',
-        'label' => t('OpenId')
-      ),
-    ),
-    'group' => t('微信'),
-    'access callback' => 'rules_user_integration_access',
-    'base' => 'wechat_user_registry_status',
-  );
-  return $condition;
-}
-
-function wechat_user_registry_status($openid) {
-  if (!wechat_user_get_user_by_openid($openid)) {
-    return TRUE;
-  }
-  return FALSE;
 }
