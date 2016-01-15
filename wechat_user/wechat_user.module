@@ -311,21 +311,18 @@ function wechat_user_permission() {
 }
 
 function wechat_user_get_wechat_user_by_openid($openid) {
-  $result = db_query("SELECT * FROM {wechat_user} WHERE openid=:openid", array(':openid' => $openid));
-  if (!$result) {
-    return FALSE;
+  $wechat_user = wechat_user_load_multiple(FALSE, array('openid' => $openid));
+  if (!empty($wechat_user)) {
+    return reset($wechat_user);
   }
-  return $result->fetchAssoc();
+  return FALSE;
 }
 
 function wechat_user_get_user_by_openid($openid) {
-  $result = db_query("SELECT * FROM {wechat_user} WHERE openid=:openid", array(':openid' => $openid));
-  if (!$result) {
-    return FALSE;
-  }
-  $authmap = $result->fetchAssoc();
-  if (!empty($authmap['uid'])) {
-    return user_load($authmap['uid']);
+  $wechat_user = wechat_user_load_multiple(FALSE, array('openid' => $openid));
+  if (!empty($wechat_user)) {
+    $wechat_user = reset($wechat_user);
+    return user_load($wechat_user->uid);
   }
   return FALSE;
 }
@@ -337,7 +334,6 @@ function _wechat_user_login($uid) {
 }
 
 function wechat_user_auth() {
-  global $user;
   $wechat_obj = wechat_api_init_wechatobj();
   $state = isset($_GET['state']) ? $_GET['state'] : 0;
   $error = isset($_GET['error']) ? $_GET['error'] : '';
@@ -351,7 +347,6 @@ function wechat_user_auth() {
 
   $access_data = $wechat_obj->getOauthAccessToken();
 
-
   if (empty($access_data)) {
     drupal_goto($error);
   }
@@ -362,14 +357,6 @@ function wechat_user_auth() {
     // todo update user info
     if (empty($destination)) {
       $destination = 'user/' . $current_user->uid;
-    }
-    drupal_goto($destination);
-  }
-
-  // user has logined
-  if ($user->uid) {
-    if (module_exists('user_bind')) {
-      user_bind_bind_user($access_data['openid'], $user);
     }
     drupal_goto($destination);
   }
