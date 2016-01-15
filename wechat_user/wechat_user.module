@@ -489,6 +489,15 @@ class WechatUserGroup extends Entity {
     return $this;
   }
 
+  static function  Options() {
+    $return = array();
+    $entities = wechat_user_group_load_multiple(FALSE);
+    foreach ($entities as $entity) {
+      $return[$entity->id] = "( 分组ID: {$entity->gid} ) " . $entity->name;
+    }
+    return $return;
+  }
+
   static function  exists($gid) {
     $entities = wechat_user_group_load_multiple(FALSE, array('gid' => $gid));
     if (!empty($entities)) {
@@ -545,6 +554,20 @@ class WechatUser extends Entity {
 
   public function  nickname() {
     return utf8_decode($this->nickname);
+  }
+
+  /**
+   * 同步用户备注和分组
+   */
+  function  push() {
+    $wObj = wechat_api_init_wechatobj();
+    $wObj->updateUserRemark($this->openid, $this->remark);
+    $wObj->updateGroupMembers($this->group($this->groupid), $this->openid);
+    $this->save();
+  }
+
+  function  group($id) {
+    return empty($group = wechat_user_group_load($id)) ? 0 : $group->gid;
   }
 
   /**

@@ -1,12 +1,14 @@
 <?php
-function wechat_user_edit_form(WechatUser $wechat_user) {
+function wechat_user_edit_form(WechatUser $wechatUser) {
+  $wechatUser->nickname = utf8_decode($wechatUser->nickname);
   module_load_include('inc', 'wechat_user', 'wechat_user.forms');
-  return drupal_get_form('wechat_user_form', $wechat_user, 'edit');
+  return drupal_get_form('wechat_user_form', $wechatUser, 'edit');
 }
 
 function wechat_user_form($form, &$form_state, WechatUser $wechatUser, $op) {
 
-  $form_state['wechat_user'] = $wechatUser;
+  $form_state['wechatUser'] = $wechatUser;
+  $form_state['_op'] = $op;
 
   $langcode = entity_language('wechat_user', $wechatUser);
 
@@ -18,6 +20,15 @@ function wechat_user_form($form, &$form_state, WechatUser $wechatUser, $op) {
     '#type' => 'textfield',
     '#default_value' => $wechatUser->remark,
   );
+  $form['groupid'] = array(
+    '#title' => t('所在分组'),
+    '#type' => 'select',
+    '#options' => WechatUserGroup::Options(),
+    '#default_value' => $wechatUser->groupid,
+    '#description' => t('Set this to <em>Yes</em> if you would like this category to be selected by default.'),
+  );
+
+
   $form['uid'] = array(
     '#title' => t('绑定的用户ID'),
     '#type' => 'textfield',
@@ -92,9 +103,17 @@ function wechat_user_form($form, &$form_state, WechatUser $wechatUser, $op) {
 
 
 function wechat_user_form_submit(&$form, &$form_state) {
-  $wechat_user = &$form_state['wechat_user'];
-  field_attach_submit('wechat_user', $wechat_user, $form, $form_state);
-  $wechat_user->save();
+  $wechatUser = $form_state['wechatUser'];
+  field_attach_submit('wechat_user', $wechatUser, $form, $form_state);
+
+  $remark = $form_state['values']['remark'];
+  $groupid = $form_state['values']['groupid'];
+  if ($wechatUser->remark != $remark || $wechatUser->groupid != $groupid) {
+    $wechatUser->remark = $remark;
+    $wechatUser->groupid = $groupid;
+    $wechatUser->push($form_state['_op']);
+  }
+
 }
 
 function wechat_user_group_add_form() {
