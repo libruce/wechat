@@ -175,7 +175,6 @@ function wechat_user_group_update_group($form, &$form_state) {
     $groupObj = new WechatUserGroup($values);
     $groupObj->save();
   }
-  dpm($groups);
 }
 
 function wechat_user_openid_update_user_info($form, &$form_state) {

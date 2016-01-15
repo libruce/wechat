@@ -2262,7 +2262,6 @@ class Wechat {
       return FALSE;
     }
     $result = $this->http_get(self::API_URL_PREFIX . self::GROUP_GET_URL . 'access_token=' . $this->access_token);
-    dpm($result);
     if ($result) {
       $json = json_decode($result, TRUE);
       if (isset($json['errcode'])) {
