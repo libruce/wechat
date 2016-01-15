@@ -81,6 +81,20 @@ function wechat_user_settings_page() {
 
 
 function wechat_user_op_user($form, &$form_state) {
+  $form['group'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('分组管理'),
+    '#weight' => 3,
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#tree' => TRUE,
+  );
+  $form['group']['update_group'] = array(
+    '#type' => 'submit',
+    '#submit' => array('wechat_user_group_update_group'),
+    '#value' => t('同步分组数据'),
+  );
+
   $form['openid'] = array(
     '#type' => 'fieldset',
     '#title' => t('更新单个用户信息'),
@@ -130,6 +144,20 @@ function wechat_user_op_user($form, &$form_state) {
     '#value' => t('同步所有用户信息'),
   );
   return $form;
+}
+
+function wechat_user_group_update_group($form, &$form_state) {
+  $wechatObj = wechat_api_init_wechatobj();
+  $groups = $wechatObj->getGroup();
+  foreach ($groups['groups'] as $group) {
+    $values = array();
+    $values['gid'] = $group['id'];
+    $values['name'] = $group['name'];
+    $values['count'] = $group['count'];
+    $groupObj = new WechatUserGroup($values);
+    $groupObj->save();
+  }
+  dpm($groups);
 }
 
 function wechat_user_openid_update_user_info($form, &$form_state) {
@@ -427,7 +455,36 @@ function wechat_user_auth() {
 }
 
 class WechatUserGroup extends Entity {
+  public $id;
+  public $gid;
+  public $name;
+  public $count;
 
+  public function __construct($values = array()) {
+    parent::__construct($values, 'wechat_user_group');
+  }
+
+  function  loadByGid($gid) {
+    $entities = wechat_user_group_load_multiple(FALSE, array('gid' => $gid));
+    if (!empty($entities)) {
+      return reset($entities);
+    }
+    return $this;
+  }
+
+  static function  exists($gid) {
+    $entities = wechat_user_group_load_multiple(FALSE, array('gid' => $gid));
+    if (!empty($entities)) {
+      return reset($entities);
+    }
+    return FALSE;
+  }
+
+  function save() {
+    $entity = $this->loadByGid($this->gid);
+    $this->id = $entity->id;
+    parent::save();
+  }
 }
 
 class WechatUser extends Entity {
@@ -488,6 +545,16 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
   public function entityPropertyInfo() {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
+
+    $properties['groupid'] = array(
+      'type' => 'wechat_user_group',
+      'label' => t('用户分组'),
+      'description' => t('关联用户分组信息.'),
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_setter_method',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'groupid',
+    );
 
     $properties['headimgurl'] = array(
       'type' => 'text',
