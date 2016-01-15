@@ -201,6 +201,7 @@ function wechat_user_registry_user($user_open_id) {
   if ($user_info['subscribe']) {//判断是否关注
     $user_name = 'wx_' . $user_open_id;
     $user = user_load_by_name($user_name);
+    dpm($user);
     if (!$user) {//不存在则创建
       $wechat_user_entity = entity_create('wechat_user', array());
       // auto register
@@ -227,6 +228,7 @@ function wechat_user_registry_user($user_open_id) {
     $wechat_user_entity->headimgurl = $user_info['headimgurl'];
     $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
     $wechat_user_entity->save();
+    dpm($wechat_user_entity);
     return $account;
   }
   return FALSE;
@@ -249,7 +251,7 @@ function wechat_user_entity_info() {
     'uri callback' => 'entity_class_uri',
     'label callback' => 'entity_class_label',
     'entity keys' => array(
-      'id' => 'uid',
+      'id' => 'id',
       'label' => 'nickname'
     ),
     'access callback' => 'wechat_user_access',
@@ -403,7 +405,11 @@ class WechatUser extends Entity {
    * 通过UID调取WechatUser
    */
   static function loadByUid($uid) {
-    return new static();
+    $wechat = wechat_user_load_multiple(FALSE, array('uid' => $uid));
+    if (empty($wechat)) {
+      return new static(array('uid' => $uid));
+    }
+    return reset($wechat);
   }
 
   public function  openid() {
@@ -417,7 +423,6 @@ class WechatUser extends Entity {
   protected function defaultLabel() {
     return utf8_decode($this->nickname);
   }
-
 
   public function save() {
     parent::save();
