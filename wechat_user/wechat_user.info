@@ -1,5 +1,5 @@
 name = 微信用户管理
-description = 提供微信用户实体定义，微信用户用户分组管理、备注
+description = 提供微信用户实体定义，微信用户用户分组管理、备注。集成分组管理
 core = 7.x
 version = 7.x-2.0-dev
 package = wecaht

@@ -117,19 +117,38 @@ function wechat_user_schema() {
       ),
     ),
   );
-  return $schema;
-}
+  $schema['wechat_user_group'] = array(
+    'description' => '微信用户分组管理表.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键，自增长',
+      ),
+      'gid' => array(
+        'description' => '分组id，由微信分配',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => '分组名字，UTF8编码',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'count' => array(
+        'description' => '分组内用户数量',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
 
-
-/**
- * Implements hook_update_N().
- */
-function wechat_user_update_7201(&$sandbox) {
-  $field = array(
-    'description' => '用户备注',
-    'type' => 'varchar',
-    'length' => 255,
-    'not null' => FALSE,
+    ),
+    'primary key' => array('id'),
   );
-  db_add_field('wechat_user', 'remark', $field);
+  return $schema;
 }

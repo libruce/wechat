@@ -307,22 +307,45 @@ function wechat_user_entity_info() {
       ),
     ),
   );
+  $return['wechat_user_group'] = array(
+    'label' => t('微信用户分组'),
+    'plural label' => t('微信用户分组'),
+    'description' => t('微信用户分组.'),
+    'entity class' => 'WechatUserGroup',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_user_group',
+    'fieldable' => FALSE,
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'name'
+    ),
+    'module' => 'wechat_user',
+  );
 
   return $return;
 }
 
 function wechat_user_load($id, $reset = FALSE) {
-  $return = wechat_user_load_multiple(array($id), array(), $reset);
-  return reset($return);
+  $entities = wechat_user_load_multiple(array($id), array(), $reset);
+  return reset($entities);
 }
 
 function wechat_user_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
   return entity_load('wechat_user', $ids, $conditions, $reset);
 }
 
+function wechat_user_group_load($id, $reset = FALSE) {
+  $entities = wechat_user_load_multiple(array($id), array(), $reset);
+  return reset($entities);
+}
+
+function wechat_user_group_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_user_group', $ids, $conditions, $reset);
+}
+
 function wechat_user_load_by_openid($openid) {
-  $entity = wechat_user_load_multiple(FALSE, array('openid' => $openid));
-  return reset($entity);
+  $entities = wechat_user_load_multiple(FALSE, array('openid' => $openid));
+  return reset($entities);
 }
 
 function wechat_user_access($op, $wechat_user = NULL, $account = NULL) {
@@ -401,6 +424,10 @@ function wechat_user_auth() {
     drupal_goto($destination);
   }
   drupal_goto($error);
+}
+
+class WechatUserGroup extends Entity {
+
 }
 
 class WechatUser extends Entity {
