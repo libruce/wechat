@@ -207,13 +207,12 @@ function wechat_session_callback() {
       $request_time = time();
 
       $return_template = "
-<xml>
-     <ToUserName><![CDATA[%s]]></ToUserName>
-     <FromUserName><![CDATA[%s]]></FromUserName>
-     <CreateTime>%s</CreateTime>
-     <MsgType><![CDATA[transfer_customer_service]]></MsgType>
-     </xml>
-";
+      <xml>
+        <ToUserName><![CDATA[%s]]></ToUserName>
+        <FromUserName><![CDATA[%s]]></FromUserName>
+        <CreateTime>%s</CreateTime>
+        <MsgType><![CDATA[transfer_customer_service]]></MsgType>
+      </xml>";
 
       $result_str = sprintf($return_template, $send_to_user_name, $send_from_user_name, $request_time);
 
