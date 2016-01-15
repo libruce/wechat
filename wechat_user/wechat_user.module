@@ -41,6 +41,17 @@ function wechat_user_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+
+  $items['admin/wechat/user/%wechat_user/edit'] = array(
+    'title' => '编辑用户资料',
+    'description' => '微信用户设置，如：微信登录自动注册为某角色，刷新用户信息等。',
+    'page callback' => 'wechat_user_edit_form',
+    'page arguments' => array(3),
+    'access arguments' => array('wechat user update user info'),
+    'weight' => -10,
+    'file' => 'wechat_user.forms.inc',
+  );
+
   return $items;
 }
 
@@ -400,6 +411,8 @@ function wechat_user_auth() {
 
 class WechatUser extends Entity {
   public $id;
+  //用户备注，用户信息获取接口获取不到。使用的是
+  public $remark;
   public $uid;
   public $openid;
   public $subscribe;
