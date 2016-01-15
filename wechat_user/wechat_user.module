@@ -51,7 +51,23 @@ function wechat_user_menu() {
     'weight' => -10,
     'file' => 'wechat_user.forms.inc',
   );
-
+  $items['admin/wechat/user-group/add'] = array(
+    'title' => '添加用户分组',
+    'description' => '微信用户设置，如：微信登录自动注册为某角色，刷新用户信息等。',
+    'page callback' => 'wechat_user_group_add_form',
+    'access arguments' => array('wechat user update user info'),
+    'weight' => -10,
+    'file' => 'wechat_user.forms.inc',
+  );
+  $items['admin/wechat/user-group/%wechat_user_group/edit'] = array(
+    'title' => '编辑用户分组',
+    'description' => '微信用户设置，如：微信登录自动注册为某角色，刷新用户信息等。',
+    'page callback' => 'wechat_user_group_edit_form',
+    'page arguments' => array(3),
+    'access arguments' => array('wechat user update user info'),
+    'weight' => -10,
+    'file' => 'wechat_user.forms.inc',
+  );
   return $items;
 }
 
@@ -363,7 +379,7 @@ function wechat_user_load_multiple($ids = array(), $conditions = array(), $reset
 }
 
 function wechat_user_group_load($id, $reset = FALSE) {
-  $entities = wechat_user_load_multiple(array($id), array(), $reset);
+  $entities = wechat_user_group_load_multiple(array($id), array(), $reset);
   return reset($entities);
 }
 
@@ -478,6 +494,27 @@ class WechatUserGroup extends Entity {
       return reset($entities);
     }
     return FALSE;
+  }
+
+  /**
+   * 和微信同步
+   */
+  function  push($op) {
+    switch ($op) {
+      case 'add': {
+        $wObj = wechat_api_init_wechatobj();
+        $r = $wObj->createGroup($this->name);
+        $this->gid = $r['group']['id'];
+        $this->save();
+        break;
+      }
+      case 'edit': {
+        $wObj = wechat_api_init_wechatobj();
+        $r = $wObj->updateGroup($this->gid, $this->name);
+        $this->save();
+        break;
+      }
+    }
   }
 
   function save() {

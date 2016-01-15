@@ -97,3 +97,56 @@ function wechat_user_form_submit(&$form, &$form_state) {
   $wechat_user->save();
 }
 
+function wechat_user_group_add_form() {
+  $wechatUserGroup = new WechatUserGroup();
+  module_load_include('inc', 'wechat_user', 'wechat_user.forms');
+  return drupal_get_form('wechat_user_group_form', $wechatUserGroup, 'add');
+}
+
+function wechat_user_group_edit_form(WechatUserGroup $wechatUserGroup) {
+  module_load_include('inc', 'wechat_user', 'wechat_user.forms');
+  return drupal_get_form('wechat_user_group_form', $wechatUserGroup, 'edit');
+}
+
+function wechat_user_group_form($form, &$form_state, WechatUserGroup $wechatUserGroup, $op) {
+  $form_state['wechatUserGroup'] = $wechatUserGroup;
+  $form_state['_op'] = $op;
+
+  $form['name'] = array(
+    '#title' => t('分组名称'),
+    '#type' => 'textfield',
+    '#default_value' => $wechatUserGroup->name,
+  );
+  $form['id'] = array(
+    '#title' => t('分组id，由微信分配'),
+    '#type' => 'textfield',
+    '#default_value' => $wechatUserGroup->id,
+    '#disabled' => TRUE,
+  );
+  $form['count'] = array(
+    '#title' => t('分组内用户数量'),
+    '#type' => 'textfield',
+    '#default_value' => $wechatUserGroup->count,
+    '#disabled' => TRUE,
+  );
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('保存'),
+    '#weight' => 40,
+  );
+  if (!empty($wechatUserGroup->id)) {
+    $form['actions']['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('删除'),
+      '#weight' => 45,
+    );
+  }
+  return $form;
+}
+
+function wechat_user_group_form_submit($form, &$form_state) {
+  $wechatUserGroup = $form_state['wechatUserGroup'];
+  $wechatUserGroup->name = $form_state['values']['name'];
+  $wechatUserGroup->push($form_state['_op']);
+}
