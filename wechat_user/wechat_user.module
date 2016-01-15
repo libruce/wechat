@@ -201,7 +201,6 @@ function wechat_user_registry_user($user_open_id) {
   if ($user_info['subscribe']) {//判断是否关注
     $user_name = 'wx_' . $user_open_id;
     $user = user_load_by_name($user_name);
-    dpm($user);
     if (!$user) {//不存在则创建
       $wechat_user_entity = entity_create('wechat_user', array());
       // auto register
@@ -228,12 +227,42 @@ function wechat_user_registry_user($user_open_id) {
     $wechat_user_entity->headimgurl = $user_info['headimgurl'];
     $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
     $wechat_user_entity->save();
-    dpm($wechat_user_entity);
     return $account;
   }
   return FALSE;
 }
 
+/**
+ * Implements hook_token_info_alter().
+ */
+function wechat_user_token_info_alter(&$data) {
+  $data['tokens']['user']['wechat_user_nickname'] = array(
+    'name' => '用户绑定的微信的昵称',
+    'description' => '用户绑定的微信的昵称'
+  );
+}
+
+/**
+ * Implements hook_tokens().
+ */
+function wechat_user_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  if ($type == 'user' && !empty($data['user'])) {
+    $account = $data['user'];
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        // Basic user account information.
+        case 'wechat_user_nickname':
+          // In the case of hook user_presave uid is not set yet.
+          $wechat_user_entity = WechatUser::loadByUid($account->uid);
+          $nickname = $wechat_user_entity->nickname;
+          $replacements[$original] = !empty($nickname) ? utf8_decode($nickname) : $account->name;
+          break;
+      }
+    }
+  }
+  return $replacements;
+}
 
 /**
  * Implements hook_entity_info().
