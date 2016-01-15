@@ -15,8 +15,8 @@ namespace Drupal\wechat_reply_material;
  * 文件素材
  */
 class FileMaterial {
-  //素材存储在Drupal的fid
-  public $id;
+  //素材存储在Drupal的file
+  public $file;
 
   public $media_id;
   public $name;
@@ -38,6 +38,14 @@ class FileMaterial {
 
   function save(FileMaterialSaveInterface $fileMaterialSaveInterface) {
     $this->save = $fileMaterialSaveInterface;
-    return $this->save->save($this);
+    $file = $this->save->save($this);
+    $this->file = $file;
+    $wechatReply = new \WechatReply(array('type' => 'image_material'));
+    $wechatReply_wrapper = $wechatReply->wrapper();
+    $wechatReply_wrapper->wechat_reply_news_image->set($file);
+    $wechatReply_wrapper->wechat_reply_news_image->set($this->name);
+    $wechatReply_wrapper->wechat_reply_news_image->set($this->url);
+    $wechatReply_wrapper->wechat_reply_news_image->set($this->update_time);
+
   }
 }
