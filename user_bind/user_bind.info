@@ -1,7 +1,7 @@
 name = 微信用户绑定
 description = 微信用户绑定。
 core = 7.x
-version = 7.x-1.0-dev
+version = 7.x-2.0-dev
 package = wechat
-dependencies[] = wechat_user
-dependencies[] = wechat_qr2
+dependencies[] = wechat_user (>= 7.x-2.0)
+;dependencies[] = wechat_qr2

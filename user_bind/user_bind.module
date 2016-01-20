@@ -46,100 +46,10 @@ function user_bind_page() {
   }
 }
 
-
-/**
- * Implements hook_rules_action_info().
- */
-function user_bind_rules_action_info() {
-  $action['user_bind_action_bind'] = array(
-    'group' => t('微信'),
-    'access callback' => user_access('administer permissions'),
-    'label' => t('绑定微信用户'),
-    'base' => 'user_bind_action_bind',
-    'parameter' => array(
-      'open_id' => array(
-        'type' => 'text',
-        'label' => t('OpenId'),
-      ),
-      'key' => array(
-        'type' => 'text',
-        'label' => t('Qr Key'),
-      ),
-    ),
-  );
-  return $action;
-}
-
-function user_bind_action_bind($openid, $key) {
-  $qr = wechat_qr2_load_multiple(FALSE, array(
-    'qr_key' => $key,
-    'bundle' => 'user_bind_qr',
-    'qr_type' => 0,
-  ));
-  if (!empty($qr)) {
-    $qr = reset($qr);
-    $user = user_load($qr->uid);
-    watchdog('uid', $qr->uid);
-    user_bind_bind_user($openid, $user);
-  }
-}
-
-function user_bind_bind_user($openid, $user) {
-  $wechat_obj = wechat_api_init_wechatobj();
-  $user_info = $wechat_obj->getUserInfo($openid);
-  if ($user_info['subscribe']) {//判断是否关注
-    $wechat_user = wechat_user_load_multiple(FALSE, array('openid' => $openid));
-    if (!empty($wechat_user)) {
-      $wechat_user_entity = reset($wechat_user);
-      entity_delete('wechat_user', $wechat_user_entity->uid);
-      $wechat_user_entity = entity_create('wechat_user', array());
-    }
-    else {
-      $wechat_user_entity = entity_create('wechat_user', array());
-    }
-
-    $account_wrapper = entity_metadata_wrapper('user', $user);
-    $nickname = utf8_encode($user_info['nickname']);
-
-    $wechat_user_entity->uid = $user->uid;
-    $wechat_user_entity->openid = $user_info['openid'];
-    $wechat_user_entity->subscribe = $user_info['subscribe'];
-    $wechat_user_entity->nickname = $nickname;//暂时无法处理特殊字符，不自动使用昵称。$user_info['nickname'];
-    $wechat_user_entity->sex = $user_info['sex'];
-    $wechat_user_entity->province = $user_info['province'];
-    $wechat_user_entity->city = $user_info['city'];
-    $wechat_user_entity->country = $user_info['country'];
-    $wechat_user_entity->headimgurl = $user_info['headimgurl'];
-    $wechat_user_entity->subscribe_time = $user_info['subscribe_time'];
-
-    $wechat_user_entity->save();
-    $account_wrapper->field_user_name->set($user_info['nickname']);
-    $account_wrapper->save();
-
-    return $user;
-  }
-  return FALSE;
-}
-
-function user_bind_settings_form($form, &$form_state) {
-  $form['required']['user_bind_key_start'] = array(
-    '#type' => 'textfield',
-    '#title' => t('二维码KEY开始的值'),
-    '#default_value' => variable_get('user_bind_key_start', ''),
-    '#required' => TRUE,
-  );
-  $form['required']['user_bind_key_end'] = array(
-    '#type' => 'textfield',
-    '#title' => t('二维码KEY结束的值'),
-    '#default_value' => variable_get('user_bind_key_end', ''),
-    '#required' => TRUE,
-  );
-  return system_settings_form($form);
-}
-
 function user_bind_wechat_info($user) {
   $output = '';
-  $wechat_user = wechat_user_load($user->uid);
+  $wechat_user = WechatUser::loadByUid($user->uid);
+
   if (empty($wechat_user)) {
     $form = drupal_get_form('user_bind_form', $user);
     $output .= render($form);
@@ -149,32 +59,6 @@ function user_bind_wechat_info($user) {
 }
 
 function user_bind_form($form, &$form_state, $user) {
-
-//  $qr = new WechatQr2();
-//  $qr->bundle = 'user_bind_qr';
-//  $qr->qr_type = '0';
-//  $qr->qr_key = user_bind_get_key();
-//  $qr->uid = $user->uid;
-//  $qr->expire = '300';
-//  $qr->save();
-//
-//  $form['qr'] = array(
-//    '#type' => 'item',
-//    '#markup' => "<div>使用微信扫描下面的二维码进行绑定！</div>" . $qr->getUrl(),
-//  );
-//
-//  global $base_url;
-//  $settings = array(
-//    'statusUrl' => $base_url . '/user/bind/status',
-//    'uid' => $user->uid
-//  );
-//  $form['qr']['#attached']['js'] = array(
-//    drupal_get_path('module', 'user_bind') . '/user_bind.js',
-//  );
-//  $form['qr']['#attached']['js'][] = array(
-//    'data' => array('userbind' => $settings),
-//    'type' => 'setting',
-//  );
   $form_state['user'] = $user;
   $form['submit'] = array('#type' => 'submit', '#value' => t('点击绑定'));
   return $form;
@@ -189,42 +73,4 @@ function user_bind_form_submit($form, &$form_state) {
       'type' => 'snsapi_base',
     )
   ));
-  //http://wsc.demo.sosyuki.com/wechat/user/login?goto=product/home&error=node&state=1&type=snsapi_base
-}
-
-/**
- * Implements hook_theme().
- */
-function user_bind_theme($existing, $type, $theme, $path) {
-  return array(
-    'user_bind_wechat' => array(
-      'render element' => 'content',
-      'template' => 'user_bind_wechat',
-      'path' => $path,
-    ),
-  );
-}
-
-function user_bind_get_key() {
-  $key_current = variable_get('user_bind_key_current', variable_get('user_bind_key_start', 0));
-  if ($key_current > variable_get('user_bind_key_end', 100)) {
-    $new_key = variable_get('user_bind_key_start', 0);
-  }
-  else {
-    $new_key = $key_current + 1;
-  }
-  variable_set('user_bind_key_current', $new_key);
-  return $key_current;
-}
-
-/**
- * Implements hook_install().
- */
-function user_bind_install() {
-  if (!drupal_installation_attempted()) {
-    $qr_type = new WechatQr2Type();
-    $qr_type->type = 'user_bind_qr';
-    $qr_type->label = t('用户绑定专用码');
-    $qr_type->save();
-  }
 }
