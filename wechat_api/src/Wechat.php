@@ -8,6 +8,7 @@
 
 namespace Drupal\wechat_api;
 
+use Drupal\wechat_api\ErrCode;
 
 class Wechat {
   const MSGTYPE_TEXT = 'text';
@@ -213,6 +214,10 @@ class Wechat {
     $this->appsecret = isset($options['appsecret']) ? $options['appsecret'] : '';
     $this->debug = isset($options['debug']) ? $options['debug'] : FALSE;
     $this->logcallback = isset($options['logcallback']) ? $options['logcallback'] : FALSE;
+  }
+
+  function  getHumanErrMsg() {
+    return ErrCode::getErrText($this->errCode);
   }
 
   /**
@@ -4473,6 +4478,6 @@ class ErrorCode {
     }
     else {
       return FALSE;
-    };
+    }
   }
 }
