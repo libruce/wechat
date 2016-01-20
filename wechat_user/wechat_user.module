@@ -77,18 +77,6 @@ function wechat_user_create_login_url($goto, $error = 'node') {
   return "/wechat/user/login?goto={$goto}&error={$error}&state=1&type=snsapi_base";
 }
 
-function wechat_user_edit_access($current_user) {
-  global $user;
-  if ($user->uid == $current_user->uid) {
-    return TRUE;
-  }
-  if (user_access('admin')) {
-    return TRUE;
-  }
-
-  return FALSE;
-}
-
 
 function wechat_user_settings_page() {
   $output = '';
@@ -250,36 +238,39 @@ function wechat_user_user_registry($openid_list) {
  * @return bool|mixed|\stdClass
  * @throws \Exception
  * 注册用户，没有关注不注册
+ * 2016.1.20 调整不在注册为站点user，只存储为 wechat_user 实体
  */
 function wechat_user_registry_user($user_open_id) {
   $wechat_obj = wechat_api_init_wechatobj();
   $user_info = $wechat_obj->getUserInfo($user_open_id);
   if ($user_info['subscribe']) {//判断是否关注
-    $user_name = 'wx_' . $user_open_id;
-    $user = user_load_by_name($user_name);
-    if (!$user) {//不存在则创建
-      $wechat_user_entity = entity_create('wechat_user', array());
-      // auto register
-      $user_name = WUUPRE . $user_open_id;
-      $new_user = array(
-        'name' => $user_name,
-        'pass' => user_password(),
-        'status' => 1,
-      );
-      $account = user_save(NULL, $new_user);
+    //根据openid读取WechatUser
+    $wechatUsers = wechat_user_load_multiple(FALSE, array('openid' => $user_open_id));
+    if (!empty($wechatUsers)) {
+      $wechatUser = reset($wechatUsers);
     }
-    else {//存在则更新
-      $account = $user;
-      $wechat_user_entity = WechatUser::loadByUid($user->uid);
+    else {
+      $wechatUser = new WechatUser();
     }
-    $wechat_user_entity->uid = $account->uid;
+    //注入新资料
     foreach ($user_info as $key => $value) {
-      $wechat_user_entity->{$key} = $value;
+      $wechatUser->{$key} = $value;
     }
-    $wechat_user_entity->save();
-    return $account;
+    //保存
+    $wechatUser->save();
+    return $wechatUser;
   }
   return FALSE;
+}
+
+/**
+ * @param \WechatUser $wechatUser
+ * @param \stdClass $user
+ * WechatUser 和 User 绑定
+ */
+function wechat_user_bind_user(WechatUser $wechatUser, stdClass $user) {
+  $wechatUser->uid = $user->uid;
+  $wechatUser->save();
 }
 
 /**
@@ -304,9 +295,8 @@ function wechat_user_tokens($type, $tokens, array $data = array(), array $option
         // Basic user account information.
         case 'wechat_user_nickname':
           // In the case of hook user_presave uid is not set yet.
-          $wechat_user_entity = WechatUser::loadByUid($account->uid);
-          $nickname = $wechat_user_entity->nickname;
-          $replacements[$original] = !empty($nickname) ? utf8_decode($nickname) : $account->name;
+          $wechatUser = WechatUser::loadByUid($account->uid);
+          $replacements[$original] = !empty($wechatUser) ? utf8_decode($wechatUser->nickname) : $account->name;
           break;
       }
     }
@@ -454,6 +444,7 @@ function wechat_user_auth() {
   }
 
   // check if already connectted
+  wechat_user_login_by_openid($access_data['openid']);
   if ($current_user = wechat_user_get_user_by_openid($access_data['openid'])) {
     _wechat_user_login($current_user->uid);
     // todo update user info
@@ -469,6 +460,10 @@ function wechat_user_auth() {
     drupal_goto($destination);
   }
   drupal_goto($error);
+}
+
+function wechat_user_login_by_openid($openid) {
+
 }
 
 class WechatUserGroup extends Entity {
@@ -578,7 +573,7 @@ class WechatUser extends Entity {
   static function loadByUid($uid) {
     $wechat = wechat_user_load_multiple(FALSE, array('uid' => $uid));
     if (empty($wechat)) {
-      return new static(array('uid' => $uid));
+      return FALSE;
     }
     return reset($wechat);
   }
