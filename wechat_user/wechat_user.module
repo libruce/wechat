@@ -425,15 +425,29 @@ function _wechat_user_login($uid) {
   drupal_session_regenerate();
 }
 
+/**
+ * state 操作类型。
+ * new 需要注册新的user ；
+ * update 同步当前登录的用户；
+ * default 默认值，只注册WechatUser。
+ */
 function wechat_user_auth() {
-  $wechat_obj = wechat_api_init_wechatobj();
-  $state = isset($_GET['state']) ? $_GET['state'] : 0;
+  $state = isset($_GET['state']) ? $_GET['state'] : 'default';
   $error = isset($_GET['error']) ? $_GET['error'] : '';
   $destination = isset($_GET['destination']) ? $_GET['destination'] : '';
   $code = isset($_GET['code']) ? $_GET['code'] : '';
 
+
+  global $user;
+  if ($user->uid) {
+    drupal_goto($destination);
+  }
+
+  $wechat_obj = wechat_api_init_wechatobj();
+
+
   // error
-  if ((!$state) || (!$code)) { // error
+  if ((!$code) || (!$state)) { // error
     drupal_goto($error);
   }
 
@@ -442,7 +456,9 @@ function wechat_user_auth() {
   if (empty($access_data)) {
     drupal_goto($error);
   }
+  if ($state == 'new') {
 
+  }
   // check if already connectted
   wechat_user_login_by_openid($access_data['openid']);
   if ($current_user = wechat_user_get_user_by_openid($access_data['openid'])) {
