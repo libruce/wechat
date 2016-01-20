@@ -68,6 +68,32 @@ function wechat_messages_rules_action_info() {
     'label' => t('微信发送消息（使用客服接口）'),
     'base' => 'wechat_messages_action_send_message',
   );
+  $action['wechat_messages_send_message2'] = array(
+    'parameter' => array(
+      'message' => array(
+        'type' => 'text',
+        'label' => t('消息体（json）'),
+        'description' => t('json格式.'),
+      )
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('微信发送消息（使用客服接口）2，完全构造消息体'),
+    'base' => 'wechat_messages_action_send_message2',
+  );
+  $action['wechat_messages_send_template_message'] = array(
+    'parameter' => array(
+      'message' => array(
+        'type' => 'text',
+        'label' => t('消息体（json）'),
+        'description' => t('json格式.'),
+      )
+    ),
+    'group' => t('微信'),
+    'access callback' => user_access('administer permissions'),
+    'label' => t('发送模版消息'),
+    'base' => 'wechat_messages_send_template_message',
+  );
   $action['wechat_messages_change_reply_status'] = array(
     'parameter' => array(
       'openid' => array(
@@ -87,6 +113,22 @@ function wechat_messages_rules_action_info() {
     'base' => 'wechat_messages_action_change_reply_status',
   );
   return $action;
+}
+
+function wechat_messages_send_template_message($message) {
+  $wechatObj = wechat_api_init_wechatobj();
+  $TemplateMessageDate = json_decode($message);
+  $TemplateMessageDate = (array) $TemplateMessageDate;
+  $r = $wechatObj->sendTemplateMessage($TemplateMessageDate);
+  watchdog('wechat_messages_send_template_message', json_encode($r, JSON_UNESCAPED_UNICODE));
+}
+
+function wechat_messages_action_send_message2($message) {
+  $data = json_decode($message);
+  $data = (array) $data;
+  $wechatObj = wechat_api_init_wechatobj();
+  $r = $wechatObj->sendCustomMessage($data);
+  watchdog('wechat_messages_send_message2', json_encode($r, JSON_UNESCAPED_UNICODE));
 }
 
 function wechat_messages_action_change_reply_status($openid, $status) {
