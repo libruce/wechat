@@ -133,7 +133,3 @@ function wechat_qr2_form_submit(&$form, &$form_state) {
   $entity->expire = $form_state['values']['expire'];
   $entity->save();
 }
-
-function wechat_qr2_create_qr($key) {
-
-}
