@@ -1,7 +1,15 @@
 name = 微信用户绑定
 description = 微信用户绑定。
 core = 7.x
-version = 7.x-2.0-dev
 package = wechat
-dependencies[] = wechat_user (>= 7.x-2.0)
-;dependencies[] = wechat_qr2
+version = 7.x-2.0
+dependencies[] = entity
+dependencies[] = entityreference
+dependencies[] = features
+dependencies[] = wechat_qr2
+features[features_api][] = api:2
+features[field_base][] = user_bind_user_referenced
+features[field_instance][] = wechat_qr2-user_bind_qr-user_bind_user_referenced
+features[wechat_qr2_type][] = user_bind_qr
+features_exclude[field_base][field_user] = field_user
+features_exclude[field_instance][wechat_qr2-user_bind_qr-field_user] = wechat_qr2-user_bind_qr-field_user

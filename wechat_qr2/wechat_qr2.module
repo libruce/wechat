@@ -375,8 +375,26 @@ class WechatQr2 extends Entity {
     return $output;
   }
 
+  protected function makeKey() {
+    $old_key = variable_get(__CLASS__ . __FUNCTION__, 1);
+    if ($old_key > 4294967295) {
+      $new_key = 1;
+    }
+    else {
+      $new_key = $old_key + 1;
+    }
+    variable_set(__CLASS__ . __FUNCTION__, $new_key);
+
+    return $old_key;
+  }
+
   public function  save() {
-    //$this->bundle = $this->bundle->type;
+
+    //临时二维码key自动生成
+    if ($this->qr_type == 0) {
+      $this->qr_key = $this->makeKey();
+    }
+
     $this->update_time = time();
 
     if (!isset($this->create_time)) {

@@ -1,4 +1,6 @@
 <?php
+define('USERBINDFIELDNAME', 'user_bind_user_referenced');
+include_once 'user_bind.features.inc';
 /**
  * Implements hook_menu().
  */
@@ -89,11 +91,18 @@ function user_bind_form($form, &$form_state, $user) {
 }
 
 function user_bind_qr_bind_callback($form, &$form_state) {
+  global $user;
   $wechatQr2 = new WechatQr2();
-  $wechatQr2->bundle = '';
+  $wechatQr2->title = '绑定码自动生成->' . format_date(time(), 'short');
+  $wechatQr2->uid = $user->uid;
+  $wechatQr2->type = 'user_bind_qr';
   $wechatQr2->qr_type = 0;
-
-  $form['actions']['qr']['img']['#markup'] = '<div>' . time() . '</div>';
+  $wechatQr2->expire = 300;
+  $wechatQr2->save();
+  $wechatQr2_w = $wechatQr2->wrapper();
+  $wechatQr2_w->{USERBINDFIELDNAME}->set($user);
+  $wechatQr2_w->save();
+  $form['actions']['qr']['img']['#markup'] = '<div>' . $wechatQr2->getUrl() . '</div>';
   return $form['actions']['qr'];
 }
 
