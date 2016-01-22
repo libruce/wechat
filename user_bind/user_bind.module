@@ -60,8 +60,41 @@ function user_bind_wechat_info($user) {
 
 function user_bind_form($form, &$form_state, $user) {
   $form_state['user'] = $user;
-  $form['submit'] = array('#type' => 'submit', '#value' => t('点击绑定'));
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('点击绑定')
+  );
+  $form['actions']['qr'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="qr-bind-wrapper">',
+    '#suffix' => '</div>',
+  );
+  $form['actions']['qr']['img'] = array(
+    '#type' => 'item',
+    '#title' => t(''),
+  );
+  $form['actions']['qr']['bind'] = array(
+    '#type' => 'button',
+    '#value' => t('二维码绑定'),
+    '#ajax' => array(
+      'callback' => 'user_bind_qr_bind_callback',
+      'wrapper' => 'qr-bind-wrapper',
+    ),
+    '#markup' => '<div>asdfjiasdnfklasdfjkl</div>',
+
+  );
   return $form;
+}
+
+function user_bind_qr_bind_callback($form, &$form_state) {
+  $wechatQr2 = new WechatQr2();
+  $wechatQr2->bundle = '';
+  $wechatQr2->qr_type = 0;
+
+  $form['actions']['qr']['img']['#markup'] = '<div>' . time() . '</div>';
+  return $form['actions']['qr'];
 }
 
 function user_bind_form_submit($form, &$form_state) {
