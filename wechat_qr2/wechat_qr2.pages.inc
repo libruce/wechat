@@ -26,7 +26,7 @@ function wechat_qr2_view_page($entity) {
 }
 
 function wechat_qr2_add_form($type) {
-  $entity = entity_create('wechat_qr2', array('bundle' => $type));
+  $entity = entity_create('wechat_qr2', array('type' => $type));
   module_load_include('inc', 'wechat_qr2', 'wechat_reply.pages');
   return drupal_get_form('wechat_qr2_form', $entity, 'add');
 }
@@ -67,7 +67,6 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
        32位非0整型.<br/>
        最大数:<b>4294967295</b><br/>
     <b>永久二维码:</b><br/>
-       数字:1--100000<br/>
        字符串:长度1到64.
     '),
     '#type' => 'textfield',
@@ -119,6 +118,9 @@ function wechat_qr2_form_validate($form, &$form_state) {
   $qr_key = $form_state['values']['qr_key'];
   if ($qr_type == 0 && !is_numeric($qr_key)) {
     form_set_error('qr_key', t('临时二维码KEY只能是数字'));
+  }
+  if ($qr_type == 1 && is_numeric($qr_key)) {
+    form_set_error('qr_key', t('永久二维码不能使用数字'));
   }
 }
 

@@ -271,8 +271,8 @@ function wechat_qr2_access($op, $entity = NULL, $account = NULL) {
 /**
  * Implements hook_wechat_qr2_access().
  */
-function wechat_qr2_wechat_qr2_access($op, $entity = NULL, $account = NULL) {
-  if (isset($entity) && ($type_name = $entity->bundle) && $op != 'delete') {
+function wechat_qr2_wechat_qr2_access($op, WechatQr2 $entity = NULL, $account = NULL) {
+  if (isset($entity) && ($type_name = $entity->type) && $op != 'delete') {
     if (user_access("$op any $type_name wecaht qr2", $account)) {
       return TRUE;
     }
@@ -394,7 +394,9 @@ class WechatQr2 extends Entity {
     if ($this->qr_type == 0) {
       $this->qr_key = $this->makeKey();
     }
-
+    if ($this->qr_type == 1 && is_numeric($this->qr_key)) {
+      return;
+    }
     $this->update_time = time();
 
     if (!isset($this->create_time)) {
