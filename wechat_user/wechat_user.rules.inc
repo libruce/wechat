@@ -4,55 +4,84 @@
  * Implements hook_rules_action_info().
  */
 function wechat_user_rules_action_info() {
-  $action['wechat_user_login_open_id'] = array(
-    'parameter' => array(
-      'open_id' => array(
-        'type' => 'text',
-        'label' => t('OpenId'),
-        'description' => t('The user whose roles should be changed.'),
-        'save' => TRUE,
-      )
-    ),
-    'group' => t('微信'),
-    'access callback' => user_access('administer permissions'),
-    'label' => t('使用微信OPENID登录'),
-    'base' => 'wechat_user_login_open_id',
-  );
-  $action['wechat_user_registry_user'] = array(
-    'parameter' => array(
-      'open_id' => array(
-        'type' => 'text',
-        'label' => t('OpenId'),
-        'description' => t('The user whose roles should be changed.'),
-        'save' => TRUE,
-      )
-    ),
-    'group' => t('微信'),
-    'access callback' => user_access('administer permissions'),
-    'label' => t('注册用户'),
-    'base' => 'wechat_user_registry_user',
-  );
-  $action['wechat_user_load_user'] = array(
-    'parameter' => array(
-      'open_id' => array(
-        'type' => 'text',
-        'label' => t('OpenId'),
-        'description' => t('The user whose roles should be changed.'),
-        'save' => TRUE,
-      )
-    ),
-    'provides' => array(
-      'user' => array(
-        'type' => 'user',
-        'label' => t('返回的用户实体'),
+  return array(
+    'wechat_user_login_open_id' => array(
+      'parameter' => array(
+        'open_id' => array(
+          'type' => 'text',
+          'label' => t('OpenId'),
+          'description' => t('The user whose roles should be changed.'),
+          'save' => TRUE,
+        )
       ),
+      'group' => t('微信'),
+      'access callback' => user_access('administer permissions'),
+      'label' => t('使用微信OPENID登录'),
+      'base' => 'wechat_user_login_open_id',
     ),
-    'group' => t('微信'),
-    'access callback' => user_access('administer permissions'),
-    'label' => t('使用OpenId提取用户实体'),
-    'base' => 'wechat_user_load_user',
+    'wechat_user_registry_user' => array(
+      'parameter' => array(
+        'open_id' => array(
+          'type' => 'text',
+          'label' => t('OpenId'),
+          'description' => t('The user whose roles should be changed.'),
+          'save' => TRUE,
+        )
+      ),
+      'group' => t('微信'),
+      'access callback' => user_access('administer permissions'),
+      'label' => t('注册用户'),
+      'base' => 'wechat_user_registry_user',
+    ),
+    'wechat_user_load_user' => array(
+      'parameter' => array(
+        'open_id' => array(
+          'type' => 'text',
+          'label' => t('OpenId'),
+          'description' => t('The user whose roles should be changed.'),
+          'save' => TRUE,
+        )
+      ),
+      'provides' => array(
+        'user' => array(
+          'type' => 'user',
+          'label' => t('返回的用户实体'),
+        ),
+      ),
+      'group' => t('微信'),
+      'access callback' => user_access('administer permissions'),
+      'label' => t('使用OpenId提取用户实体'),
+      'base' => 'wechat_user_load_user',
+    ),
+    'wechat_user_load_wechat_user' => array(
+      'parameter' => array(
+        'open_id' => array(
+          'type' => 'text',
+          'label' => t('OpenId'),
+          'description' => t('The user whose roles should be changed.'),
+          'save' => TRUE,
+        )
+      ),
+      'provides' => array(
+        'wechat_user' => array(
+          'type' => 'wechat_user',
+          'label' => t('返回的WechatUser实体'),
+        ),
+      ),
+      'group' => t('微信'),
+      'access callback' => user_access('administer permissions'),
+      'label' => t('使用OpenId提取WechatUser实体'),
+      'base' => 'wechat_user_load_wechat_user',
+    ),
   );
-  return $action;
+}
+
+function wechat_user_load_wechat_user($openid) {
+  $wechat_user = wechat_user_load_multiple(FALSE, array('openid' => $openid));
+  if (!empty($wechat_user)) {
+    $wechat_user = reset($wechat_user);
+  }
+  return array('wechat_user' => $wechat_user);
 }
 
 function wechat_user_login_open_id($openid) {
