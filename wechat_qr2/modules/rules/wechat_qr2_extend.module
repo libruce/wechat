@@ -4,9 +4,10 @@
  * Implements hook_entity_insert().
  */
 function wechat_qr2_extend_entity_insert($entity, $type) {
-//  if ($entity instanceof WechatRequest && $entity->msg_type == 'event') {
-//    $w = $entity->wrapper();
-//    $event = $w->field_event->value();
+  if ($entity instanceof WechatRequest && $entity->msg_type == 'event') {
+    $w = $entity->wrapper();
+    $event = $w->field_event->value();
+    watchdog('$event = $w->field_event->value();', $event);
 //    $key = $w->field_event_key->value();
 //    switch ($event) {
 //      case 'SCAN': {
@@ -27,7 +28,7 @@ function wechat_qr2_extend_entity_insert($entity, $type) {
 //    }
 //    $wechat_request = $entity;
 //    rules_invoke_event('wechat_qr2_extend_qr_scan_event', $openid, $event, $key, $wechat_qr2, $wechat_request);
-//  }
+  }
 }
 
 /**
