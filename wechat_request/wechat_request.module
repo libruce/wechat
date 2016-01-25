@@ -197,24 +197,28 @@ class WechatRequest extends Entity {
   }
 
   public function save() {
-    //@todo 增加消息排重检查
-    if ($this->checkOnly($this)) {
-      watchdog('deb',202);
-      return;
+    try {
+      //@todo 增加消息排重检查
+      if ($this->checkOnly($this)) {
+        watchdog('deb', 202);
+        return;
+      }
+      parent::save();
+    } catch (Exception $e) {
+      watchdog_exception('save', $e);
     }
-    parent::save();
   }
 
   //@todo 检查消息是否唯一,存在返回TRUE
   function  checkOnly(WechatRequest $request) {
-    watchdog('deb',209);
+    watchdog('deb', 209);
     if (!empty($request->msg_id)) {
-      watchdog('deb',211);
+      watchdog('deb', 211);
       return !empty(entity_load('wechat_request', FALSE, array(
         'msg_id' => $request->msg_id
       )));
     }
-    watchdog('deb',216);
+    watchdog('deb', 216);
     return !empty(entity_load('wechat_request', FALSE, array(
       'openid' => $request->openid,
       'create_time' => $request->create_time
@@ -473,7 +477,7 @@ function wechat_request_save_request_messages(Wechat $wechat) {
 //  $request_wrapper->data->set(json_encode((array) $xml_obj));
     watchdog('$request_wrapper->save();', json_encode((array) $xml_obj));
   } catch (Exception $e) {
-    watchdog('aaa',471);
+    watchdog('aaa', 471);
     watchdog_exception('wechat_request_save_request_messages', $e);
   }
 }
