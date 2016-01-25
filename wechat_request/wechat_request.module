@@ -339,6 +339,7 @@ function wechat_request_save_media($file_content, $file_name, $field_name, $msg_
  * @param \Wechat $wechat
  */
 function wechat_request_save_request_messages(Wechat $wechat) {
+  watchdog('debug', 342);
   $wechat->getRev();
   $xml_obj = $wechat->getRevData();
   $xml_obj = (object) $xml_obj;
@@ -350,7 +351,7 @@ function wechat_request_save_request_messages(Wechat $wechat) {
   $request = new WechatRequest();
   $request->msg_type = $xml_obj->MsgType;
   $request_wrapper = $request->wrapper();
-
+  watchdog('debug', 354);
 
   $request_wrapper->subscription->set($xml_obj->ToUserName);
   $request_wrapper->openid->set($xml_obj->FromUserName);
@@ -363,7 +364,7 @@ function wechat_request_save_request_messages(Wechat $wechat) {
     $request_wrapper->msg_id->set($xml_obj->MsgId);
   }
 
-
+  watchdog('debug', 367);
   switch ($xml_obj->MsgType) {
     case 'text': {
       $request_wrapper->field_content->set($xml_obj->Content);
@@ -457,6 +458,7 @@ function wechat_request_save_request_messages(Wechat $wechat) {
       break;
     }
   }
+  watchdog('debug', 461);
   //全部消息数据转换为json格式，存入数据库
 //  $request_wrapper->data->set(json_encode((array) $xml_obj));
   $request_wrapper->save();
