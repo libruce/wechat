@@ -30,7 +30,7 @@ function wechat_qr2_extend_entity_insert($entity, $type) {
       }
     }
     $wechat_request = $entity;
-//    rules_invoke_event('wechat_qr2_extend_qr_scan_event', $openid, $event, $key, $wechat_qr2, $wechat_request);
+    rules_invoke_event('wechat_qr2_extend_qr_scan_event', $openid, $event, $key, $wechat_qr2, $wechat_request);
   }
 }
 
