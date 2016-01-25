@@ -459,7 +459,8 @@ function wechat_request_save_request_messages(Wechat $wechat) {
   //全部消息数据转换为json格式，存入数据库
 //  $request_wrapper->data->set(json_encode((array) $xml_obj));
   $request_wrapper->save();
-
+//  $request_wrapper->data->set(json_encode((array) $xml_obj));
+  watchdog('$request_wrapper->save();', json_encode((array) $xml_obj));
 }
 
 function wechat_request_echo(Wechat $wechat) {
