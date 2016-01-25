@@ -25,12 +25,10 @@ function wechat_qr2_extend_entity_insert($entity, $type) {
     $wechat_qr2 = wechat_qr2_load_multiple(FALSE, array('qr_key' => $key));
     $wechat_qr2 = reset($wechat_qr2);
     if (!empty($wechat_qr2) && $wechat_qr2 instanceof WechatQr2) {
-      if ($wechat_qr2->qr_type == 0) {
 
-      }
+      $wechat_request = $entity;
+      rules_invoke_event('wechat_qr2_extend_qr_scan_event', $openid, $event, $key, $wechat_request, $wechat_qr2);
     }
-    $wechat_request = $entity;
-    rules_invoke_event('wechat_qr2_extend_qr_scan_event', $openid, $event, $key, $wechat_request);
   }
 }
 
@@ -58,6 +56,10 @@ function wechat_qr2_extend_rules_event_info() {
         'wechat_request' => array(
           'type' => 'wechat_request',
           'label' => t('请求对象'),
+        ),
+        'wechat_qr2' => array(
+          'type' => 'wechat_qr2',
+          'label' => t('二维码对象'),
         ),
       ),
     ),
