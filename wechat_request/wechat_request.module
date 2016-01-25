@@ -468,6 +468,7 @@ function wechat_request_save_request_messages(Wechat $wechat) {
 //  $request_wrapper->data->set(json_encode((array) $xml_obj));
     watchdog('$request_wrapper->save();', json_encode((array) $xml_obj));
   } catch (Exception $e) {
+    watchdog('aaa',471);
     watchdog_exception('wechat_request_save_request_messages', $e);
   }
 }
