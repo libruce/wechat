@@ -361,97 +361,97 @@ function wechat_request_save_request_messages(Wechat $wechat) {
   }
 
 
-//  switch ($xml_obj->MsgType) {
-//    case 'text': {
-//      $request_wrapper->field_content->set($xml_obj->Content);
-//      break;
-//    }
-//    case 'image': {
-//      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
-//      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.jpg', 'field_wechat_image', 'image');
-//      $request_wrapper->field_media_id->set($xml_obj->MediaId);
-//      $request_wrapper->field_pic_url->set($xml_obj->PicUrl);
-//      $request_wrapper->field_wechat_image->file->set($file);
-//      break;
-//    }
-//    case 'voice': {
-//      //存媒体ID
-//      $request_wrapper->field_media_id->set($xml_obj->MediaId);
-//      //存语音格式
-//      $request_wrapper->field_file_format->set($xml_obj->Format);
-//      //存媒体文件，是用格式拼装
-//      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
-//
-//      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.' . $xml_obj->Format, 'field_media_file', 'file');
-//      $request_wrapper->field_media_file->file->set($file);
-//
-//      //存语音识别结果
-//      $Recognition = $xml_obj->Recognition;
-//      if (!empty($Recognition)) {//使用isset存在bug
-//        $request_wrapper->field_recongnition->set($xml_obj->Recognition);
-//      }
-//      break;
-//    }
-//
-//    case 'shortvideo':
-//    case 'video': {
-//      //存媒体和媒体缩略图ID
-//      $request_wrapper->field_media_id->set($xml_obj->MediaId);
-//      $request_wrapper->field_thumb_media_id->set($xml_obj->MediaId);
-//      //存媒体文件
-//      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
-//      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.mp4', 'field_media_file', 'file');
-//      $request_wrapper->field_media_file->file->set($file);
-//      //存缩略图文件
-//      $file_content = $wechat_obj->getMedia($xml_obj->ThumbMediaId);
-//      $file = wechat_request_save_media($file_content, $xml_obj->ThumbMediaId . '.jpeg', 'field_thumb_media_image', 'image');
-//      $request_wrapper->field_thumb_media_image->file->set($file);
-//      break;
-//    }
-//
-//    case 'location': {
-//      $request_wrapper->field_label->set($xml_obj->Label);
-//      $request_wrapper->field_scale->set($xml_obj->Scale);
-//      $request_wrapper->field_location_x->set($xml_obj->Location_X);
-//      $request_wrapper->field_location_y->set($xml_obj->Location_Y);
-//      break;
-//    }
-//
-//    case 'link': {
-//      $request_wrapper->field_title->set($xml_obj->Title);
-//      $request_wrapper->field_description->set($xml_obj->Description);
-//      $request_wrapper->field_url->set($xml_obj->Url);
-//      break;
-//    }
-//    case 'event': {
-//      $EventKey = $xml_obj->EventKey;
-//      if (!empty($EventKey)) {
-//        watchdog('key_track', $EventKey);
-//        $request_wrapper->field_event_key->set($EventKey);
-//      }
-//      //watchdog('wechat_EventKey', $EventKey);
-//      $request_wrapper->field_event->set($xml_obj->Event);
-//      //watchdog('wechat', json_encode((array) $xml_obj));
-//
-//      //处理特殊事件数据，如上报地理位置事件、关注、取消关注等。
-//      switch ($xml_obj->Event) {
-//        //关注，处理扫码关注。普通关注无特殊数据
-//        case 'subscribe':
-//          //用户已关注时的事件推送
-//        case 'SCAN': {
-//          $request_wrapper->field_ticket->set($xml_obj->Ticket);
-//          break;
-//        }
-//        //上报地理位置事件
-//        case 'LOCATION': {
-//          $request_wrapper->field_location_x->set($xml_obj->Latitude);
-//          $request_wrapper->field_location_y->set($xml_obj->Longitude);
-//          $request_wrapper->field_precision->set($xml_obj->Precision);
-//        }
-//      }
-//      break;
-//    }
-//  }
+  switch ($xml_obj->MsgType) {
+    case 'text': {
+      $request_wrapper->field_content->set($xml_obj->Content);
+      break;
+    }
+    case 'image': {
+      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.jpg', 'field_wechat_image', 'image');
+      $request_wrapper->field_media_id->set($xml_obj->MediaId);
+      $request_wrapper->field_pic_url->set($xml_obj->PicUrl);
+      $request_wrapper->field_wechat_image->file->set($file);
+      break;
+    }
+    case 'voice': {
+      //存媒体ID
+      $request_wrapper->field_media_id->set($xml_obj->MediaId);
+      //存语音格式
+      $request_wrapper->field_file_format->set($xml_obj->Format);
+      //存媒体文件，是用格式拼装
+      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+
+      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.' . $xml_obj->Format, 'field_media_file', 'file');
+      $request_wrapper->field_media_file->file->set($file);
+
+      //存语音识别结果
+      $Recognition = $xml_obj->Recognition;
+      if (!empty($Recognition)) {//使用isset存在bug
+        $request_wrapper->field_recongnition->set($xml_obj->Recognition);
+      }
+      break;
+    }
+
+    case 'shortvideo':
+    case 'video': {
+      //存媒体和媒体缩略图ID
+      $request_wrapper->field_media_id->set($xml_obj->MediaId);
+      $request_wrapper->field_thumb_media_id->set($xml_obj->MediaId);
+      //存媒体文件
+      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.mp4', 'field_media_file', 'file');
+      $request_wrapper->field_media_file->file->set($file);
+      //存缩略图文件
+      $file_content = $wechat_obj->getMedia($xml_obj->ThumbMediaId);
+      $file = wechat_request_save_media($file_content, $xml_obj->ThumbMediaId . '.jpeg', 'field_thumb_media_image', 'image');
+      $request_wrapper->field_thumb_media_image->file->set($file);
+      break;
+    }
+
+    case 'location': {
+      $request_wrapper->field_label->set($xml_obj->Label);
+      $request_wrapper->field_scale->set($xml_obj->Scale);
+      $request_wrapper->field_location_x->set($xml_obj->Location_X);
+      $request_wrapper->field_location_y->set($xml_obj->Location_Y);
+      break;
+    }
+
+    case 'link': {
+      $request_wrapper->field_title->set($xml_obj->Title);
+      $request_wrapper->field_description->set($xml_obj->Description);
+      $request_wrapper->field_url->set($xml_obj->Url);
+      break;
+    }
+    case 'event': {
+      $EventKey = $xml_obj->EventKey;
+      if (!empty($EventKey)) {
+        watchdog('key_track', $EventKey);
+        $request_wrapper->field_event_key->set($EventKey);
+      }
+      //watchdog('wechat_EventKey', $EventKey);
+      $request_wrapper->field_event->set($xml_obj->Event);
+      //watchdog('wechat', json_encode((array) $xml_obj));
+
+      //处理特殊事件数据，如上报地理位置事件、关注、取消关注等。
+      switch ($xml_obj->Event) {
+        //关注，处理扫码关注。普通关注无特殊数据
+        case 'subscribe':
+          //用户已关注时的事件推送
+        case 'SCAN': {
+          $request_wrapper->field_ticket->set($xml_obj->Ticket);
+          break;
+        }
+        //上报地理位置事件
+        case 'LOCATION': {
+          $request_wrapper->field_location_x->set($xml_obj->Latitude);
+          $request_wrapper->field_location_y->set($xml_obj->Longitude);
+          $request_wrapper->field_precision->set($xml_obj->Precision);
+        }
+      }
+      break;
+    }
+  }
   //全部消息数据转换为json格式，存入数据库
 //  $request_wrapper->data->set(json_encode((array) $xml_obj));
   $request_wrapper->save();
