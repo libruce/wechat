@@ -199,6 +199,7 @@ class WechatRequest extends Entity {
   public function save() {
     //@todo 增加消息排重检查
     if ($this->checkOnly($this)) {
+      watchdog('deb',202);
       return;
     }
     parent::save();
