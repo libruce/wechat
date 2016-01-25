@@ -4,30 +4,30 @@
  * Implements hook_entity_insert().
  */
 function wechat_qr2_extend_entity_insert($entity, $type) {
-  if ($entity instanceof WechatRequest && $entity->msg_type == 'event') {
-    $w = $entity->wrapper();
-    $event = $w->field_event->value();
-    $key = $w->field_event_key->value();
-    switch ($event) {
-      case 'SCAN': {
-        break;
-      }
-      case 'subscribe': {
-        $key = substr($key, 8);
-        break;
-      }
-    }
-    $openid = $entity->openid;
-    $wechat_qr2 = wechat_qr2_load_multiple(FALSE, array('qr_key' => $key));
-    $wechat_qr2 = reset($wechat_qr2);
-    if (!empty($wechat_qr2) && $wechat_qr2 instanceof WechatQr2) {
-      if ($wechat_qr2->qr_type == 0) {
-
-      }
-    }
-    $wechat_request = $entity;
-    rules_invoke_event('wechat_qr2_extend_qr_scan_event', $openid, $event, $key, $wechat_qr2, $wechat_request);
-  }
+//  if ($entity instanceof WechatRequest && $entity->msg_type == 'event') {
+//    $w = $entity->wrapper();
+//    $event = $w->field_event->value();
+//    $key = $w->field_event_key->value();
+//    switch ($event) {
+//      case 'SCAN': {
+//        break;
+//      }
+//      case 'subscribe': {
+//        $key = substr($key, 8);
+//        break;
+//      }
+//    }
+//    $openid = $entity->openid;
+//    $wechat_qr2 = wechat_qr2_load_multiple(FALSE, array('qr_key' => $key));
+//    $wechat_qr2 = reset($wechat_qr2);
+//    if (!empty($wechat_qr2) && $wechat_qr2 instanceof WechatQr2) {
+//      if ($wechat_qr2->qr_type == 0) {
+//
+//      }
+//    }
+//    $wechat_request = $entity;
+//    rules_invoke_event('wechat_qr2_extend_qr_scan_event', $openid, $event, $key, $wechat_qr2, $wechat_request);
+//  }
 }
 
 /**

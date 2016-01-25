@@ -432,26 +432,26 @@ function wechat_request_save_request_messages(Wechat $wechat) {
         watchdog('key_track', $EventKey);
         $request_wrapper->field_event_key->set($EventKey);
       }
-      watchdog('wechat_EventKey', $xml_obj->Event);
+      //watchdog('wechat_EventKey', $EventKey);
       $request_wrapper->field_event->set($xml_obj->Event);
       //watchdog('wechat', json_encode((array) $xml_obj));
 
       //处理特殊事件数据，如上报地理位置事件、关注、取消关注等。
-//      switch ($xml_obj->Event) {
-//        //关注，处理扫码关注。普通关注无特殊数据
-//        case 'subscribe':
-//          //用户已关注时的事件推送
-//        case 'SCAN': {
-//          $request_wrapper->field_ticket->set($xml_obj->Ticket);
-//          break;
-//        }
-//        //上报地理位置事件
-//        case 'LOCATION': {
-//          $request_wrapper->field_location_x->set($xml_obj->Latitude);
-//          $request_wrapper->field_location_y->set($xml_obj->Longitude);
-//          $request_wrapper->field_precision->set($xml_obj->Precision);
-//        }
-//      }
+      switch ($xml_obj->Event) {
+        //关注，处理扫码关注。普通关注无特殊数据
+        case 'subscribe':
+          //用户已关注时的事件推送
+        case 'SCAN': {
+          $request_wrapper->field_ticket->set($xml_obj->Ticket);
+          break;
+        }
+        //上报地理位置事件
+        case 'LOCATION': {
+          $request_wrapper->field_location_x->set($xml_obj->Latitude);
+          $request_wrapper->field_location_y->set($xml_obj->Longitude);
+          $request_wrapper->field_precision->set($xml_obj->Precision);
+        }
+      }
       break;
     }
   }
