@@ -87,16 +87,6 @@ function wechat_user_settings_page() {
 
 
 function wechat_user_op_user($form, &$form_state) {
-  $openid = 'oXLV-s6O_2eD11pZqJvWkBv-EpLM';
-  $wechat_user = wechat_user_load_multiple(FALSE, array('openid' => $openid));
-  if (!empty($wechat_user)) {
-    $wechat_user = reset($wechat_user);
-  }
-  $wu = $wechat_user;
-  $wuw = $wu->wrapper();
-  $n = $wuw->nickname->value();
-  dpm($wu);
-  dpm($n);
   $form['group'] = array(
     '#type' => 'fieldset',
     '#title' => t('分组管理'),
