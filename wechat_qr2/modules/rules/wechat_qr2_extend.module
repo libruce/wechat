@@ -4,7 +4,9 @@
  * Implements hook_entity_insert().
  */
 function wechat_qr2_extend_entity_insert($entity, $type) {
+  watchdog('debug', 7);
   if ($entity instanceof WechatRequest && $entity->msg_type == 'event') {
+    watchdog('debug', 9);
     $w = $entity->wrapper();
     $event = $w->field_event->value();
     watchdog('$event = $w->field_event->value();', $event);
