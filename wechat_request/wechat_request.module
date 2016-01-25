@@ -442,7 +442,8 @@ function wechat_request_save_request_messages(Wechat $wechat) {
         case 'subscribe':
           //用户已关注时的事件推送
         case 'SCAN': {
-          $request_wrapper->field_ticket->set($xml_obj->Ticket);
+          $Ticket = !empty($xml_obj->Ticket) ? $xml_obj->Ticket : '';
+          $request_wrapper->field_ticket->set($Ticket);
           break;
         }
         //上报地理位置事件
