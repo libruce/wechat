@@ -606,6 +606,8 @@ class WechatUser extends Entity {
   }
 
   public function setUser($account) {
+    $a = $account;
+    watchdog('public function setUser($account)', json_encode((array) $a));
     $this->uid = is_object($account) ? $account->uid : $account;
   }
 
