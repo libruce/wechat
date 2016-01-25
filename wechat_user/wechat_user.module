@@ -621,6 +621,16 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
 
+    $properties['uid'] = array(
+      'type' => 'token',
+      'label' => t('UID'),
+      'description' => t('Create time of wechat response message.'),
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat response message',
+      'getter callback' => 'user_load',
+      'schema field' => 'uid',
+      'required' => TRUE,
+    );
 
     $properties['user'] = array(
       'type' => 'user',
