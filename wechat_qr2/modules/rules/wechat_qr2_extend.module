@@ -3,7 +3,7 @@
 /**
  * Implements hook_entity_insert().
  */
-function wechat_qr2_rules_entity_insert($entity, $type) {
+function wechat_qr2_extend_entity_insert($entity, $type) {
   if ($entity instanceof WechatRequest && $entity->msg_type == 'event') {
     $w = $entity->wrapper();
     $event = $w->field_event->value();
@@ -26,16 +26,16 @@ function wechat_qr2_rules_entity_insert($entity, $type) {
       }
     }
     $wechat_request = $entity;
-    rules_invoke_event('wechat_qr2_rules_qr_scan_event', $openid, $event, $key, $wechat_qr2, $wechat_request);
+    rules_invoke_event('wechat_qr2_extend_qr_scan_event', $openid, $event, $key, $wechat_qr2, $wechat_request);
   }
 }
 
 /**
  * Implements hook_rules_event_info().
  */
-function wechat_qr2_rules_rules_event_info() {
+function wechat_qr2_extend_rules_event_info() {
   return array(
-    'wechat_qr2_rules_qr_scan_event' => array(
+    'wechat_qr2_extend_qr_scan_event' => array(
       'label' => t('微信二维码扫描事件'),
       'group' => t('微信'),
       'variables' => array(
