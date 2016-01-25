@@ -429,7 +429,7 @@ function wechat_request_save_request_messages(Wechat $wechat) {
     }
     case 'event': {
       $EventKey = $xml_obj->EventKey;
-      watchdog('key_track432', $EventKey);
+      watchdog('key_track432', json_encode($EventKey));
       if (!empty($EventKey)) {
         watchdog('key_track', $EventKey);
         $request_wrapper->field_event_key->set($EventKey);
