@@ -1,5 +1,7 @@
 <?php
 include_once 'wechat_request.features.inc';
+use Drupal\wechat_api\Wechat;
+
 /**
  * Implements hook_entity_info().
  */
