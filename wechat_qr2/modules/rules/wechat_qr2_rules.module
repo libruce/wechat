@@ -4,7 +4,62 @@
  * Implements hook_entity_insert().
  */
 function wechat_qr2_rules_entity_insert($entity, $type) {
-  if ($type == 'wechat_request' && $entity->msg_type == 'event') {
+  if ($type == 'wechat_request' && $entity->msg_type == 'event' && $entity instanceof WechatRequest) {
+    $w = $entity->wrapper();
+    $event = $w->field_event->value();
+    $key = $w->field_event_key->value();
+    switch ($event) {
+      case 'SCAN': {
+        break;
+      }
+      case 'subscribe': {
+        $key = substr($key, 8);
+        break;
+      }
+    }
+    $openid = $entity->openid;
+    $wechat_qr2 = wechat_qr2_load_multiple(FALSE, array('qr_key' => $key));
+    $wechat_qr2 = reset($wechat_qr2);
+    if (!empty($wechat_qr2) && $wechat_qr2 instanceof WechatQr2) {
+      if ($wechat_qr2->qr_type == 0) {
 
+      }
+    }
+    $wechat_request = $entity;
+    rules_invoke_event('wechat_qr2_rules_qr_scan_event', $openid, $event, $key, $wechat_qr2, $wechat_request);
   }
+}
+
+/**
+ * Implements hook_rules_event_info().
+ */
+function wechat_qr2_rules_rules_event_info() {
+  return array(
+    'wechat_qr2_rules_qr_scan_event' => array(
+      'label' => t('微信二维码扫描事件'),
+      'group' => t('微信'),
+      'variables' => array(
+        'openid' => array(
+          'type' => 'text',
+          'label' => t('OpenId'),
+        ),
+        'event' => array(
+          'type' => 'text',
+          'label' => t('事件'),
+        ),
+        'event_key' => array(
+          'type' => 'text',
+          'label' => t('事件KEY'),
+        ),
+        'wechat_qr2' => array(
+          'type' => 'wechat_qr2',
+          'label' => t('二维码实体'),
+        ),
+        'wechat_request' => array(
+          'type' => 'wechat_request',
+          'label' => t('请求对象'),
+        ),
+      ),
+    ),
+  );
 }
