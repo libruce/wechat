@@ -345,8 +345,11 @@ function wechat_request_save_request_messages(Wechat $wechat) {
 
   $wechat_obj = $wechat;
 
-  $request = entity_create('wechat_request', array('msg_type' => $xml_obj->MsgType));
-  $request_wrapper = entity_metadata_wrapper('wechat_request', $request);
+//  $request = entity_create('wechat_request', array('msg_type' => $xml_obj->MsgType));
+
+  $request = new WechatRequest();
+  $request->msg_type = $xml_obj->MsgType;
+  $request_wrapper = $request->wrapper();
 
 
   $request_wrapper->subscription->set($xml_obj->ToUserName);
