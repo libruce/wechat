@@ -594,6 +594,10 @@ class WechatUser extends Entity {
     return reset($wechat);
   }
 
+  function  setuser($user) {
+    $this->uid = $user->uid;
+  }
+
   public function  openid() {
     return $this->openid;
   }
@@ -621,22 +625,11 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
 
-    $properties['uid'] = array(
-      'type' => 'token',
-      'label' => t('UID'),
-      'description' => t('Create time of wechat response message.'),
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat response message',
-      'getter callback' => 'user_load',
-      'schema field' => 'uid',
-      'required' => TRUE,
-    );
-
     $properties['user'] = array(
       'type' => 'user',
       'label' => t('User'),
       'description' => t('headimgurl of wechat user.'),
-      'setter callback' => 'entity_property_verbatim_set',
+      'setter callback' => 'entity_property_setter_method',
       'setter permission' => 'administer wechat user',
       'schema field' => 'uid',
       'required' => TRUE,
