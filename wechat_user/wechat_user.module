@@ -621,6 +621,16 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
 
+    $properties['user'] = array(
+      'type' => 'user',
+      'label' => t('User'),
+      'description' => t('headimgurl of wechat user.'),
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'uid',
+    );
+
     $properties['groupid'] = array(
       'type' => 'wechat_user_group',
       'label' => t('用户分组'),

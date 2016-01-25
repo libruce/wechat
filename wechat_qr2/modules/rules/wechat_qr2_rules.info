@@ -1,0 +1,8 @@
+name = 微信二维码Rules扩展
+description = 微信二维码Rules扩展。
+core = 7.x
+version = 7.x-2.0+1-dev
+package = wechat
+dependencies[] = wechat_api
+dependencies[] = wechat_qr2
+dependencies[] = rules

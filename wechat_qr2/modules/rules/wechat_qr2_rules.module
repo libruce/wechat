@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * Implements hook_entity_insert().
+ */
+function wechat_qr2_rules_entity_insert($entity, $type) {
+  if ($type == 'wechat_request' && $entity->msg_type == 'event') {
+
+  }
+}

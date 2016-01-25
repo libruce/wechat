@@ -7,6 +7,7 @@ dependencies[] = entity
 dependencies[] = entityreference
 dependencies[] = features
 dependencies[] = wechat_qr2
+dependencies[] = wechat_user
 features[features_api][] = api:2
 features[field_base][] = user_bind_user_referenced
 features[field_instance][] = wechat_qr2-user_bind_qr-user_bind_user_referenced
