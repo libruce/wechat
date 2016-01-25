@@ -391,7 +391,7 @@ class WechatQr2 extends Entity {
   public function  save() {
 
     //临时二维码key自动生成
-    if ($this->qr_type == 0) {
+    if ($this->qr_type == 0 && empty($this->qr_key)) {
       $this->qr_key = $this->makeKey();
     }
     if ($this->qr_type == 1 && is_numeric($this->qr_key)) {
