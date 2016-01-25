@@ -1,14 +1,29 @@
 <?php
 
 /**
- * Implements hook_entity_insert().
+ * Implements hook_rules_action_info().
  */
-function wechat_qr2_extend_entity_insert($entity, $type) {
-  watchdog('debug', 7);
-  if ($entity instanceof WechatRequest && $entity->msg_type == 'event') {
-    watchdog('debug', 9);
-    return;
-    $w = $entity->wrapper();
+function wechat_qr2_extend_rules_action_info() {
+  return array(
+    'wechat_qr2_extend_invoke_qr_scan_event' => array(
+      'group' => t('微信'),
+      'access callback' => user_access('administer permissions'),
+      'label' => t('微信二维码扩展--触发二维码扫描事件'),
+      'base' => 'wechat_qr2_extend_invoke_qr_scan_event',
+      'parameter' => array(
+        'wechat_request' => array(
+          'type' => 'wechat_request',
+          'label' => t('请求对象'),
+          'save' => TRUE,
+        ),
+      ),
+    )
+  );
+}
+
+function wechat_qr2_extend_invoke_qr_scan_event(WechatRequest $wechatRequest) {
+  if ($wechatRequest->msg_type == 'event') {
+    $w = $wechatRequest->wrapper();
     $event = $w->field_event->value();
     watchdog('$event = $w->field_event->value();', $event);
     $key = $w->field_event_key->value();
@@ -27,12 +42,12 @@ function wechat_qr2_extend_entity_insert($entity, $type) {
       }
     }
 
-    $openid = $entity->openid;
+    $openid = $wechatRequest->openid;
     $wechat_qr2 = wechat_qr2_load_multiple(FALSE, array('qr_key' => $key));
     $wechat_qr2 = reset($wechat_qr2);
     if (!empty($wechat_qr2) && $wechat_qr2 instanceof WechatQr2) {
 
-      $wechat_request = $entity;
+      $wechat_request = $wechatRequest;
       rules_invoke_event('wechat_qr2_extend_qr_scan_event', $openid, $event, $key, $wechat_request, $wechat_qr2);
     }
   }
