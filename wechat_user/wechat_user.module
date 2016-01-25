@@ -567,6 +567,10 @@ class WechatUser extends Entity {
     return utf8_decode($this->nickname);
   }
 
+  function  setNickname($value) {
+    $this->nickname = utf8_encode($value);
+  }
+
   /**
    * 同步用户备注和分组
    */
@@ -607,16 +611,16 @@ class WechatUser extends Entity {
   }
 
   protected function defaultLabel() {
-    return utf8_decode($this->nickname);
+    return $this->nickname();
   }
 
   public function save() {
-    $this->nickname = utf8_encode($this->nickname);
     if ($group = WechatUserGroup::exists($this->groupid)) {
       $this->groupid = $group->id;
     }
     parent::save();
   }
+
 }
 
 class WechatUserMetadataController extends EntityDefaultMetadataController {
@@ -632,6 +636,17 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
       'setter callback' => 'entity_property_setter_method',
       'setter permission' => 'administer wechat user',
       'schema field' => 'uid',
+      'required' => TRUE,
+    );
+
+    $properties['nickname'] = array(
+      'type' => 'user',
+      'label' => t('User'),
+      'description' => t('headimgurl of wechat user.'),
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_setter_method',
+      'setter permission' => 'administer wechat user',
+      'schema field' => 'nickname',
       'required' => TRUE,
     );
 
