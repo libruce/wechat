@@ -87,6 +87,16 @@ function wechat_user_settings_page() {
 
 
 function wechat_user_op_user($form, &$form_state) {
+  $openid = 'oXLV-s6O_2eD11pZqJvWkBv-EpLM';
+  $wechat_user = wechat_user_load_multiple(FALSE, array('openid' => $openid));
+  if (!empty($wechat_user)) {
+    $wechat_user = reset($wechat_user);
+  }
+  $wu = $wechat_user;
+  $wuw = $wu->wrapper();
+  $n = $wuw->nickname->value();
+  dpm($wu);
+  dpm($n);
   $form['group'] = array(
     '#type' => 'fieldset',
     '#title' => t('分组管理'),
@@ -366,7 +376,12 @@ function wechat_user_load($id, $reset = FALSE) {
 }
 
 function wechat_user_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('wechat_user', $ids, $conditions, $reset);
+  $entities = entity_load('wechat_user', $ids, $conditions, $reset);
+  foreach ($entities as &$entity) {
+    //处理昵称编码问题
+    $entity->nickname = utf8_decode($entity->nickname);
+  }
+  return $entities;
 }
 
 function wechat_user_group_load($id, $reset = FALSE) {
@@ -563,14 +578,6 @@ class WechatUser extends Entity {
   public $remark;
   public $groupid;
 
-  public function  nickname() {
-    return utf8_decode($this->nickname);
-  }
-
-  function  setNickname($value) {
-    $this->nickname = utf8_encode($value);
-  }
-
   /**
    * 同步用户备注和分组
    */
@@ -598,7 +605,7 @@ class WechatUser extends Entity {
     return reset($wechat);
   }
 
-  function  setuser($user) {
+  function  setUser($user) {
     $this->uid = $user->uid;
   }
 
@@ -611,7 +618,7 @@ class WechatUser extends Entity {
   }
 
   protected function defaultLabel() {
-    return $this->nickname();
+    return utf8_decode($this->nickname);
   }
 
   public function save() {
@@ -641,11 +648,9 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
     );
 
     $properties['nickname'] = array(
-      'type' => 'user',
-      'label' => t('User'),
+      'type' => 'text',
+      'label' => t('微信昵称'),
       'description' => t('headimgurl of wechat user.'),
-      'getter callback' => 'entity_property_getter_method',
-      'setter callback' => 'entity_property_setter_method',
       'setter permission' => 'administer wechat user',
       'schema field' => 'nickname',
       'required' => TRUE,
