@@ -43,9 +43,8 @@ function wechat_qr2_extend_invoke_qr_scan_event(WechatRequest $wechatRequest) {
     $wechat_qr2 = wechat_qr2_load_multiple(FALSE, array('qr_key' => $key));
     $wechat_qr2 = reset($wechat_qr2);
     if (!empty($wechat_qr2) && $wechat_qr2 instanceof WechatQr2) {
-
       $wechat_request = $wechatRequest;
-      rules_invoke_event('wechat_qr2_extend_qr_scan_event', $openid, $event, $key, $wechat_request, $wechat_qr2);
+      rules_invoke_event('wechat_qr2_extend_qr_scan_event', (string) $openid, (string) $event, (string) $key, $wechat_request, $wechat_qr2);
     }
   }
 }
