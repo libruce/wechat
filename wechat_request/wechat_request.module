@@ -348,19 +348,16 @@ function wechat_request_save_media($file_content, $file_name, $field_name, $msg_
  */
 function wechat_request_save_request_messages(Wechat $wechat) {
   try {
-    watchdog('debug', 342);
     $wechat->getRev();
     $xml_obj = $wechat->getRevData();
     $xml_obj = (object) $xml_obj;
 
     $wechat_obj = $wechat;
 
-//  $request = entity_create('wechat_request', array('msg_type' => $xml_obj->MsgType));
-
     $request = new WechatRequest();
     $request->msg_type = $xml_obj->MsgType;
     $request_wrapper = $request->wrapper();
-    watchdog('debug', 354);
+
 
     $request_wrapper->subscription->set($xml_obj->ToUserName);
     $request_wrapper->openid->set($xml_obj->FromUserName);
@@ -373,7 +370,6 @@ function wechat_request_save_request_messages(Wechat $wechat) {
       $request_wrapper->msg_id->set($xml_obj->MsgId);
     }
 
-    watchdog('debug', 367);
     switch ($xml_obj->MsgType) {
       case 'text': {
         $request_wrapper->field_content->set($xml_obj->Content);
@@ -438,14 +434,10 @@ function wechat_request_save_request_messages(Wechat $wechat) {
       }
       case 'event': {
         $EventKey = $xml_obj->EventKey;
-        watchdog('key_track432', json_encode($EventKey));
         if (!empty($EventKey)) {
-          watchdog('key_track', $EventKey);
           $request_wrapper->field_event_key->set($EventKey);
         }
-        //watchdog('wechat_EventKey', $EventKey);
         $request_wrapper->field_event->set($xml_obj->Event);
-        //watchdog('wechat', json_encode((array) $xml_obj));
 
         //处理特殊事件数据，如上报地理位置事件、关注、取消关注等。
         switch ($xml_obj->Event) {
@@ -468,16 +460,9 @@ function wechat_request_save_request_messages(Wechat $wechat) {
         break;
       }
     }
-    watchdog('debug', 461);
     //全部消息数据转换为json格式，存入数据库
-//  $request_wrapper->data->set(json_encode((array) $xml_obj));
-    watchdog('$request_wrapper->save()before;', json_encode((array) $xml_obj));
-
     $request_wrapper->save();
-//  $request_wrapper->data->set(json_encode((array) $xml_obj));
-    watchdog('$request_wrapper->save();', json_encode((array) $xml_obj));
   } catch (Exception $e) {
-    watchdog('aaa', 471);
     watchdog_exception('wechat_request_save_request_messages', $e);
   }
 }
