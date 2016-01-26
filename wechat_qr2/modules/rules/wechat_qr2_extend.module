@@ -27,8 +27,8 @@ function wechat_qr2_extend_invoke_qr_scan_event(WechatRequest $wechatRequest) {
     watchdog('aaaaaaaaaaaa', 27);
     $event = $w->field_event->value();
     watchdog('$event = $w->field_event->value();', $event);
-//    $key = $w->field_event_key->value();
-//    watchdog('$key = $w->field_event_key->value();', $key);
+    $key = $w->field_event_key->value();
+    watchdog('$key = $w->field_event_key->value();', $key);
     if (empty($event) || empty($key)) {
       watchdog('empty', 16);
       return;
