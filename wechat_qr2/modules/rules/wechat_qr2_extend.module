@@ -23,7 +23,8 @@ function wechat_qr2_extend_rules_action_info() {
 
 function wechat_qr2_extend_invoke_qr_scan_event(WechatRequest $wechatRequest) {
   if ($wechatRequest->msg_type == 'event') {
-//    $w = $wechatRequest->wrapper();
+    $w = $wechatRequest->wrapper();
+    watchdog('aaaaaaaaaaaa', 27);
 //    $event = $w->field_event->value();
 //    watchdog('$event = $w->field_event->value();', $event);
 //    $key = $w->field_event_key->value();
