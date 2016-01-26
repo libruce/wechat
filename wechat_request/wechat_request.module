@@ -200,7 +200,6 @@ class WechatRequest extends Entity {
     try {
       //@todo 增加消息排重检查
       if ($this->checkOnly($this)) {
-        watchdog('deb', 202);
         return;
       }
       parent::save();
@@ -211,14 +210,11 @@ class WechatRequest extends Entity {
 
   //@todo 检查消息是否唯一,存在返回TRUE
   function  checkOnly(WechatRequest $request) {
-    watchdog('deb', 209);
     if (!empty($request->msg_id)) {
-      watchdog('deb', 211);
       return !empty(entity_load('wechat_request', FALSE, array(
         'msg_id' => $request->msg_id
       )));
     }
-    watchdog('deb', 216);
     return !empty(entity_load('wechat_request', FALSE, array(
       'openid' => $request->openid,
       'create_time' => $request->create_time
