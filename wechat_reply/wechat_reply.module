@@ -672,27 +672,27 @@ class WechatReplyMetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info['wechat_reply']['properties'];
 
-
     $properties['msg_type'] = array(
-      'label' => t('消息类型'),
-      'description' => t('Message type of wechat response message.'),
-      'type' => 'token',
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat response message',
-      'options list' => 'wechat_request_message_type_options_list',
+        'type' => 'wechat_reply_type',
+        'getter callback' => 'entity_property_getter_method',
+        'setter callback' => 'entity_property_verbatim_set',
+        'setter permission' => 'administer profiles',
+        'required' => TRUE,
+        'description' => t('The profile type.'),
+      ) + $properties['msg_type'];
+
+    unset($properties['uid']);
+    $properties['user'] = array(
+      'label' => t("User"),
+      'type' => 'user',
+      'description' => t("The owner of the profile."),
+      'getter callback' => 'entity_property_getter_method',
+      'setter callback' => 'entity_property_setter_method',
+      'setter permission' => 'administer profiles',
       'required' => TRUE,
-      'schema field' => 'msg_type',
-    );
-    $properties['uid'] = array(
-      'type' => 'token',
-      'label' => t('UID'),
-      'description' => t('Create time of wechat response message.'),
-      'setter callback' => 'entity_property_verbatim_set',
-      'setter permission' => 'administer wechat response message',
-      'getter callback' => 'user_load',
       'schema field' => 'uid',
-      'required' => TRUE,
     );
+
     $properties['data'] = array(
       'type' => 'text',
       'label' => t('Create time'),
