@@ -49,12 +49,50 @@ function wechat_reply_views_default_views() {
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
     'id' => 'id',
+    'title' => 'title',
+    'msg_type' => 'msg_type',
+    'create_time' => 'create_time',
+    'field_reply_keyword' => 'field_reply_keyword',
+    'nothing' => 'nothing',
   );
   $handler->display->display_options['style_options']['default'] = '-1';
   $handler->display->display_options['style_options']['info'] = array(
     'id' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'msg_type' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'create_time' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_reply_keyword' => array(
       'sortable' => 0,
       'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'nothing' => array(
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -87,6 +125,11 @@ function wechat_reply_views_default_views() {
   $handler->display->display_options['fields']['create_time']['label'] = '添加/修改时间';
   $handler->display->display_options['fields']['create_time']['date_format'] = 'short';
   $handler->display->display_options['fields']['create_time']['second_date_format'] = 'long';
+  /* Field: 微信回应消息: 关键字 */
+  $handler->display->display_options['fields']['field_reply_keyword']['id'] = 'field_reply_keyword';
+  $handler->display->display_options['fields']['field_reply_keyword']['table'] = 'field_data_field_reply_keyword';
+  $handler->display->display_options['fields']['field_reply_keyword']['field'] = 'field_reply_keyword';
+  $handler->display->display_options['fields']['field_reply_keyword']['type'] = 'text_plain';
   /* Field: Global: Custom text */
   $handler->display->display_options['fields']['nothing']['id'] = 'nothing';
   $handler->display->display_options['fields']['nothing']['table'] = 'views';
@@ -133,6 +176,7 @@ function wechat_reply_views_default_views() {
     t('标签'),
     t('消息类型'),
     t('添加/修改时间'),
+    t('关键字'),
     t('操作'),
     t('<ul class="links inline operations">
 <li>
