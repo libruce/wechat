@@ -123,6 +123,7 @@ function wechat_reply_views_default_views() {
   $handler->display->display_options['fields']['msg_type']['id'] = 'msg_type';
   $handler->display->display_options['fields']['msg_type']['table'] = 'wechat_reply';
   $handler->display->display_options['fields']['msg_type']['field'] = 'msg_type';
+  $handler->display->display_options['fields']['msg_type']['label'] = '消息类型';
   /* Field: 微信回应消息: Update time */
   $handler->display->display_options['fields']['update_time']['id'] = 'update_time';
   $handler->display->display_options['fields']['update_time']['table'] = 'wechat_reply';
@@ -187,7 +188,7 @@ function wechat_reply_views_default_views() {
     t('.'),
     t(','),
     t('标签'),
-    t('Msg_type'),
+    t('消息类型'),
     t('更新时间'),
     t('关键字'),
     t('BY'),
