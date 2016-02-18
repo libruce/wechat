@@ -3,9 +3,10 @@
 /**
  * @param $material_body
  * @param $material_type
+ * @param $entity_type
+ * @param $entity_id
  * @param int $forever
- * @return array|bool|int|string
- * @todo 素材上传
+ * @return array
  */
 function wechat_material_upload($material_body, $material_type, $entity_type, $entity_id, $forever = 0) {
   $media_id = '';
