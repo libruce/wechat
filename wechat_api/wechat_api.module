@@ -72,6 +72,13 @@ function wechat_api_settings_form($form, &$form_state) {
     '#default_value' => variable_get('wechat_api_appsecret', ''),
     '#required' => TRUE,
   );
+  $form['required']['wechat_api_encodingaeskey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('EncodingAESKey'),
+    '#default_value' => variable_get('wechat_api_encodingaeskey', ''),
+    '#required' => TRUE,
+  );
+
   $form['required']['wechat_api_debug'] = array(
     '#type' => 'checkbox',
     '#title' => t('Debug（测试环境使用）'),
@@ -107,6 +114,7 @@ function wechat_api_init_wechatobj() {
       'token' => variable_get('wechat_api_token', ""),
       'appid' => variable_get('wechat_api_appid', ""),
       'appsecret' => variable_get('wechat_api_appsecret', ""),
+      'encodingaeskey' => variable_get('wechat_api_encodingaeskey', ''),
     );
     $wechat = new Wechat($options);
     $access_token = variable_get("wechat_api_access_token", '');
