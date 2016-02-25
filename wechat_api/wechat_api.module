@@ -81,7 +81,7 @@ function wechat_api_settings_form($form, &$form_state) {
 
   $form['required']['wechat_api_debug'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Debug（测试环境使用）'),
+    '#title' => t('Debug（测试时使用，选中时不验证消息签名）'),
     '#default_value' => variable_get('wechat_api_debug', FALSE),
   );
   $form['#submit'][] = 'wechat_api_access_token_refresh';
