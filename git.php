@@ -1,4 +1,4 @@
 <?php
-exec('git pull origin master');
+exec('git pull origin wechat2');
 echo time();
 ?>
