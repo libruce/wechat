@@ -323,6 +323,20 @@ class JSSDK {
   }
 }
 
+function wechat_jssdk_get_settings() {
+  $JSSDK = new JSSDK();
+  $getSignPackage = $JSSDK->getSignPackage();
+
+  $settings = array(
+    'appId' => $getSignPackage['appId'],
+    'timestamp' => $getSignPackage['timestamp'],
+    'nonceStr' => $getSignPackage['nonceStr'],
+    'signature' => $getSignPackage['signature'],
+    'editAddress' => $JSSDK->GetEditAddressParameters(),
+  );
+  return $settings;
+}
+
 /**
  * Implements hook_page_build().
  */
