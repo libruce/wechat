@@ -2471,10 +2471,6 @@ class Wechat {
     return self::OAUTH_PREFIX . self::OAUTH_AUTHORIZE_URL . 'appid=' . $this->appid . '&redirect_uri=' . urlencode($callback) . '&response_type=code&scope=' . $scope . '&state=' . $state . '#wechat_redirect';
   }
 
-  function getOauthRedirect2($callback, $state = '', $scope = 'snsapi_userinfo') {
-    return 'http://wechat.open.sosyuki.com/' . 'open/connect/oauth2/authorize?' . 'appid=' . $this->appid . '&redirect_uri=' . urlencode($callback) . '&response_type=code&scope=' . $scope . '&state=' . $state . '#wechat_redirect';
-  }
-
   /**
    * 通过code获取Access Token
    * @return array {access_token,expires_in,refresh_token,openid,scope}
@@ -2484,8 +2480,7 @@ class Wechat {
     if (!$code) {
       return FALSE;
     }
-    //"http://wechat.open.sosyuki.com/open/sns/oauth2/access_token"
-    $result = $this->http_get("http://wechat.open.sosyuki.com/open/sns/oauth2/access_token?" . 'appid=' . $this->appid . '&secret=' . $this->appsecret . '&code=' . $code . '&grant_type=authorization_code');
+    $result = $this->http_get(self::API_BASE_URL_PREFIX . self::OAUTH_TOKEN_URL . 'appid=' . $this->appid . '&secret=' . $this->appsecret . '&code=' . $code . '&grant_type=authorization_code');
     if ($result) {
       $json = json_decode($result, TRUE);
       if (!$json || !empty($json['errcode'])) {
