@@ -457,8 +457,9 @@ function wechat_user_auth() {
   $error = isset($_GET['error']) ? $_GET['error'] : '';
   $destination = isset($_GET['destination']) ? $_GET['destination'] : '';
   $code = isset($_GET['code']) ? $_GET['code'] : '';
+  dpm($_GET);
 
-
+  return 'b';
   global $user;
   if ($user->uid) {
     drupal_goto($destination);
