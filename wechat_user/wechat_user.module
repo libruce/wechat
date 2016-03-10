@@ -27,6 +27,16 @@ function wechat_user_menu() {
     'type' => MENU_CALLBACK,
   );
 
+
+  //自定义登录回调
+  $items['demo-test'] = array(
+    'title' => 'Wechat Login',
+    'page callback' => 'wechat_user_demo_callback',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+
   $items['admin/structure/wechat_user'] = array(
     'title' => '微信用户设置',
     'description' => '微信用户设置，如：微信登录自动注册为某角色，刷新用户信息等。',
@@ -71,6 +81,12 @@ function wechat_user_menu() {
     'type' => MENU_LOCAL_TASK,
   );
   return $items;
+}
+
+function wechat_user_demo_callback() {
+  dpm($_GET);
+  dpm($_POST);
+  return 'a';
 }
 
 function wechat_user_create_login_url($goto, $error = 'node') {
