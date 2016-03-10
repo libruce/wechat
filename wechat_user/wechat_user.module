@@ -220,7 +220,7 @@ function wechat_user_login_two() {
   $type = $_GET['type'];
 
   $we_obj = wechat_api_init_wechatobj();
-  $auth_url = $we_obj->getOauthRedirect(url('wechat/auth', array(
+  $auth_url = $we_obj->getOauthRedirect2(url('wechat/auth', array(
     'absolute' => TRUE,
     'query' => array('destination' => $goto, 'error' => $error)
   )), $state, $type);

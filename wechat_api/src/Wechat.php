@@ -2471,6 +2471,10 @@ class Wechat {
     return self::OAUTH_PREFIX . self::OAUTH_AUTHORIZE_URL . 'appid=' . $this->appid . '&redirect_uri=' . urlencode($callback) . '&response_type=code&scope=' . $scope . '&state=' . $state . '#wechat_redirect';
   }
 
+  function getOauthRedirect2($callback, $state = '', $scope = 'snsapi_userinfo') {
+    return 'http://wechat.open.sosyuki.com/'.'open/connect/oauth2/authorize?' . 'appid=' . $this->appid . '&redirect_uri=' . urlencode($callback) . '&response_type=code&scope=' . $scope . '&state=' . $state . '#wechat_redirect';
+  }
+
   /**
    * 通过code获取Access Token
    * @return array {access_token,expires_in,refresh_token,openid,scope}
