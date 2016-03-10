@@ -459,22 +459,24 @@ function wechat_user_auth() {
   $code = isset($_GET['code']) ? $_GET['code'] : '';
   dpm($_GET);
 
-  return 'b';
+//  return 'b';
   global $user;
-  if ($user->uid) {
-    drupal_goto($destination);
-  }
+//  if ($user->uid) {
+//    drupal_goto($destination);
+//  }
 
   $wechat_obj = wechat_api_init_wechatobj();
 
 
   // error
-  if ((!$code) || (!$state)) { // error
-    drupal_goto($error);
-  }
+//  if ((!$code) || (!$state)) { // error
+//    drupal_goto($error);
+//  }
 
   $access_data = $wechat_obj->getOauthAccessToken();
-
+  $u = $wechat_obj->getUserInfo($access_data['openid']);
+  dpm($u);
+  return 'b';
   if (empty($access_data)) {
     drupal_goto($error);
   }
