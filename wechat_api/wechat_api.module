@@ -135,6 +135,7 @@ function wechat_api_init_wechatobj() {
   }
   return $wechat;
 }
+use Drupal\wechat_api\WeixinMsgCrypt;
 
 /**
  * 微信接口回调函数，提供验证是否接入成功。在wechat_session模块中使用hook_menu_alter()覆写提供更强大的功能。
@@ -171,6 +172,17 @@ function wechat_api_callback() {
 
   $result_str = sprintf($return_template, $to_user_name, $from_user_name, $request_time, $content);
   watchdog('$result_str', json_encode($result_str));
-  echo $result_str;
+
+  $token = variable_get('weixin_open_token', "");
+  $appId = variable_get('weixin_open_appid', "");
+  $encodingAesKey = variable_get('weixin_open_aes_key', '');
+
+  //消息加密
+  $pc = new WeixinMsgCrypt($token, $encodingAesKey, $appId);
+  $echo = '';
+  $pc->encryptMsg($result_str, time(), drupal_random_key(10), $echo);
+  echo $echo;
+
+//  echo $result_str;
 }
 
