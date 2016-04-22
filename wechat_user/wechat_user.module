@@ -73,8 +73,8 @@ function wechat_user_menu() {
   return $items;
 }
 
-function wechat_user_create_login_url($goto, $error = 'node') {
-  return "/wechat/user/login?goto={$goto}&error={$error}&state=1&type=snsapi_base";
+function wechat_user_create_login_url($goto, $error, $state, $type = 'snsapi_base') {
+  return "/wechat/user/login?goto={$goto}&error={$error}&state={$state}&type={$type}";
 }
 
 
@@ -431,6 +431,7 @@ function _wechat_user_login($uid) {
 }
 
 /**
+ * @todo 微信授权认证回调
  * state 操作类型。
  * new 需要注册新的user ；
  * update 同步当前登录的用户；
@@ -444,47 +445,100 @@ function wechat_user_auth() {
 
 
   global $user;
+  //@todo 如果已经登录跳转
   if ($user->uid) {
     drupal_goto($destination);
   }
 
   $wechat_obj = wechat_api_init_wechatobj();
 
-
-  // error
+  //@todo 判断是否出错了。到错误页面
   if ((!$code) || (!$state)) { // error
     drupal_goto($error);
   }
-
   $access_data = $wechat_obj->getOauthAccessToken();
 
+  //@todo 微信返回错误
   if (empty($access_data)) {
     drupal_goto($error);
   }
-  if ($state == 'new') {
 
-  }
-  // check if already connectted
-  wechat_user_login_by_openid($access_data['openid']);
-  if ($current_user = wechat_user_get_user_by_openid($access_data['openid'])) {
-    _wechat_user_login($current_user->uid);
-    // todo update user info
-    if (empty($destination)) {
-      $destination = 'user/' . $current_user->uid;
+  //@todo 尝试登录
+  $openid = $access_data['openid'];
+  $wechat_user = wechat_user_load_multiple(FALSE, array('openid' => $openid));
+  if (!empty($wechat_user)) {
+    $wechat_user = reset($wechat_user);
+    if ($uid = $wechat_user->uid) {
+      global $user;
+      $user = user_load($uid);
+      drupal_session_regenerate();
+      rules_invoke_event('wechat_user_wechat_login', $wechat_user, $user);
+      drupal_goto($destination);
     }
+  }
+
+
+  //@todo 判断操作类型
+  if ($state == 'new') {
+    // auto register
+    $user_name = 'wechat_' . $access_data['openid'];
+
+    $new_user = array(
+      'name' => $user_name,
+      'pass' => user_password(),
+      'status' => 1,
+    );
+
+    $account = user_save(NULL, $new_user);
+    $uid = $account->uid;
+    global $user;
+    $user = user_load($uid);
+    drupal_session_regenerate();
+    $wechat_user = wechat_user_registry_user($access_data['openid']);
+    if ($wechat_user instanceof WechatUser) {
+      $wechat_user->uid = $uid;
+      $wechat_user->save();
+    }
+    rules_invoke_event('wechat_user_wechat_login', $wechat_user, $user);
     drupal_goto($destination);
   }
 
-  $account = wechat_user_registry_user($access_data['openid']);
-  if (!empty($account)) {
-    _wechat_user_login($account->uid);
-    drupal_goto($destination);
-  }
   drupal_goto($error);
 }
 
-function wechat_user_login_by_openid($openid) {
+/**
+ * Implements hook_rules_event_info().
+ */
+function wechat_user_rules_event_info() {
+  $events['wechat_user_wechat_login'] = array(
+    'label' => t('微信登录事件'),
+    'group' => t('微信'),
+    'variables' => array(
+      'wechat_user' => array(
+        'type' => 'wechat_user',
+        'label' => t('Wechat User'),
+      ),
+      'user' => array(
+        'type' => 'user',
+        'label' => t('User'),
+      ),
+    ),
+  );
+  return $events;
+}
 
+function wechat_user_login_by_openid($openid) {
+  $wechat_user = wechat_user_load_multiple(FALSE, array('openid' => $openid));
+  if (!empty($wechat_user)) {
+    $wechat_user = reset($wechat_user);
+    if ($uid = $wechat_user->uid) {
+      global $user;
+      $user = user_load($uid);
+      drupal_session_regenerate();
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 class WechatUserGroup extends Entity {
@@ -596,8 +650,6 @@ class WechatUser extends Entity {
   }
 
   public function setUser($account) {
-    $a = $account;
-    watchdog('public function setUser($account)', json_encode((array) $a));
     $this->uid = is_object($account) ? $account->uid : $account;
   }
 
