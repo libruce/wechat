@@ -5,3 +5,4 @@ version = 7.x-2.0+1-dev
 php = 5.4
 package = wechat
 dependencies[] = xautoload (>= 7.x-5.0)
+dependencies[] = weixin_lib

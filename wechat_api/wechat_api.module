@@ -1,4 +1,9 @@
 <?php
+//默认工作模式。公众平台
+define('WEIXIN_USE_DEFAULT', 1);
+//开放平台工作模式
+define('WEIXIN_USE_OPEN', 2);
+
 use Drupal\wechat_api\Wechat;
 
 /**
@@ -34,6 +39,13 @@ function wechat_api_menu() {
     'page arguments' => array('wechat_api_settings_form'),
     'access arguments' => array('administer wechat configuration'),
   );
+  $items['admin/config/wechat/api/use'] = array(
+    'title' => '微信使用配置',
+    'description' => '设置使用方式.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_api_use_settings_form'),
+    'access arguments' => array('administer wechat configuration'),
+  );
   $items['wechat'] = array(
     'title' => 'wechat',
     'description' => 'wechat callback',
@@ -42,6 +54,26 @@ function wechat_api_menu() {
     'type' => MENU_CALLBACK,
   );
   return $items;
+}
+
+
+function wechat_api_use_settings_form($form, &$form_state) {
+  $form['required'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('微信使用配置'),
+  );
+
+  $form['required']['wechat_api_use'] = array(
+    '#type' => 'radios',
+    '#title' => t('运行模式'),
+    '#default_value' => variable_get('wechat_api_use', WEIXIN_USE_DEFAULT),
+    '#options' => array(
+      '1' => '公众平台',
+      '2' => '开放平台',
+    ),
+    '#required' => TRUE,
+  );
+  return system_settings_form($form);
 }
 
 function wechat_api_settings_form($form, &$form_state) {
@@ -136,7 +168,7 @@ function wechat_api_init_wechatobj() {
   return $wechat;
 }
 
-use Drupal\weixin_open\WeixinMsgCrypt;
+use Drupal\weixin_lib\WeixinMsgCrypt;
 
 /**
  * 微信接口回调函数，提供验证是否接入成功。在wechat_session模块中使用hook_menu_alter()覆写提供更强大的功能。
