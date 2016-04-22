@@ -174,9 +174,9 @@ function wechat_api_callback() {
   $result_str = sprintf($return_template, $to_user_name, $from_user_name, $request_time, $content);
   watchdog('$result_str', json_encode($result_str));
 
-  $token = variable_get('weixin_open_token', "");
-  $appId = variable_get('weixin_open_appid', "");
-  $encodingAesKey = variable_get('weixin_open_aes_key', '');
+  $token = variable_get('wechat_api_token', "");
+  $appId = variable_get('wechat_api_appid', "");
+  $encodingAesKey = variable_get('wechat_api_encodingaeskey', '');
 
   //消息加密
   $pc = new WeixinMsgCrypt($token, $encodingAesKey, $appId);
