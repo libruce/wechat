@@ -159,7 +159,7 @@ function wechat_api_callback() {
     $content .= $wechat_obj->getRevContent();
   }
   else {
-    $content .= 'api配置成功。';
+    $content .= '转发接收 api配置成功。';
   }
 
   $return_template = "<xml>
