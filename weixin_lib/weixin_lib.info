@@ -1,0 +1,6 @@
+name = 微信相关基础库
+description = 微信相关基础库，提供加解密库
+core = 7.x
+package = weixin
+version = 7.x-1.0
+dependencies[] = xautoload (>= 7.x-5.0)
