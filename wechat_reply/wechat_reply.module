@@ -317,7 +317,7 @@ function wechat_reply_rules_action_info() {
 function wechat_reply_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   // Add action link to 'node/add' on 'admin/content' page.
   if ($root_path == 'admin/content/reply') {
-    $item = menu_get_item('admin/content/reply/add');
+    $item = menu_get_item('admin/wechat/reply/add');
     if ($item['access']) {
       $data['actions']['output'][] = array(
         '#theme' => 'menu_local_action',
@@ -345,7 +345,7 @@ function wechat_reply_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
-  $items['admin/content/reply/%wechat_reply'] = array(
+  $items['admin/wechat/reply/%wechat_reply'] = array(
     'title' => 'Reply Messages',
     'access callback' => 'wechat_reply_access',
     'access arguments' => array('view', 3),
@@ -356,7 +356,7 @@ function wechat_reply_menu() {
     'file' => 'wechat_reply.pages.inc',
   );
 
-  $items['admin/content/reply/%wechat_reply/edit'] = array(
+  $items['admin/wechat/reply/%wechat_reply/edit'] = array(
     'title' => '编辑',
     'page callback' => 'wechat_reply_edit_form',
     'page arguments' => array(3),
@@ -366,7 +366,7 @@ function wechat_reply_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'wechat_reply.forms.inc',
   );
-  $items['admin/content/reply/%wechat_reply/delete'] = array(
+  $items['admin/wechat/reply/%wechat_reply/delete'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wechat_reply_delete_confirm', 3),
     'access callback' => 'wechat_reply_access',
@@ -376,7 +376,7 @@ function wechat_reply_menu() {
     'file' => 'wechat_reply.pages.inc',
   );
 
-  $items['admin/content/reply/add'] = array(
+  $items['admin/wechat/reply/add'] = array(
     'title' => '添加微信回复消息',
     'access callback' => 'wechat_reply_access',
     'access arguments' => array('add_all'),
@@ -390,7 +390,7 @@ function wechat_reply_menu() {
   foreach ($types as $type) {
     //$type_url_str = str_replace('_', '-', $type->type);
     //参数看entity_info定义
-    $items['admin/content/reply/add/' . $type->type] = array(
+    $items['admin/wechat/reply/add/' . $type->type] = array(
       'title' => '添加' . $type->label,
       'title callback' => 'check_plain',
       'description' => $type->description,
