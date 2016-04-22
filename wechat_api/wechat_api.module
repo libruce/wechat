@@ -153,13 +153,13 @@ function wechat_api_callback() {
   $from_user_name = $wechat_obj->getRevTo();
   $request_time = time();
   $content = format_date(time(), 'short') . '
-  api配置成功
+  转发接收 api配置成功
   ';
   if ($xml_obj->MsgType == 'text') {
     $content .= $wechat_obj->getRevContent();
   }
   else {
-    $content .= '转发接收 api配置成功。';
+    $content .= 'api配置成功。';
   }
 
   $return_template = "<xml>
