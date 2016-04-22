@@ -170,7 +170,7 @@ function wechat_api_callback() {
     </xml>";
 
   $result_str = sprintf($return_template, $to_user_name, $from_user_name, $request_time, $content);
-
+  watchdog('$result_str', json_encode($result_str));
   echo $result_str;
 }
 
