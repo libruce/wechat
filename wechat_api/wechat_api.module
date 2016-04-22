@@ -147,6 +147,7 @@ function wechat_api_callback() {
   watchdog('$xml_obj', json_encode($xml_obj));
   $xml_obj = (object) $xml_obj;
   $to_user_name = $wechat_obj->getRevFrom();
+  watchdog('$to_user_name', $to_user_name);
   $from_user_name = $wechat_obj->getRevTo();
   $request_time = time();
   $content = format_date(time(), 'short') . '
