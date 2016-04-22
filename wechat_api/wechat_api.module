@@ -181,7 +181,7 @@ function wechat_api_callback() {
   $from_user_name = $wechat_obj->getRevTo();
   $request_time = time();
   $content = format_date(time(), 'short') . '
-  转发接收 api配置成功
+  api配置成功
   ';
   if ($xml_obj->MsgType == 'text') {
     $content .= $wechat_obj->getRevContent();
