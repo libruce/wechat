@@ -310,6 +310,23 @@ function wechat_reply_rules_action_info() {
   return $action;
 }
 
+/**
+ * Implements hook_admin_paths().
+ */
+function wechat_reply_admin_paths() {
+
+  $paths = array(
+    'reply/*/edit' => TRUE,
+    'reply/*/delete' => TRUE,
+//      'node/*/revisions' => TRUE,
+//      'node/*/revisions/*/revert' => TRUE,
+//      'node/*/revisions/*/delete' => TRUE,
+    'reply/add' => TRUE,
+    'reply/add/*' => TRUE,
+  );
+  return $paths;
+
+}
 
 /**
  * Implements hook_menu_local_tasks_alter().
@@ -317,7 +334,7 @@ function wechat_reply_rules_action_info() {
 function wechat_reply_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   // Add action link to 'node/add' on 'admin/content' page.
   if ($root_path == 'admin/content/reply') {
-    $item = menu_get_item('admin/wechat/reply/add');
+    $item = menu_get_item('reply/add');
     if ($item['access']) {
       $data['actions']['output'][] = array(
         '#theme' => 'menu_local_action',
@@ -345,38 +362,38 @@ function wechat_reply_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
-  $items['admin/wechat/reply/%wechat_reply'] = array(
+  $items['reply/%wechat_reply'] = array(
     'title' => 'Reply Messages',
     'access callback' => 'wechat_reply_access',
-    'access arguments' => array('view', 3),
+    'access arguments' => array('view', 1),
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'description' => 'Add a new property.',
     'page callback' => 'wechat_reply_pages',
-    'page arguments' => array(3),
+    'page arguments' => array(1),
     'file' => 'wechat_reply.pages.inc',
   );
 
-  $items['admin/wechat/reply/%wechat_reply/edit'] = array(
+  $items['reply/%wechat_reply/edit'] = array(
     'title' => '编辑',
     'page callback' => 'wechat_reply_edit_form',
-    'page arguments' => array(3),
+    'page arguments' => array(1),
     'access callback' => 'wechat_reply_access',
-    'access arguments' => array('edit', 3),
+    'access arguments' => array('edit', 1),
     'weight' => 0,
     'type' => MENU_LOCAL_TASK,
     'file' => 'wechat_reply.forms.inc',
   );
-  $items['admin/wechat/reply/%wechat_reply/delete'] = array(
+  $items['reply/%wechat_reply/delete'] = array(
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('wechat_reply_delete_confirm', 3),
+    'page arguments' => array('wechat_reply_delete_confirm', 1),
     'access callback' => 'wechat_reply_access',
-    'access arguments' => array('delete', 3),
+    'access arguments' => array('delete', 1),
     'weight' => 0,
     'type' => MENU_LOCAL_TASK,
     'file' => 'wechat_reply.pages.inc',
   );
 
-  $items['admin/wechat/reply/add'] = array(
+  $items['reply/add'] = array(
     'title' => '添加微信回复消息',
     'access callback' => 'wechat_reply_access',
     'access arguments' => array('add_all'),
@@ -390,7 +407,7 @@ function wechat_reply_menu() {
   foreach ($types as $type) {
     //$type_url_str = str_replace('_', '-', $type->type);
     //参数看entity_info定义
-    $items['admin/wechat/reply/add/' . $type->type] = array(
+    $items['reply/add/' . $type->type] = array(
       'title' => '添加' . $type->label,
       'title callback' => 'check_plain',
       'description' => $type->description,
@@ -538,7 +555,7 @@ function wechat_reply_new($type = '') {
 }
 
 function wechat_reply_access($op, $wechat_reply_type = NULL, $account = NULL) {
-  return user_access('administer wechat reply');
+  return user_access('administer wechat reply', $account);
 }
 
 function wechat_reply_type_access($op, $wechat_reply_type = NULL, $account = NULL) {
@@ -550,9 +567,6 @@ function wechat_reply_type_access($op, $wechat_reply_type = NULL, $account = NUL
  */
 function wechat_reply_permission() {
   return array(
-    'administer wechat reply' => [
-      'title' => t('操作微信回复消息'),
-    ],
     'administer wechat reply type' => array(
       'title' => t('微信回复消息类型'),
       'description' => t('管理微信回复消息类型.'),
