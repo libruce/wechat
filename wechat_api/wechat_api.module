@@ -5,6 +5,7 @@ define('WEIXIN_USE_DEFAULT', 1);
 define('WEIXIN_USE_OPEN', 2);
 
 use Drupal\wechat_api\Wechat;
+use Drupal\wechat_api\ErrCode;
 
 /**
  * Implements hook_permission().
