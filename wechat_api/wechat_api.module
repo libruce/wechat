@@ -144,6 +144,7 @@ function wechat_api_callback() {
   $wechat_obj->valid(variable_get('wechat_api_debug', FALSE));
   $wechat_obj->getRev();
   $xml_obj = $wechat_obj->getRevData();
+  watchdog('$xml_obj', $xml_obj);
   $xml_obj = (object) $xml_obj;
   $to_user_name = $wechat_obj->getRevFrom();
   $from_user_name = $wechat_obj->getRevTo();
