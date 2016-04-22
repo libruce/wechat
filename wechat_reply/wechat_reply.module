@@ -538,7 +538,7 @@ function wechat_reply_new($type = '') {
 }
 
 function wechat_reply_access($op, $wechat_reply_type = NULL, $account = NULL) {
-  return user_access('administer wechat reply', $account);
+  return user_access('administer wechat reply');
 }
 
 function wechat_reply_type_access($op, $wechat_reply_type = NULL, $account = NULL) {
@@ -550,6 +550,9 @@ function wechat_reply_type_access($op, $wechat_reply_type = NULL, $account = NUL
  */
 function wechat_reply_permission() {
   return array(
+    'administer wechat reply' => [
+      'title' => t('操作微信回复消息'),
+    ],
     'administer wechat reply type' => array(
       'title' => t('微信回复消息类型'),
       'description' => t('管理微信回复消息类型.'),
