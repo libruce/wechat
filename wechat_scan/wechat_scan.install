@@ -9,6 +9,7 @@ function wechat_scan_schema() {
   $schema['wechat_scan_product'] = array(
     'description' => '微信扫一扫产品.',
     'fields' => array(
+      //管理
       'id' => array(
         'type' => 'serial',
         'not null' => TRUE,
@@ -26,6 +27,19 @@ function wechat_scan_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'created' => array(
+        'description' => '创建时间.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => '变更时间.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      //发送
       'title' => array(
         'description' => '商品名称，建议不超过15个字，超过部分在客户端上以省略号显示。',
         'type' => 'varchar',
@@ -47,24 +61,13 @@ function wechat_scan_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      //返回
       'pid' => array(
         'description' => '创建成功，微信返回的PID。转译后的商品 id ，将直接编入 “获取商品二维码接口 ”返回的二维码内容 。',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-      ),
-      'created' => array(
-        'description' => '创建时间.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'changed' => array(
-        'description' => '变更时间.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
       ),
     ),
     'primary key' => array('id'),
