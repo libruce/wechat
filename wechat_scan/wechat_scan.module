@@ -1,2 +1,8 @@
 <?php
 
+/**
+ * Implements hook_menu().
+ */
+function wechat_scan_menu() {
+
+}
