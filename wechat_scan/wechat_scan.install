@@ -85,6 +85,7 @@ function wechat_scan_schema() {
   $schema['wechat_scan_product_revision'] = array(
     'description' => '微信扫一扫产品版本.',
     'fields' => array(
+      //管理
       'id' => array(
         'description' => 'id',
         'type' => 'int',
@@ -97,38 +98,55 @@ function wechat_scan_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'title' => array(
-        'description' => '消息标题，描述当前消息，不在微信中使用',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
       'uid' => array(
         'description' => '作者',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
-      'data' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'size' => 'big',
-        'serialize' => TRUE,
-        'description' => '消息的json格式，使用客服接口可直接发送，创建和更新时需更新。',
-      ),
-      'update_time' => array(
-        'description' => '消息更新时间',
+      'created' => array(
+        'description' => '创建时间.',
         'type' => 'int',
-        'unsigned' => TRUE,
         'not null' => TRUE,
+        'default' => 0,
       ),
-      'create_time' => array(
-        'description' => '消息创建时间',
+      'changed' => array(
+        'description' => '变更时间.',
         'type' => 'int',
-        'unsigned' => TRUE,
         'not null' => TRUE,
+        'default' => 0,
       ),
+      //发送
+      'title' => array(
+        'description' => '商品名称，建议不超过15个字，超过部分在客户端上以省略号显示。',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'keystandard' => array(
+        'description' => '商品编码标准，只支持 ean13 和 qrcode 两种标准。',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'keystr' => array(
+        'description' => '商品编码内容。 标准是 eaneanean13 ，则直接填写商品条码，如 “6901939621608” “6901939621608” “6901939621608” 。 标准是 qrcode，二维码的内容可由二维码的内容可由商户自定义，建议使自定义，建议使用商品条码，≤ 20 个字符，由 大小 字母 、数字 、下划线和连字符组成。 注意 ：编码标准是ean13时，编码内容必须在商户的号段之下 ，否则会报错。',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      //返回
+      'pid' => array(
+        'description' => '创建成功，微信返回的PID。转译后的商品 id ，将直接编入 “获取商品二维码接口 ”返回的二维码内容 。',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+
     ),
     'primary key' => array('vid'),
     'foreign keys' => array(
