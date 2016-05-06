@@ -306,6 +306,10 @@ class Wechat {
     return TRUE;
   }
 
+  function  getPostxml() {
+    return $this->postxml;
+  }
+
   /**
    * 设置发送消息
    * @param array $msg 消息数组
