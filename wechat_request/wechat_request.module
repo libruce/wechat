@@ -198,9 +198,10 @@ class WechatRequest extends Entity {
 
   public function save() {
     try {
+      watchdog(__FUNCTION__ . '-' . __LINE__, __FUNCTION__ . '-' . __LINE__);
       //@todo 增加消息排重检查
       if ($this->checkOnly($this)) {
-        watchdog('($this->checkOnly($this))',203);
+        watchdog('($this->checkOnly($this))', 203);
         return;
       }
       if (empty($this->create_time)) {
@@ -367,7 +368,7 @@ function wechat_request_save_request_messages(Wechat $wechat) {
     $request_wrapper->subscription->set($xml_obj->ToUserName);
     $request_wrapper->openid->set($xml_obj->FromUserName);
     $request_wrapper->create_time->set($xml_obj->CreateTime);
-watchdog('$xml_obj->MsgType',$xml_obj->MsgType);
+    watchdog('$xml_obj->MsgType', $xml_obj->MsgType);
     if ($xml_obj->MsgType == 'event') {
       $request_wrapper->msg_id->set('');
     }
@@ -378,7 +379,7 @@ watchdog('$xml_obj->MsgType',$xml_obj->MsgType);
     switch ($xml_obj->MsgType) {
       case 'text': {
         $request_wrapper->field_content->set($xml_obj->Content);
-        watchdog('$xml_obj->Content',$xml_obj->Content);
+        watchdog('$xml_obj->Content', $xml_obj->Content);
         break;
       }
       case 'image': {
@@ -466,11 +467,11 @@ watchdog('$xml_obj->MsgType',$xml_obj->MsgType);
         break;
       }
     }
-    watchdog('$request',json_encode($request));
+    watchdog('$request', json_encode($request));
     //全部消息数据转换为json格式，存入数据库
     $request_wrapper->save();
 
-    watchdog('$request',json_encode($request));
+    watchdog('$request', json_encode($request));
 
   } catch (Exception $e) {
     watchdog_exception('wechat_request_save_request_messages', $e);
