@@ -172,8 +172,8 @@ function wechat_api_init_wechatobj() {
     }
     case WEIXIN_USE_OPEN: {
       if (!isset($wechat)) {
-        $access_token = isset($_GET['wx_token']) ? $_GET['wx_token'] : '';
-        watchdog('$access_token',$access_token);
+        $access_token = isset($_GET['wx_token']) ? $_GET['wx_token'] : 'cWqSBMhAb4_DYSKRWpNN80dz3hGPKtl30WTAuxWjj-vgPHwff5rHJieGOnQy0HO3H351-z3UbwSUgGg4NGS7eO-KG9MgOE5KAY0_ErA-trWvSFL7SbHE0wDH5OX8BlyjWYQiAMDACU';
+        watchdog('$access_token', $access_token);
         $options = array(
           'access_token' => $access_token,
         );
