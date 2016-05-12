@@ -23,6 +23,7 @@ class Wechat2 extends Wechat {
   }
 
   function sendCustomMessage($data) {
+    watchdog('api_data', $data);
     if (!$this->access_token && !$this->checkAuth()) {
       return FALSE;
     }
