@@ -357,10 +357,8 @@ function wechat_session_status_list() {
 
 function wechat_session_status_options_list() {
   $status = wechat_session_status_list();
-  //dpm($return);
   $return = array();
   foreach ($status as $key => $info) {
-    dpm($info);
     $return[$key] = $info['name'] . '(' . $key . ')';
   }
   return $return;
