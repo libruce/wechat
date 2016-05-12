@@ -18,7 +18,27 @@ class Wechat2 extends Wechat {
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
       $postStr = file_get_contents("php://input");
       $this->postxml = $postStr;
-      watchdog('$postStr',$postStr);
+      watchdog('$postStr', $postStr);
     }
+  }
+
+  function sendCustomMessage($data) {
+
+    watchdog('api_data', $data);
+    //$data = self::json_encode($data);
+    //$data = json_encode($data, JSON_UNESCAPED_UNICODE);
+    $result = $this->http_post(self::API_URL_PREFIX . self::CUSTOM_SEND_URL . 'access_token=' . $this->access_token, self::json_encode($data));
+
+    watchdog('$result', json_encode(($result)));
+    if ($result) {
+      $json = json_decode($result, TRUE);
+      if (!$json || !empty($json['errcode'])) {
+        $this->errCode = $json['errcode'];
+        $this->errMsg = $json['errmsg'];
+        return FALSE;
+      }
+      return $json;
+    }
+    return FALSE;
   }
 }
