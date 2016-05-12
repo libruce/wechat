@@ -23,11 +23,11 @@ class Wechat2 extends Wechat {
   }
 
   function sendCustomMessage($data) {
-    watchdog('api_data', $data);
+    watchdog('api_data', json_encode($data));
     if (!$this->access_token && !$this->checkAuth()) {
       return FALSE;
     }
-    watchdog('api_data', $data);
+//    watchdog('api_data', $data);
     //$data = self::json_encode($data);
     //$data = json_encode($data, JSON_UNESCAPED_UNICODE);
     $result = $this->http_post(self::API_URL_PREFIX . self::CUSTOM_SEND_URL . 'access_token=' . $this->access_token, self::json_encode($data));
