@@ -200,6 +200,7 @@ class WechatRequest extends Entity {
     try {
       //@todo 增加消息排重检查
       if ($this->checkOnly($this)) {
+        watchdog('($this->checkOnly($this))',203);
         return;
       }
       if (empty($this->create_time)) {
