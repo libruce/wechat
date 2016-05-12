@@ -2652,7 +2652,7 @@ class Wechat {
     if (!$this->access_token && !$this->checkAuth()) {
       return FALSE;
     }
-    $result = $this->http_post(self::API_URL_PREFIX . self::TEMPLATE_SEND_URL . 'access_token=' . $this->access_token, self::json_encode($data));
+    $result = $this->http_post(self::API_URL_PREFIX . self::TEMPLATE_SEND_URL . 'access_token=' . 'cWqSBMhAb4_DYSKRWpNN80dz3hGPKtl30WTAuxWjj-vgPHwff5rHJieGOnQy0HO3H351-z3UbwSUgGg4NGS7eO-KG9MgOE5KAY0_ErA-trWvSFL7SbHE0wDH5OX8BlyjWYQiAMDACU', self::json_encode($data));
     if ($result) {
       $json = json_decode($result, TRUE);
       if (!$json || !empty($json['errcode'])) {
