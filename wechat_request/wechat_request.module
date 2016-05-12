@@ -362,9 +362,9 @@ function wechat_request_save_request_messages(Wechat $wechat) {
 
     $request = new WechatRequest();
     $request->msg_type = $xml_obj->MsgType;
-    $request->subscription = $xml_obj->ToUserName;
+//    $request->subscription = $xml_obj->ToUserName;
     $request->openid = $xml_obj->FromUserName;
-    $request->create_time = $xml_obj->CreateTime;
+//    $request->create_time = $xml_obj->CreateTime;
     $request->save();
     watchdog('$request', json_encode($request));
     return;
