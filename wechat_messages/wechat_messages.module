@@ -161,7 +161,6 @@ function wechat_messages_action_send_message($user, $type, $body) {
   drupal_alter('wechat_messages_type_repair', $type);
 
   $wechat_obj = wechat_api_init_wechatobj();
-  $body = '{"content:"aaaaabbbasdfasdf"}';
   $body = drupal_json_decode($body);
   watchdog('$body', drupal_json_encode($body));
   $body = (array) $body;
@@ -174,7 +173,6 @@ function wechat_messages_action_send_message($user, $type, $body) {
 
   watchdog('wechat_messages_send_message', json_encode($r, JSON_UNESCAPED_UNICODE));
 }
-
 
 /**
  * Implements hook_rules_condition_info().
