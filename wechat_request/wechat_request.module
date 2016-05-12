@@ -466,6 +466,7 @@ watchdog('$xml_obj->MsgType',$xml_obj->MsgType);
         break;
       }
     }
+    watchdog('$request',json_encode($request));
     //全部消息数据转换为json格式，存入数据库
     $request_wrapper->save();
 
