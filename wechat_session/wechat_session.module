@@ -254,11 +254,7 @@ function wechat_session_menu() {
 
 function wechat_session_settings_form($form, &$form_state) {
 
-  $options = array();
-
-  foreach (wechat_session_status_list() as $info) {
-    $options[$info->status] = $info->name;
-  }
+  $options = wechat_session_status_options_list();
   //dpm($options);
   $form['required']['wechat_session_default_status'] = array(
     '#type' => 'radios',
@@ -355,11 +351,8 @@ class WechatSession extends Entity {
 }
 
 function wechat_session_status_list() {
-  $types = db_select('wechat_session_status', 'wss')
-    ->fields('wss')
-    ->execute()
-    ->fetchAllAssoc('status');
-  return $types;
+  $status = wechat_session_get_status();
+  return $status;
 }
 
 function wechat_session_status_options_list() {
@@ -367,7 +360,8 @@ function wechat_session_status_options_list() {
   //dpm($return);
   $return = array();
   foreach ($status as $key => $info) {
-    $return[$key] = $info->name . '(' . $key . ')';
+    dpm($info);
+    $return[$key] = $info['name'] . '(' . $key . ')';
   }
   return $return;
 }
