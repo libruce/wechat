@@ -164,7 +164,7 @@ function wechat_session_callback() {
 
     $function_callback($wechat_obj);
   } catch (Exception $e) {
-    watchdog_exception(__FUNCTION__, $e);
+    watchdog_exception('', $e);
   }
 }
 
