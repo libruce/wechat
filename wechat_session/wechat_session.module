@@ -59,13 +59,34 @@ function wechat_session_status_save($info) {
   }
 }
 
+/**
+ * @param $status
+ * @return bool
+ */
 function wechat_session_status_load($status) {
-  $result = db_select('wechat_session_status', 'wss')
-    ->fields('wss')
-    ->condition('status', $status)
-    ->execute()
-    ->fetchAssoc();
-  return $result;
+//  $result = db_select('wechat_session_status', 'wss')
+//    ->fields('wss')
+//    ->condition('status', $status)
+//    ->execute()
+//    ->fetchAssoc();
+//  return $result;
+  $s = wechat_session_get_status();
+  return isset($s[$status]) ? $s[$status] : FALSE;
+}
+
+function wechat_session_get_status() {
+  $status = &drupal_static(__FUNCTION__, []);
+  if (empty($status)) {
+    $modules = module_implements('wechat_session_status');
+    foreach ($modules as $module) {
+      $info = call_user_func("{$module}_wechat_session_status");
+      if (empty($info)) {
+        continue;
+      }
+      $status = array_merge($status, $info);
+    }
+  }
+  return $status;
 }
 
 function wechat_session_wechat_session_status() {
