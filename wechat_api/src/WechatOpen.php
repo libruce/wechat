@@ -26,6 +26,7 @@ class WechatOpen extends Wechat {
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
       $postStr = file_get_contents("php://input");
       $this->postxml = $postStr;
+      watchdog('$postStr',$postStr);
     }
   }
 }
