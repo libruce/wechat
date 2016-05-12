@@ -202,6 +202,9 @@ class WechatRequest extends Entity {
       if ($this->checkOnly($this)) {
         return;
       }
+      if (empty($this->create_time)) {
+        $this->create_time = time();
+      }
       parent::save();
     } catch (Exception $e) {
       watchdog_exception('save', $e);
@@ -210,6 +213,11 @@ class WechatRequest extends Entity {
 
   //@todo 检查消息是否唯一,存在返回TRUE
   function  checkOnly(WechatRequest $request) {
+
+//    $Query = new EntityFieldQuery();
+//    $Query->entityCondition('entity_type', 'wechat_request')
+//      ->propertyCondition('openid', $request->openid);
+
     if (!empty($request->msg_id)) {
       return !empty(entity_load('wechat_request', FALSE, array(
         'msg_id' => $request->msg_id
