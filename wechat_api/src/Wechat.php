@@ -186,22 +186,22 @@ class Wechat {
   const SHAKEAROUND_USER_GETSHAKEINFO = '/shakearound/user/getshakeinfo?';//获取摇周边的设备及用户信息
   const SHAKEAROUND_STATISTICS_DEVICE = '/shakearound/statistics/device?';//以设备为维度的数据统计接口
 
-  private $token;
-  private $encodingAesKey;
-  private $encrypt_type;
-  private $appid;
-  private $appsecret;
-  private $access_token;
-  private $jsapi_ticket;
-  private $user_token;
-  private $partnerid;
-  private $partnerkey;
-  private $paysignkey;
-  private $postxml;
-  private $_msg;
-  private $_funcflag = FALSE;
-  private $_receive;
-  private $_text_filter = TRUE;
+  protected $token;
+  protected $encodingAesKey;
+  protected $encrypt_type;
+  protected $appid;
+  protected $appsecret;
+  protected $access_token;
+  protected $jsapi_ticket;
+  protected $user_token;
+  protected $partnerid;
+  protected $partnerkey;
+  protected $paysignkey;
+  protected $postxml;
+  protected $_msg;
+  protected $_funcflag = FALSE;
+  protected $_receive;
+  protected $_text_filter = TRUE;
   public $debug = FALSE;
   public $errCode = 40001;
   public $errMsg = "no access";
@@ -223,7 +223,7 @@ class Wechat {
   /**
    * For weixin server validation
    */
-  private function checkSignature($str = '') {
+  protected function checkSignature($str = '') {
     $signature = isset($_GET["signature"]) ? $_GET["signature"] : '';
     $signature = isset($_GET["msg_signature"]) ? $_GET["msg_signature"] : $signature; //如果存在加密验证则用加密验证段
     $timestamp = isset($_GET["timestamp"]) ? $_GET["timestamp"] : '';
@@ -942,7 +942,7 @@ class Wechat {
    * @param string $text
    * @return string|mixed
    */
-  private function _auto_text_filter($text) {
+  protected function _auto_text_filter($text) {
     if (!$this->_text_filter) {
       return $text;
     }
@@ -1141,7 +1141,7 @@ class Wechat {
   /**
    * xml格式加密，仅请求为加密方式时再用
    */
-  private function generate($encrypt, $signature, $timestamp, $nonce) {
+  protected function generate($encrypt, $signature, $timestamp, $nonce) {
     //格式化加密信息
     $format = "<xml>
 <Encrypt><![CDATA[%s]]></Encrypt>
@@ -1156,7 +1156,7 @@ class Wechat {
    * GET 请求
    * @param string $url
    */
-  private function http_get($url) {
+  protected function http_get($url) {
     $oCurl = curl_init();
     if (stripos($url, "https://") !== FALSE) {
       curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -1183,7 +1183,7 @@ class Wechat {
    * @param boolean $post_file 是否文件上传
    * @return string content
    */
-  private function http_post($url, $param, $post_file = FALSE) {
+  protected function http_post($url, $param, $post_file = FALSE) {
     $oCurl = curl_init();
     if (stripos($url, "https://") !== FALSE) {
       curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, FALSE);
