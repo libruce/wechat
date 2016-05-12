@@ -172,20 +172,10 @@ function wechat_api_init_wechatobj() {
     }
     case WEIXIN_USE_OPEN: {
       if (!isset($wechat)) {
-
-        if (isset($_GET['access_token'])) {
-          $access_token = $_GET['access_token'];
-          variable_set("wechat_api_access_token", $access_token);
-        }
-        else {
-          $access_token = variable_get("wechat_api_access_token", '');
-        }
-
+        $access_token = isset($_GET['access_token']) ? $_GET['access_token'] : '';
         $options = array(
           'access_token' => $access_token,
         );
-
-
         $wechat = new \Drupal\wechat_api\WechatOpen($options);
       }
     }
