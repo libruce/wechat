@@ -172,7 +172,7 @@ function wechat_api_init_wechatobj() {
     }
     case WEIXIN_USE_OPEN: {
       if (!isset($wechat)) {
-        $access_token = isset($_GET['access_token']) ? $_GET['access_token'] : '';
+        $access_token = isset($_GET['wx_token']) ? $_GET['wx_token'] : '';
         $options = array(
           'access_token' => $access_token,
         );
