@@ -109,37 +109,7 @@ function wechat_session_callback() {
 
   $openid = $wechat_obj->getRevFrom();
 
-  $event = '';
-  $event_key = '';
-  $content = '';
-  $xml_obj = $wechat_obj->getRevData();
-  $xml_obj = (object) $xml_obj;
-  switch ($xml_obj->MsgType) {
-    case 'text': {
-      $content = $xml_obj->Content;
-      break;
-    }
-    case 'voice': {
-      //取语音识别结果
-      if (!empty($xml_obj->Recognition)) {
-        $content = $xml_obj->Recognition;
-      }
-      break;
-    }
-    case 'event': {
-      $EventKey = $xml_obj->EventKey;
-      if (!empty($EventKey)) {
-        $event_key = $EventKey;
-      }
-      $event = $xml_obj->Event;
-      break;
-    }
-  }
-  rules_invoke_event('wechat_session_message_before', $openid, $event, $event_key, $content);
-
-
   $wechat_session = wechat_session_load($openid);
-
 
   if (empty($wechat_session)) {
     $status_info = wechat_session_set_default_status($openid);
