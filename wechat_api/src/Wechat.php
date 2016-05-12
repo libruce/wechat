@@ -2450,10 +2450,11 @@ class Wechat {
 //    if (!$this->access_token && !$this->checkAuth()) {
 //      return FALSE;
 //    }
+    watchdog('api_data', $data);
     //$data = self::json_encode($data);
     //$data = json_encode($data, JSON_UNESCAPED_UNICODE);
     $result = $this->http_post(self::API_URL_PREFIX . self::CUSTOM_SEND_URL . 'access_token=' . 'cWqSBMhAb4_DYSKRWpNN80dz3hGPKtl30WTAuxWjj-vgPHwff5rHJieGOnQy0HO3H351-z3UbwSUgGg4NGS7eO-KG9MgOE5KAY0_ErA-trWvSFL7SbHE0wDH5OX8BlyjWYQiAMDACU', self::json_encode($data));
-    watchdog('api_data', $data);
+
     watchdog('$result',json_encode(($result)));
     if ($result) {
       $json = json_decode($result, TRUE);
