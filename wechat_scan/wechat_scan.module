@@ -5,15 +5,25 @@
  */
 function wechat_scan_menu() {
   $items['wechat-scan/product/add'] = array(
-    'page callback' => 'wechat_qr2_view_page',
-    'page arguments' => array(1),
-    'access callback' => 'wechat_qr2_access',
-    'access arguments' => array('view', 1),
-    'weight' => 0,
+    'page callback' => 'wechat_scan_product_add_form',
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', NULL, 'add'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_scan.pages.inc',
+  );
+  $items['wechat-scan/product/%wechat_scan_product/edit'] = array(
+    'page callback' => 'wechat_scan_product_edit_form',
+    'page arguments' => array(2),
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', 2, 'edit'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'wechat_scan.pages.inc',
   );
   return $items;
+}
+
+function wechat_scan_access($type, $entity = NULL, $op = NULL) {
+  return TRUE;
 }
 
 /**
@@ -62,7 +72,7 @@ function wechat_scan_entity_info() {
 class WechatScanProduct extends Entity {
   public $id;
   public $uid;
-
+  public $title;
 
   public $is_new_revision;
 
