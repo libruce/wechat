@@ -3,6 +3,9 @@
 function wechat_scan_product_form($form, &$form_state, WechatScanProduct $product, $op) {
   $form_state['WechatScanProduct'] = $product;
 
+  $langcode = LANGUAGE_NONE;
+  field_attach_form('wechat_scan_product', $product, $form, $form_state, $langcode);
+
   $form['title'] = array(
     '#title' => t('产品标题'),
     '#type' => 'textfield',

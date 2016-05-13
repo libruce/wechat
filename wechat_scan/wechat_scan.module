@@ -71,6 +71,7 @@ function wechat_scan_entity_info() {
     ),
     'bundles' => array(
       'wechat_scan_product' => array(
+        'label' => t('扫一扫商品'),
         'admin' => array(
           'path' => 'admin/structure/wechat_scan_product',
           'access arguments' => array('administer users'),
