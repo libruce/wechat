@@ -15,16 +15,6 @@ function wechat_request_entity_info() {
       'controller class' => 'EntityAPIController',
       'base table' => 'wechat_request',
       'fieldable' => TRUE,
-      'view modes' => array(
-        'full' => array(
-          'label' => t('查看消息'),
-          'custom settings' => FALSE,
-        ),
-        'preview' => array(
-          'label' => t('消息预览'),
-          'custom settings' => FALSE,
-        ),
-      ),
       'entity keys' => array(
         'id' => 'id',
         'bundle' => 'msg_type',
@@ -187,6 +177,7 @@ class WechatRequest extends Entity {
   public $msg_id;
   public $subscription;
   public $openid;
+  public $data;
 
   public function __construct($values = array()) {
     parent::__construct($values, 'wechat_request');
@@ -198,10 +189,8 @@ class WechatRequest extends Entity {
 
   public function save() {
     try {
-      watchdog(__FUNCTION__ . '-' . __LINE__, __FUNCTION__ . '-' . __LINE__);
       //@todo 增加消息排重检查
       if ($this->checkOnly($this)) {
-        watchdog('($this->checkOnly($this))', 203);
         return;
       }
       if (empty($this->create_time)) {
@@ -234,7 +223,6 @@ class WechatRequest extends Entity {
 }
 
 class WechatRequestType extends Entity {
-
 
   public $type;
   public $label;
@@ -369,7 +357,7 @@ function wechat_request_save_request_messages(Wechat $wechat) {
     $request_wrapper->subscription->set($xml_obj->ToUserName);
     $request_wrapper->openid->set($xml_obj->FromUserName);
     $request_wrapper->create_time->set($xml_obj->CreateTime);
-    watchdog('$xml_obj->MsgType', $xml_obj->MsgType);
+
     if ($xml_obj->MsgType == 'event') {
       $request_wrapper->msg_id->set('');
     }
@@ -380,7 +368,6 @@ function wechat_request_save_request_messages(Wechat $wechat) {
     switch ($xml_obj->MsgType) {
       case 'text': {
         $request_wrapper->field_content->set($xml_obj->Content);
-        watchdog('$xml_obj->Content', $xml_obj->Content);
         break;
       }
       case 'image': {
@@ -468,7 +455,7 @@ function wechat_request_save_request_messages(Wechat $wechat) {
         break;
       }
     }
-    watchdog('$request', json_encode($request));
+    $request->data = serialize($xml_obj);
     //全部消息数据转换为json格式，存入数据库
     $request_wrapper->save();
 
