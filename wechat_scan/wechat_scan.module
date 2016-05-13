@@ -22,6 +22,16 @@ function wechat_scan_menu() {
   return $items;
 }
 
+function wechat_scan_product_load($id, $reset = FALSE) {
+  $entities = wechat_scan_product_load_multiple(array($id), array(), $reset);
+  return reset($entities);
+}
+
+function wechat_scan_product_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_scan_product', $ids, $conditions, $reset);
+}
+
+
 function wechat_scan_access($type, $entity = NULL, $op = NULL) {
   return TRUE;
 }
@@ -72,6 +82,7 @@ function wechat_scan_entity_info() {
 class WechatScanProduct extends Entity {
   public $id;
   public $uid;
+  public $vid;
   public $title;
 
   public $is_new_revision;

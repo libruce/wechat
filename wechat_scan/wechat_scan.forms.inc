@@ -25,3 +25,14 @@ function wechat_scan_product_form($form, &$form_state, WechatScanProduct $produc
   }
   return $form;
 }
+
+function wechat_scan_product_form_submit($form, &$form_state) {
+  $entity = $form_state['WechatScanProduct'];
+  entity_form_submit_build_entity('wechat_scan_product', $entity, $form, $form_state);
+
+  $entity->save();
+  dpm($entity);
+  dpm($form_state);
+
+
+}
