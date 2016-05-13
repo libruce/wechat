@@ -4,3 +4,4 @@ core = 7.x
 package = wechat
 version = 7.x-1.0
 dependencies[] = xautoload (>= 7.x-5.0)
+dependencies[] = entity

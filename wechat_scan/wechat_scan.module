@@ -4,5 +4,84 @@
  * Implements hook_menu().
  */
 function wechat_scan_menu() {
+  $items['wechat-scan/product/add'] = array(
+    'page callback' => 'wechat_qr2_view_page',
+    'page arguments' => array(1),
+    'access callback' => 'wechat_qr2_access',
+    'access arguments' => array('view', 1),
+    'weight' => 0,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_scan.pages.inc',
+  );
+  return $items;
+}
 
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_scan_entity_info() {
+  $return['wechat_scan_product'] = array(
+    'label' => t('扫一扫商品信息'),
+    'plural label' => t('扫一扫商品信息'),
+    'description' => t('扫一扫商品信息.'),
+    'entity class' => 'WechatScanProduct',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_scan_product',
+    'revision table' => 'wechat_scan_product_revision',
+    'fieldable' => FALSE,
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'title',
+      'revision' => 'vid',
+    ),
+    'module' => 'wechat_scan',
+  );
+  $return['wechat_scan_product_qrcode'] = array(
+    'label' => t('扫一扫商品二维码'),
+    'plural label' => t('扫一扫商品二维码'),
+    'description' => t('扫一扫商品二维码.'),
+    'entity class' => 'WechatScanProductQrcode',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_scan_product_qrcode',
+    'fieldable' => FALSE,
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'title',
+    ),
+    'module' => 'wechat_scan',
+  );
+
+
+  return $return;
+}
+
+class WechatScanProduct extends Entity {
+  public $id;
+  public $uid;
+
+
+  public $is_new_revision;
+
+  function __construct($values = array()) {
+    $this->is_new_revision = TRUE;
+    parent::__construct($values, 'wechat_scan_product');
+  }
+
+  function save() {
+    parent::save();
+  }
+}
+
+class wechat_scan_product_qrcode extends Entity {
+  function __construct($values = array()) {
+    parent::__construct($values, 'wechat_scan_product_qrcode');
+  }
+
+  function save() {
+    parent::save();
+  }
 }
