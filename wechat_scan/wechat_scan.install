@@ -38,6 +38,12 @@ function wechat_scan_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'log' => array(
+        'description' => 'The log entry explaining the changes in this version.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+      ),
       //发送
       'title' => array(
         'description' => '商品名称，建议不超过15个字，超过部分在客户端上以省略号显示。',
@@ -114,6 +120,12 @@ function wechat_scan_schema() {
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
+      ),
+      'log' => array(
+        'description' => 'The log entry explaining the changes in this version.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
       ),
       //发送
       'title' => array(

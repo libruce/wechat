@@ -114,6 +114,7 @@ class WechatScanProduct extends Entity {
   //创建成功返回的PID
   public $pid;
 
+  public $log = '';
   public $is_new_revision;
 
   function __construct($values = array()) {
