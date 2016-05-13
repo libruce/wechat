@@ -7,8 +7,23 @@ function wechat_scan_product_form($form, &$form_state, WechatScanProduct $produc
     '#title' => t('产品标题'),
     '#type' => 'textfield',
     '#default_value' => $product->title,
-    '#size' => 30,
+    '#required' => TRUE,
   );
+  $form['keystandard'] = array(
+    '#type' => 'radios',
+    '#title' => t('编码格式'),
+    '#default_value' => $product->keystandard,
+    '#options' => ['ean13' => '条码', 'qrcode' => '二维码'],
+    '#disabled' => TRUE,
+    '#description' => t('暂时只开放了条码'),
+  );
+  $form['keystr'] = array(
+    '#title' => t('编码'),
+    '#type' => 'textfield',
+    '#default_value' => $product->keystr,
+//    '#required' => TRUE,
+  );
+
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
