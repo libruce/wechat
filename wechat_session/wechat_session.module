@@ -101,6 +101,21 @@ function wechat_session_default_status_echo($wechat_obj) {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function wechat_session_menu() {
+  $items['admin/config/wechat/session/config'] = array(
+    'title' => '微信Session设置',
+    'description' => '微信Session设置.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_session_settings_form'),
+    'access arguments' => array('administer wechat configuration'),
+    'file' => 'wechat_session.admin.inc',
+  );
+  return $items;
+}
+
+/**
  * Implements hook_menu_alter().
  */
 function wechat_session_menu_alter(&$items) {
@@ -110,7 +125,7 @@ function wechat_session_menu_alter(&$items) {
     'page callback' => 'wechat_session_callback',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
-    'files' => 'wechat_session.pages.inc',
+    'file' => 'wechat_session.pages.inc',
   );
 }
 
@@ -163,20 +178,6 @@ function wechat_session_openid_to_status($openid, $status) {
   }
 }
 
-/**
- * Implements hook_menu().
- */
-function wechat_session_menu() {
-  $items['admin/config/wechat/session/config'] = array(
-    'title' => '微信Session设置',
-    'description' => '微信Session设置.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('wechat_session_settings_form'),
-    'access arguments' => array('administer wechat configuration'),
-    'files' => 'wechat_session.admin.inc',
-  );
-  return $items;
-}
 
 /**
  * Implements hook_entity_info().
