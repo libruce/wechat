@@ -480,16 +480,25 @@ function wechat_user_auth() {
 
     //@todo 判断操作类型
     if ($state == 'new') {
+
+      //@todo 生成之前判断是否存在
+
       // auto register
       $user_name = 'wechat_' . $access_data['openid'];
+      $u = user_load_by_name($user_name);
+      if (empty($u)) {
+        $new_user = array(
+          'name' => $user_name,
+          'pass' => user_password(),
+          'status' => 1,
+        );
+        $account = user_save(NULL, $new_user);
+      }
+      else {
+        $account = $u;
+      }
 
-      $new_user = array(
-        'name' => $user_name,
-        'pass' => user_password(),
-        'status' => 1,
-      );
 
-      $account = user_save(NULL, $new_user);
       $uid = $account->uid;
       global $user;
       $user = user_load($uid);
