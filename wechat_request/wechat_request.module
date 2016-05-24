@@ -341,6 +341,7 @@ function wechat_request_save_media($file_content, $file_name, $field_name, $msg_
  * @param \Wechat $wechat
  */
 function wechat_request_save_request_messages(Wechat $wechat) {
+  sleep(10);
   try {
     $wechat->getRev();
     $xml_obj = $wechat->getRevData();

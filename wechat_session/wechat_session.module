@@ -183,6 +183,9 @@ function wechat_session_wechat_callback() {
       echo 'success';
     }
 
+    ob_flush();
+    flush();
+
     $function_callback($wechat_obj);
   } catch (Exception $e) {
     watchdog_exception('', $e);
