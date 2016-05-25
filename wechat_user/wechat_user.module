@@ -632,6 +632,8 @@ class WechatUser extends Entity {
   public $subscribe;
   public $openid;
   public $nickname;
+  private $utf8 = FALSE;
+
   public $sex;
   public $city;
   public $country;
@@ -691,7 +693,12 @@ class WechatUser extends Entity {
   }
 
   public function save() {
-    $this->nickname = utf8_encode($this->nickname);
+
+    if (!$this->utf8) {
+      $this->nickname = utf8_encode($this->nickname);
+      $this->utf8 = TRUE;
+    }
+
     if ($group = WechatUserGroup::exists($this->groupid)) {
       $this->groupid = $group->id;
     }
