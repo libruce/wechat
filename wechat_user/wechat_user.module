@@ -691,7 +691,7 @@ class WechatUser extends Entity {
   }
 
   public function save() {
-    $this->nickname = utf8_encode($this->nickname);
+//    $this->nickname = utf8_encode($this->nickname);
     if ($group = WechatUserGroup::exists($this->groupid)) {
       $this->groupid = $group->id;
     }
