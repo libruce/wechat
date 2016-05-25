@@ -675,7 +675,7 @@ class WechatUser extends Entity {
   }
 
   function nickname() {
-    return utf8_decode($this->nickname);
+    return $this->nickname;
   }
 
   protected function defaultLabel() {
