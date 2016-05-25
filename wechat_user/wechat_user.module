@@ -674,6 +674,10 @@ class WechatUser extends Entity {
     parent::__construct($values, 'wechat_user');
   }
 
+  function nickname() {
+    return utf8_decode($this->nickname);
+  }
+
   protected function defaultLabel() {
     return utf8_decode($this->nickname);
   }
@@ -708,6 +712,7 @@ class WechatUserMetadataController extends EntityDefaultMetadataController {
       'type' => 'text',
       'label' => t('微信昵称'),
       'description' => t('headimgurl of wechat user.'),
+      'getter callback' => 'entity_property_getter_method',
       'setter permission' => 'administer wechat user',
       'schema field' => 'nickname',
       'required' => TRUE,
