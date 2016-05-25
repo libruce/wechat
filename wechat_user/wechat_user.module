@@ -296,7 +296,7 @@ function wechat_user_tokens($type, $tokens, array $data = array(), array $option
         case 'wechat_user_nickname':
           // In the case of hook user_presave uid is not set yet.
           $wechatUser = WechatUser::loadByUid($account->uid);
-          $replacements[$original] = !empty($wechatUser) ? utf8_decode($wechatUser->nickname) : $account->name;
+          $replacements[$original] = !empty($wechatUser) ? $wechatUser->nickname : $account->name;
           break;
       }
     }
@@ -368,18 +368,6 @@ function wechat_user_load($id, $reset = FALSE) {
 function wechat_user_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
   $entities = entity_load('wechat_user', $ids, $conditions, $reset);
   return $entities;
-}
-
-/**
- * Implements hook_entity_load().
- */
-function wechat_user_entity_load($entities, $type) {
-  if ($type == 'wechat_user') {
-    foreach ($entities as &$entity) {
-      //处理昵称编码问题
-      $entity->nickname = utf8_decode($entity->nickname);
-    }
-  }
 }
 
 function wechat_user_group_load($id, $reset = FALSE) {
@@ -632,7 +620,6 @@ class WechatUser extends Entity {
   public $subscribe;
   public $openid;
   public $nickname;
-  private $utf8 = FALSE;
 
   public $sex;
   public $city;
@@ -680,6 +667,7 @@ class WechatUser extends Entity {
     return $this->openid;
   }
 
+
   public function __construct($values = array()) {
     parent::__construct($values, 'wechat_user');
   }
@@ -688,20 +676,16 @@ class WechatUser extends Entity {
     return $this->nickname;
   }
 
-  protected function defaultLabel() {
-    return utf8_decode($this->nickname);
-  }
-
   public function save() {
-    if ($group = WechatUserGroup::exists($this->groupid)) {
-      $this->groupid = $group->id;
+    try {
+      if ($group = WechatUserGroup::exists($this->groupid)) {
+        $this->groupid = $group->id;
+      }
+      parent::save();
+    } catch (Exception $e) {
+      $this->nickname = '微信昵称无法识别';
+      parent::save();
     }
-    if (!$this->utf8) {
-      $this->nickname = utf8_encode($this->nickname);
-      $this->utf8 = TRUE;
-    }
-    parent::save();
-    $this->nickname = utf8_decode($this->nickname);
   }
 
 }
@@ -776,6 +760,6 @@ class WechatUserViewsController extends EntityDefaultViewsController {
 
 class views_handler_field_nickname extends views_handler_field {
   public function  render($values) {
-    return utf8_decode($values->wechat_user_nickname);
+    return $values->wechat_user_nickname;
   }
 }
