@@ -701,10 +701,7 @@ class WechatUser extends Entity {
       $this->utf8 = TRUE;
     }
     parent::save();
-    if ($this->utf8) {
-      $this->nickname = utf8_decode($this->nickname);
-      $this->utf8 = FALSE;
-    }
+    $this->nickname = utf8_decode($this->nickname);
   }
 
 }
