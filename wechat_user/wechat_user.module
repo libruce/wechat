@@ -367,11 +367,19 @@ function wechat_user_load($id, $reset = FALSE) {
 
 function wechat_user_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
   $entities = entity_load('wechat_user', $ids, $conditions, $reset);
-  foreach ($entities as &$entity) {
-    //处理昵称编码问题
-    $entity->nickname = utf8_decode($entity->nickname);
-  }
   return $entities;
+}
+
+/**
+ * Implements hook_entity_load().
+ */
+function wechat_user_entity_load($entities, $type) {
+  if ($type == 'wechat_user') {
+    foreach ($entities as &$entity) {
+      //处理昵称编码问题
+      $entity->nickname = utf8_decode($entity->nickname);
+    }
+  }
 }
 
 function wechat_user_group_load($id, $reset = FALSE) {
