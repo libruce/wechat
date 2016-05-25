@@ -693,16 +693,18 @@ class WechatUser extends Entity {
   }
 
   public function save() {
-
+    if ($group = WechatUserGroup::exists($this->groupid)) {
+      $this->groupid = $group->id;
+    }
     if (!$this->utf8) {
       $this->nickname = utf8_encode($this->nickname);
       $this->utf8 = TRUE;
     }
-
-    if ($group = WechatUserGroup::exists($this->groupid)) {
-      $this->groupid = $group->id;
-    }
     parent::save();
+    if ($this->utf8) {
+      $this->nickname = utf8_decode($this->nickname);
+      $this->utf8 = FALSE;
+    }
   }
 
 }
