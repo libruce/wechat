@@ -189,6 +189,11 @@ function wechat_api_init_wechatobj() {
   return $wechat;
 }
 
+function wechat_api_get_access_token() {
+  $obj = wechat_api_init_wechatobj();
+  return $obj->get_access_token();
+}
+
 /**
  * 微信接口回调函数，提供验证是否接入成功。在wechat_session模块中使用hook_menu_alter()覆写提供更强大的功能。
  */

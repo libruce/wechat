@@ -23,10 +23,11 @@ function wechat_scan_menu() {
   $items['admin/structure/wechat_scan_product'] = array(
     'title' => '微信扫一扫设置',
     'description' => '微信用户设置，如：微信登录自动注册为某角色，刷新用户信息等。',
-    'page callback' => 'wechat_scan_product_add_form',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['wechat_scan_settings_form'],
     'access callback' => 'wechat_scan_access',
     'access arguments' => array('product', NULL, 'add'),
-    'file' => 'wechat_scan.pages.inc',
+    'file' => 'wechat_scan.admin.inc',
   );
   $items['admin/structure/wechat_scan_product/settings'] = array(
     'title' => 'Settings',
