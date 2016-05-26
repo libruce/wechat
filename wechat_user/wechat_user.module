@@ -683,7 +683,7 @@ class WechatUser extends Entity {
       }
       parent::save();
     } catch (Exception $e) {
-      $this->nickname = '微信昵称无法识别';
+      $this->nickname = '';
       parent::save();
     }
   }
