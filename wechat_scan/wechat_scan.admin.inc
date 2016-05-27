@@ -76,8 +76,8 @@ function wechat_scan_settings_form_merchantinfo($form, &$form_state) {
     $data = drupal_json_decode($data);
     dpm($data);
     if ($data['errcode'] == 0) {
-      variable_set('wechat_scan_verified_cate_list', $data['verified_cate_list']);
-      variable_set('wechat_scan_verified_firm_code_list', $data['verified_firm_code_list']);
+//      variable_set('wechat_scan_verified_cate_list', $data['verified_cate_list']);
+//      variable_set('wechat_scan_verified_firm_code_list', $data['verified_firm_code_list']);
       variable_set('wechat_scan_brand_tag_list', $data['brand_tag_list']);
     }
   }
