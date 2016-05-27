@@ -1,4 +1,14 @@
 <?php
+/**
+ * Implements hook_theme().
+ */
+function wechat_scan_theme($existing, $type, $theme, $path) {
+  return array(
+    'wechat_scan' => array(
+      'render element' => 'content',
+    ),
+  );
+}
 
 /**
  * Implements hook_menu().
@@ -6,6 +16,13 @@
 function wechat_scan_menu() {
   $items['wechat-scan/product/add'] = array(
     'page callback' => 'wechat_scan_product_add_form',
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', NULL, 'add'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_scan.forms.inc',
+  );
+  $items['wechat-scan/product/add2'] = array(
+    'page callback' => 'wechat_scan_product_add_form2',
     'access callback' => 'wechat_scan_access',
     'access arguments' => array('product', NULL, 'add'),
     'type' => MENU_LOCAL_TASK,
@@ -59,17 +76,17 @@ function wechat_scan_field_extra_fields() {
     'form' => array(
       'title' => array(
         'label' => t('标题'),
-        'description' => t('由Wechat Qr2模块提供'),
+        'description' => t('商品标题'),
         'weight' => -7,
       ),
       'keystandard' => array(
-        'label' => t('二维码KEY'),
-        'description' => t('由Wechat Qr2模块提供'),
+        'label' => t('编码类型'),
+        'description' => t('编码类型'),
         'weight' => -7,
       ),
       'keystr' => array(
-        'label' => t('二维码类型'),
-        'description' => t('由Wechat Qr2模块提供'),
+        'label' => t('编码内容'),
+        'description' => t('编码内容'),
         'weight' => -6,
       ),
     ),
@@ -175,4 +192,12 @@ class wechat_scan_product_qrcode extends Entity {
   function save() {
     parent::save();
   }
+}
+
+
+/**
+ * Implements hook_tpl_api().
+ */
+function wechat_scan_tpl_api() {
+
 }

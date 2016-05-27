@@ -1,5 +1,9 @@
 <?php
 
+function wechat_scan_product_add_form2() {
+  return theme('wechat_scan');
+}
+
 function wechat_scan_product_add_form() {
   module_load_include('inc', 'wechat_scan', 'wechat_scan.forms');
   $entity = new WechatScanProduct();

@@ -5,7 +5,7 @@ function wechat_scan_settings_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('同步商户信息'),
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => FALSE,
     '#tree' => TRUE,
   );
   $form['merchantinfo']['submit'] = array(
@@ -18,7 +18,7 @@ function wechat_scan_settings_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('设置测试人员'),
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => FALSE,
     '#tree' => TRUE,
   );
   $form['testwhitelist']['openid'] = array(
@@ -46,39 +46,89 @@ function wechat_scan_settings_form($form, &$form_state) {
   );
 
 
+  $form['product_getlist'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('同步商品信息'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+  );
+  $form['product_getlist']['submit'] = array(
+    '#type' => 'submit',
+    '#submit' => array('wechat_scan_settings_form_product_getlist'),
+    '#value' => t('同步商品信息'),
+  );
+
+// https://api.weixin.qq.com/scan/product/getlist?access_token=PE8Pe2gEpsHPb5TVoIzu_3f-166mw2pb0UEey0ni-kAf1uvE0bh0BnFSY2TTi8NsgXMF3EafzwHBNQs-PaLmCg
   return $form;
+}
+
+function wechat_scan_settings_form_product_getlist($form, &$form_state) {
+  $access_token = wechat_api_get_access_token();
+  $access_token = 'XqUvXjKENQ03j5XUzWMNxMZV48WsI0krhzPAO0zRVDhhJZtcsbsbf6zc8IRcmGiz9V4iyHxBl_vktrauD1Q-oXQEIYNlx3CNvxHj37oi-Zkx0QmEvt8Xm_4wdKZENnmjIGRdCEDPNY';
+
+  $url = "https://api.weixin.qq.com/scan/product/getlist?access_token={$access_token}";
+  /**
+   *
+   * {
+   * "offset": "1",
+   * "limit": "10",
+   * "status":"on",
+   * }
+   */
+  $data = [
+    'offset' => 1,
+    'limit' => 10,
+    'status' => 'all',
+  ];
+
+  $data = drupal_json_encode($data);
+
+  $request = drupal_http_request($url, array(
+    'headers' => array(
+      'Content-Type' => 'application/json',
+    ),
+    'method' => 'POST',
+    'data' => $data,
+    'timeout' => 60,
+    'context' => [],
+  ));
+
+  if ($request->code == 200) {
+    $data = $request->data;
+    $data = drupal_json_decode($data);
+    dpm($data);
+  }
+  dpm($request);
+
 }
 
 function wechat_scan_settings_form_merchantinfo($form, &$form_state) {
   $access_token = wechat_api_get_access_token();
   $url = "https://api.weixin.qq.com/scan/merchantinfo/get?access_token={$access_token}";
   $request = drupal_http_request($url);
+
   if ($request->code == 200) {
     $data = $request->data;
-//    $data = <<<j
-//{
-// "errcode": 0,
-// "errmsg": "ok",
-// "verified_cate_list":[
-//  {
-//   "verified_cate_id": 200531967,
-//   "verified_cate_name": "调味品"
-//  }
-// ],
-// "verified_firm_code_list":[8888],
-// "brand_tag_list":[
-//  "小耿哥8",
-//  "testtag"
-// ]
-//}
-//j;
-//;
+
     $data = drupal_json_decode($data);
     dpm($data);
     if ($data['errcode'] == 0) {
-//      variable_set('wechat_scan_verified_cate_list', $data['verified_cate_list']);
-//      variable_set('wechat_scan_verified_firm_code_list', $data['verified_firm_code_list']);
+
       variable_set('wechat_scan_brand_tag_list', $data['brand_tag_list']);
+      $v = taxonomy_vocabulary_machine_name_load('brand_tag');
+      $term = taxonomy_term_load_multiple(FALSE, ['vid' => $v->vid]);
+      foreach ($term as $i) {
+        taxonomy_term_delete($i->tid);
+      }
+      if (!empty($data['brand_tag_list']) && is_array($data['brand_tag_list'])) {
+        foreach ($data['brand_tag_list'] as $i) {
+          $t = new stdClass();
+          $t->vid = $v->vid;
+          $t->name = $i;
+          taxonomy_term_save($t);
+        }
+      }
     }
   }
 

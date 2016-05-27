@@ -202,6 +202,7 @@ function wechat_api_init_wechatobj() {
 }
 
 function wechat_api_get_access_token() {
+  return 'XqUvXjKENQ03j5XUzWMNxMZV48WsI0krhzPAO0zRVDhhJZtcsbsbf6zc8IRcmGiz9V4iyHxBl_vktrauD1Q-oXQEIYNlx3CNvxHj37oi-Zkx0QmEvt8Xm_4wdKZENnmjIGRdCEDPNY';
   $obj = wechat_api_init_wechatobj();
   return $obj->get_access_token();
 }
