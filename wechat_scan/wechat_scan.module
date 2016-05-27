@@ -9,7 +9,7 @@ function wechat_scan_menu() {
     'access callback' => 'wechat_scan_access',
     'access arguments' => array('product', NULL, 'add'),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'wechat_scan.pages.inc',
+    'file' => 'wechat_scan.forms.inc',
   );
   $items['wechat-scan/product/%wechat_scan_product/edit'] = array(
     'page callback' => 'wechat_scan_product_edit_form',
@@ -17,7 +17,7 @@ function wechat_scan_menu() {
     'access callback' => 'wechat_scan_access',
     'access arguments' => array('product', 2, 'edit'),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'wechat_scan.pages.inc',
+    'file' => 'wechat_scan.forms.inc',
   );
 
   $items['admin/structure/wechat_scan_product'] = array(
