@@ -51,6 +51,33 @@ function wechat_scan_access($type, $entity = NULL, $op = NULL) {
 }
 
 /**
+ * Implements hook_field_extra_fields().
+ */
+function wechat_scan_field_extra_fields() {
+  $extra = array();
+  $extra['wechat_scan_product']['wechat_scan_product'] = array(
+    'form' => array(
+      'title' => array(
+        'label' => t('标题'),
+        'description' => t('由Wechat Qr2模块提供'),
+        'weight' => -7,
+      ),
+      'keystandard' => array(
+        'label' => t('二维码KEY'),
+        'description' => t('由Wechat Qr2模块提供'),
+        'weight' => -7,
+      ),
+      'keystr' => array(
+        'label' => t('二维码类型'),
+        'description' => t('由Wechat Qr2模块提供'),
+        'weight' => -6,
+      ),
+    ),
+  );
+  return $extra;
+}
+
+/**
  * Implements hook_entity_info().
  */
 function wechat_scan_entity_info() {

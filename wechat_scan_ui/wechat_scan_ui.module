@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function wechat_scan_ui_field_widget_form_alter(&$element, &$form_state, $context) {
+  if (!empty($element['#field_name']) && ($element['#field_name'] == 'field_color')) {
+    $element['value']['#type'] = 'jquery_colorpicker';
+  }
+}

@@ -10,5 +10,5 @@ namespace Drupal\wechat_scan;
 
 
 class ScanController {
-
+//https://api.weixin.qq.com/scan/product/create?access_token=tT8VqJWVX4C-WvIG41tyelMclMZsAPFbLxbECsJvIghceqQCMB83hI5bxcInUR-amUrVsKq4bcBmF9PgooNrFA%20
 }
