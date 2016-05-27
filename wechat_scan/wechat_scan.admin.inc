@@ -55,24 +55,24 @@ function wechat_scan_settings_form_merchantinfo($form, &$form_state) {
   $request = drupal_http_request($url);
   if ($request->code == 200) {
     $data = $request->data;
-    $data = <<<j
-{
- "errcode": 0,
- "errmsg": "ok",
- "verified_cate_list":[
-  {
-   "verified_cate_id": 200531967,
-   "verified_cate_name": "调味品"
-  }
- ],
- "verified_firm_code_list":[8888],
- "brand_tag_list":[
-  "小耿哥8",
-  "testtag"
- ]
-}
-j;
-;
+//    $data = <<<j
+//{
+// "errcode": 0,
+// "errmsg": "ok",
+// "verified_cate_list":[
+//  {
+//   "verified_cate_id": 200531967,
+//   "verified_cate_name": "调味品"
+//  }
+// ],
+// "verified_firm_code_list":[8888],
+// "brand_tag_list":[
+//  "小耿哥8",
+//  "testtag"
+// ]
+//}
+//j;
+//;
     $data = drupal_json_decode($data);
     dpm($data);
     if ($data['errcode'] == 0) {
