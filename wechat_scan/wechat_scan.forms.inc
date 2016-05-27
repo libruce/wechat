@@ -42,7 +42,17 @@ function wechat_scan_product_form($form, &$form_state, WechatScanProduct $produc
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('保存'),
+    '#value' => t('本地保存'),
+  );
+
+  $form['actions']['create'] = array(
+    '#type' => 'submit',
+    '#value' => t('本地保存并创建'),
+  );
+
+  $form['actions']['audit'] = array(
+    '#type' => 'submit',
+    '#value' => t('本地保存并创建并提交审核'),
   );
 
   if (!empty($product->id)) {
