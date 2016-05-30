@@ -192,8 +192,9 @@ function wechat_api_init_wechatobj() {
             $r = $wechat->getRevData();
             watchdog('AAAAAAAAAAAAAAA', serialize($r));
 
-
+            $event = trim($event);
             if ($event == 'scan_product_callback') {
+
               $template = <<<xml
 <xml>
     <ToUserName><![CDATA[%s]]></ToUserName>
