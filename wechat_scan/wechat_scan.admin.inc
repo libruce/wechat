@@ -127,17 +127,22 @@ function wechat_scan_settings_form($form, &$form_state) {
 function wechat_scan_settings_form_test($form, &$form_state) {
   $Controller = new \Drupal\wechat_scan\ScanController();
   try {
-//    $data = $form_state['values']['test']['data'];
-//    variable_set('wechat_scan_test_data', $data);
-////    dpm($data);
-//    $data1 = drupal_json_decode($data);
+    $data = $form_state['values']['test']['data'];
+    variable_set('wechat_scan_test_data', $data);
+//    dpm($data);
+    $data1 = drupal_json_decode($data);
 //    dpm($data1);
 //    $Controller = new \Drupal\wechat_scan\ScanController();
 //    $r = $Controller->createProduct($data1);
 //    dpm($r);
+    $r = $Controller->updateProduct($data1);
+    dpm($r);
 
-//    $qr = $Controller->getQr('ean13', '6901798999993', '', 64);
-//    dpm($qr);
+    $extinfo = drupal_random_key(10);
+    $qr = $Controller->getQr('ean13', '6901798999986', $extinfo, 64);
+
+    dpm($extinfo);
+    dpm($qr);
 
   } catch (Exception $e) {
     dpm($e->getMessage());
@@ -214,6 +219,7 @@ function wechat_scan_settings_form_merchantinfo($form, &$form_state) {
 
 }
 
+//ob2sIv3Jgq7HBMplEv-dsRaX_wmg
 function wechat_scan_settings_form_testwhitelist($form, &$form_state) {
   $access_token = wechat_api_get_access_token();
   $url = "https://api.weixin.qq.com/scan/testwhitelist/set?access_token={$access_token}";

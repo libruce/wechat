@@ -1,6 +1,6 @@
 {
   "keystandard": "ean13",
-  "keystr": "6901798999999",
+  "keystr": "6901798999986",
   "brand_info": {
     "base_info": {
       "title": "扫一扫动态主页Test",
@@ -65,6 +65,15 @@
         {
           "type": "text",
           "text": "此处可根据品牌商需要，用于简单描述商品或活动。"
+        }
+      ]
+    },
+    "module_info": {
+      "module_list": [
+        {
+          "type": "anti_fake",
+          "native_show": true,
+          "anti_fake_url": "weixin.qq.com"
         }
       ]
     }

@@ -11,22 +11,22 @@ namespace Drupal\wechat_scan;
 
 class ScanController {
 
-  /**
-   * @param $keystandard
-   * @param $keystr
-   * @todo 同步商品信息
-   */
-  function updateProduct($keystandard, $keystr) {
-    $product = $this->loadProduct($keystandard, $keystr);
-    if ($product instanceof \WechatScanProduct) {
-      $product->update($this->getProduct($keystandard, $keystr));
-    }
-    else {
-      $product = new \WechatScanProduct();
-      $product->update($this->getProduct($keystandard, $keystr));
-    }
-    $product->save();
-  }
+//  /**
+//   * @param $keystandard
+//   * @param $keystr
+//   * @todo 同步商品信息
+//   */
+//  function updateProduct($keystandard, $keystr) {
+//    $product = $this->loadProduct($keystandard, $keystr);
+//    if ($product instanceof \WechatScanProduct) {
+//      $product->update($this->getProduct($keystandard, $keystr));
+//    }
+//    else {
+//      $product = new \WechatScanProduct();
+//      $product->update($this->getProduct($keystandard, $keystr));
+//    }
+//    $product->save();
+//  }
 
   function loadProduct($keystandard, $keystr) {
     $entities = entity_load('wechat_scan_product', FALSE, [
@@ -44,6 +44,13 @@ class ScanController {
     dpm($data);
     $data = drupal_json_encode($data);
     $url = "https://api.weixin.qq.com/scan/product/create?access_token={$this->access_token()}";
+    return $this->request($url, 'POST', $data);
+  }
+
+  function  updateProduct($data) {
+    $url = "https://api.weixin.qq.com/scan/product/update?access_token={$this->access_token()}";
+    $data = json_encode($data, JSON_UNESCAPED_UNICODE);
+    dpm($data);
     return $this->request($url, 'POST', $data);
   }
 
