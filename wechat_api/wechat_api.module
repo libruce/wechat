@@ -187,12 +187,13 @@ function wechat_api_init_wechatobj() {
           $openid = $wechat->getRevFrom();
           watchdog('openid', $openid);
           if ($openid == 'ob2sIv3Jgq7HBMplEv-dsRaX_wmg') {
+
             $template = <<<xml
 <xml>
     <ToUserName><![CDATA[%s]]></ToUserName>
 
     <FromUserName><![CDATA[%s]]></FromUserName>
-    <CreateTime>1447848568</CreateTime>
+    <CreateTime>%s</CreateTime>
     <MsgType><![CDATA[scanproduct]]></MsgType>
 
     <ScanProduct>
@@ -205,7 +206,12 @@ function wechat_api_init_wechatobj() {
     </ScanProduct>
 </xml>
 xml;
-            $result_str = sprintf($template, $to_user_name, $from_user_name, $request_time, $content);
+
+            $event = $wechat->getRevEvent();
+            watchdog('$event', $event);
+
+
+            $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME);
 
           }
         }
