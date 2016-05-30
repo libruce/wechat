@@ -187,8 +187,10 @@ function wechat_api_init_wechatobj() {
           $openid = $wechat->getRevFrom();
           watchdog('openid', $openid);
           if ($openid == 'ob2sIv3Jgq7HBMplEv-dsRaX_wmg') {
-
-            $template = <<<xml
+            $event = $wechat->getRevEvent();
+            watchdog('$event', $event);
+            if ($event == 'scan_product_callback') {
+              $template = <<<xml
 <xml>
     <ToUserName><![CDATA[%s]]></ToUserName>
 
@@ -207,12 +209,9 @@ function wechat_api_init_wechatobj() {
 </xml>
 xml;
 
-            $event = $wechat->getRevEvent();
-            watchdog('$event', $event);
+//              $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME);
 
-
-            $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME);
-
+            }
           }
         }
         else {
