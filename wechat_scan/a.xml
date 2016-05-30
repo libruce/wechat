@@ -1,0 +1,16 @@
+<xml>
+    <ToUserName><![CDATA[otAzGjrJVN21mpDF4ZWQiYZwdK0Y]]></ToUserName>
+
+    <FromUserName><![CDATA[gh_fbe8a958756e]]></FromUserName>
+    <CreateTime>1447848568</CreateTime>
+    <MsgType><![CDATA[scanproduct]]></MsgType>
+
+    <ScanProduct>
+        <KeyStandard><![CDATA[qrcode]]></KeyStandard>
+        <KeyStr><![CDATA[weixin_antifake]]> </KeyStr>
+        <ExtInfo><![CDATA[hyhy]]></ExtInfo>
+        <AntiFake>
+            <CodeResult><![CDATA[fake]]></CodeResult>
+        </AntiFake>
+    </ScanProduct>
+</xml>
