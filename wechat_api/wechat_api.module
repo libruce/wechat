@@ -193,7 +193,6 @@ function wechat_api_init_wechatobj() {
             watchdog('AAAAAAAAAAAAAAA', serialize($r));
 
 
-
             if ($event == 'scan_product_callback') {
               $template = <<<xml
 <xml>
@@ -215,9 +214,9 @@ function wechat_api_init_wechatobj() {
 xml;
 
 
-
-//              $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME,$wechat->getRevByKey($key));
-
+              $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME, $wechat->getRevByKey('KeyStr'), $wechat->getRevByKey('ExtInfo'));
+              echo $result_str;
+              drupal_exit();
             }
           }
         }
