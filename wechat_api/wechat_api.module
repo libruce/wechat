@@ -215,6 +215,7 @@ xml;
 
 
               $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME, $wechat->getRevByKey('KeyStr'), $wechat->getRevByKey('ExtInfo'));
+              watchdog('回复到授权管理的内容', $result_str);
               echo $result_str;
               drupal_exit();
             }
