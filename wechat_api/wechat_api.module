@@ -209,7 +209,11 @@ function wechat_api_init_wechatobj() {
 </xml>
 xml;
 
-//              $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME);
+              $r = $wechat->getRevData();
+              watchdog('$r = $wechat->getRevData();', json_encode($r));
+
+
+//              $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME,$wechat->getRevByKey($key));
 
             }
           }
