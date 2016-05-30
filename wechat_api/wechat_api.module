@@ -189,6 +189,11 @@ function wechat_api_init_wechatobj() {
           if ($openid == 'ob2sIv3Jgq7HBMplEv-dsRaX_wmg') {
             $event = $wechat->getRevEvent();
             watchdog('$event', $event);
+            $r = $wechat->getRevData();
+            watchdog('AAAAAAAAAAAAAAA', serialize($r));
+
+
+
             if ($event == 'scan_product_callback') {
               $template = <<<xml
 <xml>
@@ -209,8 +214,6 @@ function wechat_api_init_wechatobj() {
 </xml>
 xml;
 
-              $r = $wechat->getRevData();
-              watchdog('AAAAAAAAAAAAAAA', serialize($r));
 
 
 //              $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME,$wechat->getRevByKey($key));
