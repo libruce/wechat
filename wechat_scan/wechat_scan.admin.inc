@@ -42,7 +42,7 @@ function wechat_scan_settings_form($form, &$form_state) {
   $form['testwhitelist']['submit'] = array(
     '#type' => 'submit',
     '#submit' => array('wechat_scan_settings_form_testwhitelist'),
-    '#value' => t('提交'),
+    '#value' => t('设置测试人员'),
   );
 
 
@@ -59,13 +59,93 @@ function wechat_scan_settings_form($form, &$form_state) {
     '#value' => t('同步商品信息'),
   );
 
+
+  $form['test'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('测试'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+
+  );
+  $form['test']['data'] = array(
+    '#type' => 'textarea',
+    '#title' => t('测试数据'),
+    '#default_value' => variable_get('wechat_scan_test_data', ''),
+  );
+  $form['test']['submit'] = array(
+    '#type' => 'submit',
+    '#submit' => array('wechat_scan_settings_form_test'),
+    '#value' => t('提交'),
+  );
+//  $Controller = new \Drupal\wechat_scan\ScanController();
+//  $r = $Controller->getProduct('ean13', '6901798143587');
+//
+//  dpm($r);
+//
+//  $url = 'http://mmbiz.qpic.cn/mmbiz/PMXyQaV1nePHiax1kCFoZ259646fiaqd1aaiarOoCI5Bn2eVHqkDuTCgVeNrP1EQ4SyBDibcw0fWc7EIAjLEF6goEA/0?wx_fmt=jpeg';
+//
+//  $content = file_get_contents($url);
+//
+//
+//  $filename = '42° 泸州邮礼天下-喜庆装 500ml';
+//  if (module_exists('transliteration')) {
+//    module_load_include('inc', 'transliteration');
+//
+//    $langcode = NULL;
+//    if (!empty($_POST['language'])) {
+//      $languages = language_list();
+//      $langcode = isset($languages[$_POST['language']]) ? $_POST['language'] : NULL;
+//    }
+//    $filename = transliteration_clean_filename($filename, $langcode);
+//  }
+//
+//  dpm($filename);
+
+
+//  $a = file_unmanaged_save_data($content);
+
+//  dpm($a);
+
+//  global $user;
+//  $file = new stdClass();
+//  $file->uid = $user->uid;
+//  $file->status = 0;
+//  $file->filename = trim(basename($filepath), '.');
+//  $file->uri = $filepath;
+//  $file->filemime = file_get_mimetype($file->filename);
+//  $file->filesize = filesize($filepath);
+//
+//  file_save($file);
+//  dpm($file);
+
 // https://api.weixin.qq.com/scan/product/getlist?access_token=PE8Pe2gEpsHPb5TVoIzu_3f-166mw2pb0UEey0ni-kAf1uvE0bh0BnFSY2TTi8NsgXMF3EafzwHBNQs-PaLmCg
   return $form;
 }
 
+//LQ6p-Brzf6o
+function wechat_scan_settings_form_test($form, &$form_state) {
+  $Controller = new \Drupal\wechat_scan\ScanController();
+  try {
+//    $data = $form_state['values']['test']['data'];
+//    variable_set('wechat_scan_test_data', $data);
+////    dpm($data);
+//    $data1 = drupal_json_decode($data);
+//    dpm($data1);
+//    $Controller = new \Drupal\wechat_scan\ScanController();
+//    $r = $Controller->createProduct($data1);
+//    dpm($r);
+
+//    $qr = $Controller->getQr('ean13', '6901798999993', '', 64);
+//    dpm($qr);
+
+  } catch (Exception $e) {
+    dpm($e->getMessage());
+  }
+}
+
 function wechat_scan_settings_form_product_getlist($form, &$form_state) {
   $access_token = wechat_api_get_access_token();
-  $access_token = 'XqUvXjKENQ03j5XUzWMNxMZV48WsI0krhzPAO0zRVDhhJZtcsbsbf6zc8IRcmGiz9V4iyHxBl_vktrauD1Q-oXQEIYNlx3CNvxHj37oi-Zkx0QmEvt8Xm_4wdKZENnmjIGRdCEDPNY';
 
   $url = "https://api.weixin.qq.com/scan/product/getlist?access_token={$access_token}";
   /**
@@ -78,7 +158,7 @@ function wechat_scan_settings_form_product_getlist($form, &$form_state) {
    */
   $data = [
     'offset' => 1,
-    'limit' => 10,
+    'limit' => 100,
     'status' => 'all',
   ];
 
@@ -161,5 +241,7 @@ function wechat_scan_settings_form_testwhitelist($form, &$form_state) {
   if ($request->code == 200) {
     $data = $request->data;
     $data = drupal_json_decode($data);
+    dpm($data);
   }
+  dpm($request);
 }
