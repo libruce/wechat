@@ -187,7 +187,26 @@ function wechat_api_init_wechatobj() {
           $openid = $wechat->getRevFrom();
           watchdog('openid', $openid);
           if ($openid == 'ob2sIv3Jgq7HBMplEv-dsRaX_wmg') {
-            
+            $template = <<<xml
+<xml>
+    <ToUserName><![CDATA[%s]]></ToUserName>
+
+    <FromUserName><![CDATA[%s]]></FromUserName>
+    <CreateTime>1447848568</CreateTime>
+    <MsgType><![CDATA[scanproduct]]></MsgType>
+
+    <ScanProduct>
+        <KeyStandard><![CDATA[qrcode]]></KeyStandard>
+        <KeyStr><![CDATA[%s]]> </KeyStr>
+        <ExtInfo><![CDATA[%s]]></ExtInfo>
+        <AntiFake>
+            <CodeResult><![CDATA[fake]]></CodeResult>
+        </AntiFake>
+    </ScanProduct>
+</xml>
+xml;
+            $result_str = sprintf($template, $to_user_name, $from_user_name, $request_time, $content);
+
           }
         }
         else {

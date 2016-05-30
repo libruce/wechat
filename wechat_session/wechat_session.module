@@ -86,14 +86,17 @@ function wechat_session_default_status_echo($wechat_obj) {
     $content .= 'api配置成功。';
   }
 
-  $return_template = "<xml>
+  $return_template = <<<xml
+<xml>
       <ToUserName><![CDATA[%s]]></ToUserName>
       <FromUserName><![CDATA[%s]]></FromUserName>
       <CreateTime>%s</CreateTime>
       <MsgType><![CDATA[text]]></MsgType>
       <Content><![CDATA[%s]]></Content>
       <FuncFlag>0</FuncFlag>
-    </xml>";
+  </xml>
+xml;
+
 
   $result_str = sprintf($return_template, $to_user_name, $from_user_name, $request_time, $content);
 
