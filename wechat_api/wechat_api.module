@@ -210,7 +210,7 @@ function wechat_api_init_wechatobj() {
 xml;
 
               $r = $wechat->getRevData();
-              watchdog('$r = $wechat->getRevData();', serialize($r));
+              watchdog('AAAAAAAAAAAAAAA', serialize($r));
 
 
 //              $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME,$wechat->getRevByKey($key));
