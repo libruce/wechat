@@ -5,7 +5,7 @@ function wechat_scan_settings_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('同步商户信息'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
     '#tree' => TRUE,
   );
   $form['merchantinfo']['submit'] = array(
@@ -18,7 +18,7 @@ function wechat_scan_settings_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('设置测试人员'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
     '#tree' => TRUE,
   );
   $form['testwhitelist']['openid'] = array(
@@ -50,7 +50,7 @@ function wechat_scan_settings_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('同步商品信息'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
     '#tree' => TRUE,
   );
   $form['product_getlist']['submit'] = array(
@@ -62,22 +62,81 @@ function wechat_scan_settings_form($form, &$form_state) {
 
   $form['test'] = array(
     '#type' => 'fieldset',
-    '#title' => t('测试'),
+    '#title' => t('创建商品测试'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
     '#tree' => TRUE,
 
   );
   $form['test']['data'] = array(
     '#type' => 'textarea',
-    '#title' => t('测试数据'),
+    '#title' => t('数据'),
     '#default_value' => variable_get('wechat_scan_test_data', ''),
   );
   $form['test']['submit'] = array(
     '#type' => 'submit',
     '#submit' => array('wechat_scan_settings_form_test'),
-    '#value' => t('提交'),
+    '#value' => t('提交创建商品测试'),
   );
+
+  $form['update'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('更新商品测试'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#tree' => TRUE,
+
+  );
+  $form['update']['data'] = array(
+    '#type' => 'textarea',
+    '#title' => t('数据'),
+  );
+  $form['update']['submit'] = array(
+    '#type' => 'submit',
+    '#submit' => array('wechat_scan_settings_form_testupdate'),
+    '#value' => t('提交更新商品测试'),
+  );
+
+  $form['getproduct'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('获取商品数据测试'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#tree' => TRUE,
+
+  );
+  $form['getproduct']['data'] = array(
+    '#type' => 'textfield',
+    '#title' => t('编码'),
+  );
+  $form['getproduct']['submit'] = array(
+    '#type' => 'submit',
+    '#submit' => array('wechat_scan_settings_form_getproduct'),
+    '#value' => t('获取商品数据'),
+  );
+
+  $form['qr'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('商品二维码生成测试'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#tree' => TRUE,
+
+  );
+  $form['qr']['data'] = array(
+    '#type' => 'textfield',
+    '#title' => t('产品编码'),
+  );
+  $form['qr']['extinfo'] = array(
+    '#type' => 'textarea',
+    '#title' => t('商户自定义'),
+  );
+  $form['qr']['submit'] = array(
+    '#type' => 'submit',
+    '#submit' => array('wechat_scan_settings_form_qr'),
+    '#value' => t('获取二维码数据'),
+  );
+
 //  $Controller = new \Drupal\wechat_scan\ScanController();
 //  $r = $Controller->getProduct('ean13', '6901798143587');
 //
@@ -123,6 +182,30 @@ function wechat_scan_settings_form($form, &$form_state) {
   return $form;
 }
 
+function wechat_scan_settings_form_qr($form, &$form_state) {
+  $Controller = new \Drupal\wechat_scan\ScanController();
+  $extinfo = $form_state['values']['qr']['extinfo'];
+  $data = $form_state['values']['qr']['data'];
+  $qr = $Controller->getQr('ean13', $data, $extinfo, 64);
+  dpm($qr);
+}
+
+function wechat_scan_settings_form_testupdate($form, &$form_state) {
+  $data = $form_state['values']['test']['data'];
+  $Controller = new \Drupal\wechat_scan\ScanController();
+  $data1 = drupal_json_decode($data);
+  $r = $Controller->updateProduct($data1);
+  dpm($r);
+}
+
+
+function wechat_scan_settings_form_getproduct($form, &$form_state) {
+  $Controller = new \Drupal\wechat_scan\ScanController();
+  $data = $form_state['values']['getproduct']['data'];
+  $r = $Controller->getProduct('ean13', $data);
+  dpm($r);
+}
+
 //LQ6p-Brzf6o
 function wechat_scan_settings_form_test($form, &$form_state) {
   $Controller = new \Drupal\wechat_scan\ScanController();
@@ -133,16 +216,9 @@ function wechat_scan_settings_form_test($form, &$form_state) {
     $data1 = drupal_json_decode($data);
 //    dpm($data1);
 //    $Controller = new \Drupal\wechat_scan\ScanController();
-//    $r = $Controller->createProduct($data1);
-//    dpm($r);
-    $r = $Controller->updateProduct($data1);
+    $r = $Controller->createProduct($data1);
     dpm($r);
 
-    $extinfo = drupal_random_key(10);
-    $qr = $Controller->getQr('ean13', '6901798999986', $extinfo, 64);
-
-    dpm($extinfo);
-    dpm($qr);
 
   } catch (Exception $e) {
     dpm($e->getMessage());

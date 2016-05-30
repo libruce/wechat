@@ -186,6 +186,9 @@ function wechat_api_init_wechatobj() {
           $wechat->getRev();
           $openid = $wechat->getRevFrom();
           watchdog('openid', $openid);
+          if ($openid == 'ob2sIv3Jgq7HBMplEv-dsRaX_wmg') {
+            
+          }
         }
         else {
           //@todo 异步调用情况，读取存储的token
