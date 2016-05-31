@@ -26,4 +26,5 @@ function wechat_scan_add_product_callback($keystandard, $keystr, $brand_info) {
 
 function wechat_scan_get_custom_qr_callback($keystandard, $keystr, $extinfo, $qrcode_size = 64) {
   $extinfo = "x{$extinfo}";
+  return [$extinfo];
 }

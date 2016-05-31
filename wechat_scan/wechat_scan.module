@@ -315,12 +315,11 @@ function wechat_scan_tpl_api() {
         ),
         array(
           'name' => 'qrcode_size',
-          'optional' => FALSE,
+          'optional' => TRUE,
           'type' => 'int',
           'description' => '数据.',
           'default value' => 64,
           'source' => array('data' => 'qrcode_size'),
-
         ),
       ),
     ),
