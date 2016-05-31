@@ -38,5 +38,14 @@ function wechat_scan_get_custom_qr_callback($keystandard, $keystr, $extinfo, $qr
 }
 
 function wechat_scan_get_qr_callback($keystandard, $keystr, $type, $qrcode_size = 64) {
-
+  $entities = entity_load('wechat_scan_product', FALSE, [
+    'keystandard' => $keystandard,
+    'keystr' => $keystr
+  ]);
+  if (empty($entities)) {
+    throw new Exception('商品不存在');
+  }
+  else {
+    $entity = reset($entities);
+  }
 }

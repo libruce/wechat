@@ -1,6 +1,7 @@
 <?php
 
 function wechat_scan_settings_form($form, &$form_state) {
+
   $form['merchantinfo'] = array(
     '#type' => 'fieldset',
     '#title' => t('同步商户信息'),
@@ -45,13 +46,13 @@ function wechat_scan_settings_form($form, &$form_state) {
     '#value' => t('设置测试人员'),
   );
 
-
   $form['product_getlist'] = array(
     '#type' => 'fieldset',
     '#title' => t('同步商品信息'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#tree' => TRUE,
+    '#description' => t('从微信服务器同步商品信息到本地服务器。这可能会覆盖本地商品数据。'),
   );
   $form['product_getlist']['submit'] = array(
     '#type' => 'submit',
@@ -59,126 +60,87 @@ function wechat_scan_settings_form($form, &$form_state) {
     '#value' => t('同步商品信息'),
   );
 
+  /**
+   *
+   */
+  if (wechat_api_isdebug()) {
+    $form['test'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('创建商品测试'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
 
-  $form['test'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('创建商品测试'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#tree' => TRUE,
+    );
+    $form['test']['data'] = array(
+      '#type' => 'textarea',
+      '#title' => t('数据'),
+      '#default_value' => variable_get('wechat_scan_test_data', ''),
+    );
+    $form['test']['submit'] = array(
+      '#type' => 'submit',
+      '#submit' => array('wechat_scan_settings_form_test'),
+      '#value' => t('提交创建商品测试'),
+    );
 
-  );
-  $form['test']['data'] = array(
-    '#type' => 'textarea',
-    '#title' => t('数据'),
-    '#default_value' => variable_get('wechat_scan_test_data', ''),
-  );
-  $form['test']['submit'] = array(
-    '#type' => 'submit',
-    '#submit' => array('wechat_scan_settings_form_test'),
-    '#value' => t('提交创建商品测试'),
-  );
+    $form['update'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('更新商品测试'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
 
-  $form['update'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('更新商品测试'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#tree' => TRUE,
+    );
+    $form['update']['data'] = array(
+      '#type' => 'textarea',
+      '#title' => t('数据'),
+    );
+    $form['update']['submit'] = array(
+      '#type' => 'submit',
+      '#submit' => array('wechat_scan_settings_form_testupdate'),
+      '#value' => t('提交更新商品测试'),
+    );
 
-  );
-  $form['update']['data'] = array(
-    '#type' => 'textarea',
-    '#title' => t('数据'),
-  );
-  $form['update']['submit'] = array(
-    '#type' => 'submit',
-    '#submit' => array('wechat_scan_settings_form_testupdate'),
-    '#value' => t('提交更新商品测试'),
-  );
+    $form['getproduct'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('获取商品数据测试'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
 
-  $form['getproduct'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('获取商品数据测试'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#tree' => TRUE,
+    );
+    $form['getproduct']['data'] = array(
+      '#type' => 'textfield',
+      '#title' => t('编码'),
+    );
+    $form['getproduct']['submit'] = array(
+      '#type' => 'submit',
+      '#submit' => array('wechat_scan_settings_form_getproduct'),
+      '#value' => t('获取商品数据'),
+    );
 
-  );
-  $form['getproduct']['data'] = array(
-    '#type' => 'textfield',
-    '#title' => t('编码'),
-  );
-  $form['getproduct']['submit'] = array(
-    '#type' => 'submit',
-    '#submit' => array('wechat_scan_settings_form_getproduct'),
-    '#value' => t('获取商品数据'),
-  );
+    $form['qr'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('商品二维码生成测试'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
 
-  $form['qr'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('商品二维码生成测试'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#tree' => TRUE,
-
-  );
-  $form['qr']['data'] = array(
-    '#type' => 'textfield',
-    '#title' => t('产品编码'),
-  );
-  $form['qr']['extinfo'] = array(
-    '#type' => 'textarea',
-    '#title' => t('商户自定义'),
-  );
-  $form['qr']['submit'] = array(
-    '#type' => 'submit',
-    '#submit' => array('wechat_scan_settings_form_qr'),
-    '#value' => t('获取二维码数据'),
-  );
-
-//  $Controller = new \Drupal\wechat_scan\ScanController();
-//  $r = $Controller->getProduct('ean13', '6901798143587');
-//
-//  dpm($r);
-//
-//  $url = 'http://mmbiz.qpic.cn/mmbiz/PMXyQaV1nePHiax1kCFoZ259646fiaqd1aaiarOoCI5Bn2eVHqkDuTCgVeNrP1EQ4SyBDibcw0fWc7EIAjLEF6goEA/0?wx_fmt=jpeg';
-//
-//  $content = file_get_contents($url);
-//
-//
-//  $filename = '42° 泸州邮礼天下-喜庆装 500ml';
-//  if (module_exists('transliteration')) {
-//    module_load_include('inc', 'transliteration');
-//
-//    $langcode = NULL;
-//    if (!empty($_POST['language'])) {
-//      $languages = language_list();
-//      $langcode = isset($languages[$_POST['language']]) ? $_POST['language'] : NULL;
-//    }
-//    $filename = transliteration_clean_filename($filename, $langcode);
-//  }
-//
-//  dpm($filename);
-
-
-//  $a = file_unmanaged_save_data($content);
-
-//  dpm($a);
-
-//  global $user;
-//  $file = new stdClass();
-//  $file->uid = $user->uid;
-//  $file->status = 0;
-//  $file->filename = trim(basename($filepath), '.');
-//  $file->uri = $filepath;
-//  $file->filemime = file_get_mimetype($file->filename);
-//  $file->filesize = filesize($filepath);
-//
-//  file_save($file);
-//  dpm($file);
-
-// https://api.weixin.qq.com/scan/product/getlist?access_token=PE8Pe2gEpsHPb5TVoIzu_3f-166mw2pb0UEey0ni-kAf1uvE0bh0BnFSY2TTi8NsgXMF3EafzwHBNQs-PaLmCg
+    );
+    $form['qr']['data'] = array(
+      '#type' => 'textfield',
+      '#title' => t('产品编码'),
+    );
+    $form['qr']['extinfo'] = array(
+      '#type' => 'textarea',
+      '#title' => t('商户自定义'),
+    );
+    $form['qr']['submit'] = array(
+      '#type' => 'submit',
+      '#submit' => array('wechat_scan_settings_form_qr'),
+      '#value' => t('获取二维码数据'),
+    );
+  }
   return $form;
 }
 
@@ -327,3 +289,47 @@ function wechat_scan_settings_form_testwhitelist($form, &$form_state) {
   }
   dpm($request);
 }
+
+
+//  $Controller = new \Drupal\wechat_scan\ScanController();
+//  $r = $Controller->getProduct('ean13', '6901798143587');
+//
+//  dpm($r);
+//
+//  $url = 'http://mmbiz.qpic.cn/mmbiz/PMXyQaV1nePHiax1kCFoZ259646fiaqd1aaiarOoCI5Bn2eVHqkDuTCgVeNrP1EQ4SyBDibcw0fWc7EIAjLEF6goEA/0?wx_fmt=jpeg';
+//
+//  $content = file_get_contents($url);
+//
+//
+//  $filename = '42° 泸州邮礼天下-喜庆装 500ml';
+//  if (module_exists('transliteration')) {
+//    module_load_include('inc', 'transliteration');
+//
+//    $langcode = NULL;
+//    if (!empty($_POST['language'])) {
+//      $languages = language_list();
+//      $langcode = isset($languages[$_POST['language']]) ? $_POST['language'] : NULL;
+//    }
+//    $filename = transliteration_clean_filename($filename, $langcode);
+//  }
+//
+//  dpm($filename);
+
+
+//  $a = file_unmanaged_save_data($content);
+
+//  dpm($a);
+
+//  global $user;
+//  $file = new stdClass();
+//  $file->uid = $user->uid;
+//  $file->status = 0;
+//  $file->filename = trim(basename($filepath), '.');
+//  $file->uri = $filepath;
+//  $file->filemime = file_get_mimetype($file->filename);
+//  $file->filesize = filesize($filepath);
+//
+//  file_save($file);
+//  dpm($file);
+
+// https://api.weixin.qq.com/scan/product/getlist?access_token=PE8Pe2gEpsHPb5TVoIzu_3f-166mw2pb0UEey0ni-kAf1uvE0bh0BnFSY2TTi8NsgXMF3EafzwHBNQs-PaLmCg

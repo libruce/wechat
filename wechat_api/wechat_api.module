@@ -246,6 +246,14 @@ function wechat_api_get_access_token() {
 }
 
 /**
+ * @return null
+ * @todo 返回微信debug状态  debug 返回 true 否则返回 false
+ */
+function wechat_api_isdebug() {
+  return variable_get('wechat_api_debug', FALSE);
+}
+
+/**
  * 微信接口回调函数，提供验证是否接入成功。在wechat_session模块中使用hook_menu_alter()覆写提供更强大的功能。
  */
 function wechat_api_callback() {
