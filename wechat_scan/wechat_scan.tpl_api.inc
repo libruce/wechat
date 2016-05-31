@@ -24,6 +24,14 @@ function wechat_scan_add_product_callback($keystandard, $keystr, $brand_info) {
   return $brand_info;
 }
 
+/**
+ * @param $keystandard
+ * @param $keystr
+ * @param $extinfo
+ * @param int $qrcode_size
+ * @return array
+ * @todo  生成自定义商品二维码  加  x  前缀
+ */
 function wechat_scan_get_custom_qr_callback($keystandard, $keystr, $extinfo, $qrcode_size = 64) {
   $extinfo = "x{$extinfo}";
   return [$extinfo];
