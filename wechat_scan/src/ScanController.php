@@ -64,6 +64,26 @@ class ScanController {
     return $this->request($url, 'POST', $data);
   }
 
+  /**
+   * @param int $offset
+   * @param $number
+   * @param string $status
+   * @todo 拉取商品列表。
+   */
+  function getProductList($offset = 0, $number = 100, $status = 'all', $keystr = NULL) {
+    $url = "https://api.weixin.qq.com/scan/product/getlist?access_token={$this->access_token()}";
+
+    $data = [
+      'offset' => $offset,
+      'limit' => $number,
+      'status' => $status,
+      'keystr' => $keystr,
+    ];
+
+    return $this->request($url, 'POST', drupal_json_encode($data));
+
+  }
+
   function  getQr($keystandard, $keystr, $extinfo, $qrcode_size = 64) {
     $data = [
       'keystandard' => $keystandard,

@@ -232,7 +232,7 @@ class WechatScanProduct extends Entity {
    * @todo 从微信更新数据
    */
   function update($info) {
-
+    dpm($info);
   }
 }
 

@@ -189,45 +189,17 @@ function wechat_scan_settings_form_test($form, &$form_state) {
 
 function wechat_scan_settings_form_product_getlist($form, &$form_state) {
   try {
-    $access_token = wechat_api_get_access_token();
-
-    $url = "https://api.weixin.qq.com/scan/product/getlist?access_token={$access_token}";
-
-    /**
-     *
-     * {
-     * "offset": "1",
-     * "limit": "10",
-     * "status":"on",
-     * }
-     */
-    $data = [
-      'offset' => 1,
-      'limit' => 10,
-      'status' => 'all',
-    ];
-
-    $data = drupal_json_encode($data);
-
-    $request = drupal_http_request($url, array(
-      'headers' => array(
-        'Content-Type' => 'application/json',
-      ),
-      'method' => 'POST',
-      'data' => $data,
-      'timeout' => 60,
-      'context' => [],
-    ));
-
-    if ($request->code == 200) {
-      $data = $request->data;
-      $data = drupal_json_decode($data);
-      dpm($data);
-    }
-    dpm($request);
-
+    $Controller = new \Drupal\wechat_scan\ScanController();
+    $list = $Controller->getProductList();
+    dpm($list);
+//    return;
     $operations = [];
-
+    foreach ($list['key_list'] as $item) {
+      $operations[] = [
+        'wechat_scan_pull_product',
+        [$item['keystandard'], $item['keystr']]
+      ];
+    }
     batch_set(array(
       'operations' => $operations,
       'title' => '商品信息同步',
