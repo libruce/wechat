@@ -240,7 +240,7 @@ xml;
 }
 
 function wechat_api_get_access_token() {
-//  return 'vnCysKluW0HdIduR2VvZrYPhd3CI2ZLozYiiEg0VOnDaHYWkN6BSAqz-HxrT_K9lO9Oy7cjnHgBrmAaXds__VGRdfyRSFWUe2aNgjPDtTe7-2cdudxdqSN17Vl89bmZsWBIjCMDFKR';
+  return 'yMotGwQm7c23ut15FS0zILV8L1MaQS7lUHO2KmwmJavv89JJfq32tGXz7eAjstH93QEa7e3VaXlNCKBL_93I8Vhe-0KLtomokMzykjBrOime-jR2mlrUlcQcXXH74gJSPXXjAIDYGG';
   $obj = wechat_api_init_wechatobj();
   return $obj->get_access_token();
 }

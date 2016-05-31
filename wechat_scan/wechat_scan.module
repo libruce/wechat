@@ -50,6 +50,16 @@ function wechat_scan_menu() {
     'title' => 'Settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
+
+
+  $items['wechat-scan/product/add2'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_scan_add_test'),
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', NULL, 'add'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_scan.pages.inc',
+  );
   return $items;
 }
 
@@ -208,5 +218,38 @@ class wechat_scan_product_qrcode extends Entity {
  * Implements hook_tpl_api().
  */
 function wechat_scan_tpl_api() {
-
+  return array(
+    'add-action-info' => array(
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_add_action_info_callback',
+      'description' => '添加action_info信息',
+      'args' => array(
+        array(
+          'name' => 'title',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '标题（管理时使用）.',
+          'source' => array('data' => 'title'),
+        ),
+        array(
+          'name' => 'type',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '类型.',
+          'source' => array('data' => 'type'),
+        ),
+        array(
+          'name' => 'data',
+          'optional' => FALSE,
+          'type' => 'array',
+          'description' => '数据.',
+          'source' => array('data' => 'data'),
+        ),
+      ),
+    ),
+  );
 }
