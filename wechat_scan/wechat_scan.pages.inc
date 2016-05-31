@@ -6,7 +6,7 @@ function wechat_scan_add_test($form, &$form_state) {
 
   $qr = new WechatScanProductQrcode;
   $qr->qrcode_url = $a;
-  $qr->save();
+//  $qr->save();
 
   $form['fieldset'] = array(
     '#type' => 'fieldset',

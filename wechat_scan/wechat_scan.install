@@ -243,6 +243,7 @@ function wechat_scan_schema() {
 
 /**
  * Implements hook_update_N().
+ * @todo 修改表结构 二维码扩展和url 可能很长  修改为  longtext 字段类型
  */
 function wechat_scan_update_7101(&$sandbox) {
   $fields = [
