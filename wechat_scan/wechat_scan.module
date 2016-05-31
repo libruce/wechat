@@ -84,15 +84,13 @@ function wechat_scan_access($type, $entity = NULL, $op = NULL) {
  */
 function wechat_scan_pull_product($keystandard, $keystr) {
   try {
-    $Controller = new \Drupal\wechat_scan\ScanController();
-
-    $info = $Controller->getProduct($keystandard, $keystr);
     $product = wechat_scan_product_load_by_key($keystandard, $keystr);
 
     if (!$product) {
       $product = new WechatScanProduct();
     }
-    $product->update($info);
+
+    $product->update($keystandard, $keystr);
     $product->save();
 
   } catch (Exception $e) {
@@ -197,6 +195,7 @@ class WechatScanProduct extends Entity {
   public $title;
   public $created;
   public $changed;
+  public $data;
 
   public $keystandard = 'ean13';
   public $keystr;
@@ -212,7 +211,21 @@ class WechatScanProduct extends Entity {
     parent::__construct($values, 'wechat_scan_product');
   }
 
+  protected function checkOnly(WechatScanProduct $wechatScanProduct) {
+    return !empty(entity_load('wechat_scan_product', FALSE, array(
+      'keystandard' => $wechatScanProduct->keystandard,
+      'keystr' => $wechatScanProduct->keystr,
+    )));
+  }
+
   function save() {
+    /**
+     * @todo 如果ID不存在，则表示是新商品。则检查是否已存在
+     */
+    if (empty($this->id) && $this->checkOnly($this)) {
+      return;
+    }
+
     $this->changed = time();
 
     if (empty($this->created)) {
@@ -231,9 +244,17 @@ class WechatScanProduct extends Entity {
    * @param $info
    * @todo 从微信更新数据
    */
-  function update($info) {
-    dpm($info);
+  function update($keystandard, $keystr) {
+    $Controller = new \Drupal\wechat_scan\ScanController();
+    $info = $Controller->getProduct($keystandard, $keystr);
+
+    $this->log = '微信同步-' . date('Y-m-d H:i:s');
+    $this->title = $info['brand_info']['base_info']['title'];
+    $this->keystandard = $keystandard;
+    $this->keystr = $keystr;
+    $this->data = serialize($info['brand_info']);
   }
+
 }
 
 class WechatScanProductQrcode extends Entity {
