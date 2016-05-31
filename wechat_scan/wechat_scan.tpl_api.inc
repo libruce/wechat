@@ -21,7 +21,13 @@ function wechat_scan_add_action_info_callback($title, $type, $data) {
 }
 
 function wechat_scan_add_product_callback($keystandard, $keystr, $brand_info) {
-  return $brand_info;
+  $entities = entity_load('wechat_scan_product', FALSE, [
+    'keystandard' => $keystandard,
+    'keystr' => $keystr
+  ]);
+  if (!empty($entities)) {
+    throw new Exception(format_string('编码 @keystr 的商品已存在', ['@keystr' => $keystr]), 900001);
+  }
 }
 
 /**
@@ -43,7 +49,7 @@ function wechat_scan_get_qr_callback($keystandard, $keystr, $type, $qrcode_size 
     'keystr' => $keystr
   ]);
   if (empty($entities)) {
-    throw new Exception('商品不存在');
+    throw new Exception(format_string('编码 @keystr 的商品不存在', ['@keystr' => $keystr]), 900002);
   }
   else {
     $entity = reset($entities);
