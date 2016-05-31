@@ -203,7 +203,7 @@ class WechatScanProduct extends Entity {
   }
 }
 
-class wechat_scan_product_qrcode extends Entity {
+class WechatScanProductQrcode extends Entity {
   function __construct($values = array()) {
     parent::__construct($values, 'wechat_scan_product_qrcode');
   }

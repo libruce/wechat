@@ -2,6 +2,6 @@ name = 微信扫一扫
 description = 微信扫一扫
 core = 7.x
 package = wechat
-version = 7.x-1.0
+version = 7.x-1.1
 dependencies[] = xautoload (>= 7.x-5.0)
 dependencies[] = entity
