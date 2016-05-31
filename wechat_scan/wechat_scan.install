@@ -39,9 +39,15 @@ function wechat_scan_schema() {
         'default' => 0,
       ),
       'log' => array(
-        'description' => 'The log entry explaining the changes in this version.',
+        'description' => '商品变更记录。',
         'type' => 'text',
         'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'data' => array(
+        'description' => '全部的商品数据序列化后的存储.',
+        'type' => 'blob',
+        'not null' => FALSE,
         'size' => 'big',
       ),
       //发送
@@ -122,9 +128,15 @@ function wechat_scan_schema() {
         'default' => 0,
       ),
       'log' => array(
-        'description' => 'The log entry explaining the changes in this version.',
+        'description' => '商品变更记录。',
         'type' => 'text',
         'not null' => TRUE,
+        'size' => 'big',
+      ),
+      'data' => array(
+        'description' => '全部的商品数据序列化后的存储.',
+        'type' => 'blob',
+        'not null' => FALSE,
         'size' => 'big',
       ),
       //发送
@@ -263,4 +275,18 @@ function wechat_scan_update_7101(&$sandbox) {
   foreach ($fields as $name => $spec) {
     db_change_field('wechat_scan_product_qrcode', $name, $name, $spec);
   }
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function wechat_scan_update_7102(&$sandbox) {
+  $field = array(
+    'description' => '全部的商品数据序列化后的存储.',
+    'type' => 'blob',
+    'not null' => FALSE,
+    'size' => 'big',
+  );
+  db_add_field('wechat_scan_product', 'data', $field);
+  db_add_field('wechat_scan_product_revision', 'data', $field);
 }

@@ -78,6 +78,40 @@ function wechat_scan_access($type, $entity = NULL, $op = NULL) {
 }
 
 /**
+ * @param $keystandard
+ * @param $keystr
+ * @todo 使用编码信息拉取商品信息，并保存到本地。如果本地存在相应的商品则覆盖
+ */
+function wechat_scan_pull_product($keystandard, $keystr) {
+  try {
+    $Controller = new \Drupal\wechat_scan\ScanController();
+
+    $info = $Controller->getProduct($keystandard, $keystr);
+    $product = wechat_scan_product_load_by_key($keystandard, $keystr);
+
+    if (!$product) {
+      $product = new WechatScanProduct();
+    }
+    $product->update($info);
+    $product->save();
+
+  } catch (Exception $e) {
+
+  }
+}
+
+function wechat_scan_product_load_by_key($keystandard, $keystr) {
+  $entities = entity_load('wechat_scan_product', FALSE, [
+    'keystandard' => $keystandard,
+    'keystr' => $keystr
+  ]);
+  if (!empty($entities)) {
+    return reset($entities);
+  }
+  return FALSE;
+}
+
+/**
  * Implements hook_field_extra_fields().
  */
 function wechat_scan_field_extra_fields() {
@@ -194,8 +228,7 @@ class WechatScanProduct extends Entity {
   }
 
   /**
-   * @param $keystandard
-   * @param $keystr
+   * @param $info
    * @todo 从微信更新数据
    */
   function update($info) {

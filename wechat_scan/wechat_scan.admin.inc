@@ -188,42 +188,54 @@ function wechat_scan_settings_form_test($form, &$form_state) {
 }
 
 function wechat_scan_settings_form_product_getlist($form, &$form_state) {
-  $access_token = wechat_api_get_access_token();
+  try {
+    $access_token = wechat_api_get_access_token();
 
-  $url = "https://api.weixin.qq.com/scan/product/getlist?access_token={$access_token}";
-  /**
-   *
-   * {
-   * "offset": "1",
-   * "limit": "10",
-   * "status":"on",
-   * }
-   */
-  $data = [
-    'offset' => 1,
-    'limit' => 100,
-    'status' => 'all',
-  ];
+    $url = "https://api.weixin.qq.com/scan/product/getlist?access_token={$access_token}";
 
-  $data = drupal_json_encode($data);
+    /**
+     *
+     * {
+     * "offset": "1",
+     * "limit": "10",
+     * "status":"on",
+     * }
+     */
+    $data = [
+      'offset' => 1,
+      'limit' => 10,
+      'status' => 'all',
+    ];
 
-  $request = drupal_http_request($url, array(
-    'headers' => array(
-      'Content-Type' => 'application/json',
-    ),
-    'method' => 'POST',
-    'data' => $data,
-    'timeout' => 60,
-    'context' => [],
-  ));
+    $data = drupal_json_encode($data);
 
-  if ($request->code == 200) {
-    $data = $request->data;
-    $data = drupal_json_decode($data);
-    dpm($data);
+    $request = drupal_http_request($url, array(
+      'headers' => array(
+        'Content-Type' => 'application/json',
+      ),
+      'method' => 'POST',
+      'data' => $data,
+      'timeout' => 60,
+      'context' => [],
+    ));
+
+    if ($request->code == 200) {
+      $data = $request->data;
+      $data = drupal_json_decode($data);
+      dpm($data);
+    }
+    dpm($request);
+
+    $operations = [];
+
+    batch_set(array(
+      'operations' => $operations,
+      'title' => '商品信息同步',
+    ));
+
+  } catch (Exception $e) {
+    drupal_set_message('出现错误', 'error');
   }
-  dpm($request);
-
 }
 
 function wechat_scan_settings_form_merchantinfo($form, &$form_state) {
