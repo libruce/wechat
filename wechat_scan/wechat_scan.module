@@ -251,5 +251,78 @@ function wechat_scan_tpl_api() {
         ),
       ),
     ),
+    'add-scan-product' => array(
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_add_product_callback',
+      'description' => '添加action_info信息',
+      'args' => array(
+        array(
+          'name' => 'keystandard',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '标题（管理时使用）.',
+          'source' => array('data' => 'keystandard'),
+        ),
+        array(
+          'name' => 'keystr',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '类型.',
+          'source' => array('data' => 'keystr'),
+        ),
+        array(
+          'name' => 'brand_info',
+          'optional' => FALSE,
+          'type' => 'array',
+          'description' => '数据.',
+          'source' => array('data' => 'brand_info'),
+        ),
+      ),
+    ),
+    'get-scan-product-qr' => array(
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_custom_qr_callback',
+      'description' => '生成自定义二维码',
+      'args' => array(
+        array(
+          'name' => 'keystandard',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '标题（管理时使用）.',
+          'source' => array('data' => 'keystandard'),
+        ),
+        array(
+          'name' => 'keystr',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '类型.',
+          'source' => array('data' => 'keystr'),
+        ),
+        array(
+          'name' => 'extinfo',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '数据.',
+          'source' => array('data' => 'extinfo'),
+        ),
+        array(
+          'name' => 'qrcode_size',
+          'optional' => FALSE,
+          'type' => 'int',
+          'description' => '数据.',
+          'default value' => 64,
+          'source' => array('data' => 'qrcode_size'),
+
+        ),
+      ),
+    ),
   );
 }
