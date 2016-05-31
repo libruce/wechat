@@ -283,7 +283,7 @@ function wechat_scan_tpl_api() {
         ),
       ),
     ),
-    'get-scan-product-qr' => array(
+    'get-scan-product-custom-qr' => array(
       'file' => array(
         'type' => 'inc',
         'module' => 'wechat_scan',
@@ -318,6 +318,46 @@ function wechat_scan_tpl_api() {
           'optional' => TRUE,
           'type' => 'int',
           'description' => '数据.',
+          'default value' => 64,
+          'source' => array('data' => 'qrcode_size'),
+        ),
+      ),
+    ),
+    'get-scan-product-qr' => array(
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_qr_callback',
+      'description' => '生成扫一扫商品二维码，按类型',
+      'args' => array(
+        array(
+          'name' => 'keystandard',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '商品编码格式.',
+          'source' => array('data' => 'keystandard'),
+        ),
+        array(
+          'name' => 'keystr',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '商品编码.',
+          'source' => array('data' => 'keystr'),
+        ),
+        array(
+          'name' => 'type',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '码类型.',
+          'source' => array('data' => 'type'),
+        ),
+        array(
+          'name' => 'qrcode_size',
+          'optional' => TRUE,
+          'type' => 'int',
+          'description' => '需要的码大小.',
           'default value' => 64,
           'source' => array('data' => 'qrcode_size'),
         ),

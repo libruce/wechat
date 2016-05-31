@@ -36,3 +36,7 @@ function wechat_scan_get_custom_qr_callback($keystandard, $keystr, $extinfo, $qr
   $extinfo = "x{$extinfo}";
   return [$extinfo];
 }
+
+function wechat_scan_get_qr_callback($keystandard, $keystr, $type, $qrcode_size = 64) {
+
+}
