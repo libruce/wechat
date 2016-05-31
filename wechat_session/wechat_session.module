@@ -4,12 +4,6 @@
  * @return bool
  */
 function wechat_session_status_load($status) {
-//  $result = db_select('wechat_session_status', 'wss')
-//    ->fields('wss')
-//    ->condition('status', $status)
-//    ->execute()
-//    ->fetchAssoc();
-//  return $result;
   $s = wechat_session_get_status();
   return isset($s[$status]) ? $s[$status] : FALSE;
 }
