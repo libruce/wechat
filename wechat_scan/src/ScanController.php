@@ -97,6 +97,23 @@ class ScanController {
     return $this->request($url, 'POST', drupal_json_encode($data));
   }
 
+  /**
+   * @param $keystandard
+   * @param $keystr
+   * @param $status
+   * @return mixed|string
+   * @todo 修改商品在微信的状态，及提交审核/取消发布商品
+   */
+  function modStatus($keystandard, $keystr, $status) {
+    $data = [
+      'keystandard' => $keystandard,
+      'keystr' => $keystr,
+      'status' => $status,
+    ];
+    $url = "https://api.weixin.qq.com/scan/product/modstatus?access_token={$this->access_token()}";
+    return $this->request($url, 'POST', drupal_json_encode($data));
+  }
+
   protected function request($url, $method = 'GET', $data = '', $timeout = 60) {
     try {
       $request = drupal_http_request($url, array(

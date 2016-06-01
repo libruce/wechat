@@ -255,6 +255,15 @@ class WechatScanProduct extends Entity {
     $this->data = serialize($info['brand_info']);
   }
 
+  /**
+   * @todo 将商品信息推送到微信，及商品创建
+   */
+  function push() {
+    $Controller = new \Drupal\wechat_scan\ScanController();
+    $data = unserialize($this->data);
+    $Controller->createProduct($data);
+  }
+
 }
 
 class WechatScanProductQrcode extends Entity {
@@ -273,38 +282,6 @@ class WechatScanProductQrcode extends Entity {
  */
 function wechat_scan_tpl_api() {
   return array(
-    'add-action-info' => array(
-      'file' => array(
-        'type' => 'inc',
-        'module' => 'wechat_scan',
-        'name' => 'wechat_scan.tpl_api'
-      ),
-      'callback' => 'wechat_scan_add_action_info_callback',
-      'description' => '添加action_info信息',
-      'args' => array(
-        array(
-          'name' => 'title',
-          'optional' => FALSE,
-          'type' => 'string',
-          'description' => '标题（管理时使用）.',
-          'source' => array('data' => 'title'),
-        ),
-        array(
-          'name' => 'type',
-          'optional' => FALSE,
-          'type' => 'string',
-          'description' => '类型.',
-          'source' => array('data' => 'type'),
-        ),
-        array(
-          'name' => 'data',
-          'optional' => FALSE,
-          'type' => 'array',
-          'description' => '数据.',
-          'source' => array('data' => 'data'),
-        ),
-      ),
-    ),
     'add-scan-product' => array(
       'file' => array(
         'type' => 'inc',
@@ -312,20 +289,20 @@ function wechat_scan_tpl_api() {
         'name' => 'wechat_scan.tpl_api'
       ),
       'callback' => 'wechat_scan_add_product_callback',
-      'description' => '添加action_info信息',
+      'description' => '添加扫一扫产品',
       'args' => array(
         array(
           'name' => 'keystandard',
           'optional' => FALSE,
           'type' => 'string',
-          'description' => '标题（管理时使用）.',
+          'description' => '商品编码类型.',
           'source' => array('data' => 'keystandard'),
         ),
         array(
           'name' => 'keystr',
           'optional' => FALSE,
           'type' => 'string',
-          'description' => '类型.',
+          'description' => '商品编码.',
           'source' => array('data' => 'keystr'),
         ),
         array(
@@ -350,14 +327,14 @@ function wechat_scan_tpl_api() {
           'name' => 'keystandard',
           'optional' => FALSE,
           'type' => 'string',
-          'description' => '标题（管理时使用）.',
+          'description' => '商品编码类型.',
           'source' => array('data' => 'keystandard'),
         ),
         array(
           'name' => 'keystr',
           'optional' => FALSE,
           'type' => 'string',
-          'description' => '类型.',
+          'description' => '商品编码.',
           'source' => array('data' => 'keystr'),
         ),
         array(
@@ -416,6 +393,20 @@ function wechat_scan_tpl_api() {
           'source' => array('data' => 'qrcode_size'),
         ),
       ),
+      'responses' => [
+        'url' => [
+          'type' => 'array',
+          'description' => '二维码url',
+          'default value' => ['asdf'],
+        ],
+//        array(
+//          'name' => 'url',
+//          'optional' => FALSE,
+//          'type' => 'string',
+//          'description' => '商品编码格式.',
+//          'source' => array('data' => 'keystandard'),
+//        ),
+      ],
     ),
   );
 }

@@ -28,6 +28,17 @@ class WechatScanTplApiController {
     throw new \Exception(format_string('编码 @keystr 的商品不存在', ['@keystr' => $keystr]), 900002);
   }
 
+  function add_product_callback($keystandard, $keystr, $brand_info) {
+    $product = new \WechatScanProduct();
+    $product->keystandard = $keystandard;
+    $product->keystr = $keystr;
+    $product->title = $brand_info['base_info']['title'];
+    $product->data = serialize($brand_info);
+
+    $product->save();
+    return [$product];
+  }
+
   /**
    * @param $keystandard
    * @param $keystr
