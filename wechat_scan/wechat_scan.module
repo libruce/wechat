@@ -7,7 +7,17 @@ function wechat_scan_theme($existing, $type, $theme, $path) {
     'wechat_scan' => array(
       'render element' => 'content',
     ),
+    'wechat_scan_add_test' => array(
+      'render element' => 'content',
+      'template' => 'wechat_scan_add_test',
+      'function' => 'wechat_scan_theme_test'
+    ),
   );
+}
+
+function wechat_scan_theme_test($v) {
+  dpm($v);
+  return 'aaaa';
 }
 
 /**
@@ -60,6 +70,15 @@ function wechat_scan_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'wechat_scan.pages.inc',
   );
+
+  $items['wechat-scan/product/add3'] = array(
+    'page callback' => 'wechat_scan_add_test2',
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', NULL, 'add'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_scan.pages.inc',
+  );
+
   return $items;
 }
 

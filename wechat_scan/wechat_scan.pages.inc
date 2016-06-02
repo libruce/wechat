@@ -120,3 +120,8 @@ function wechat_scan_add_test($form, &$form_state) {
 function wechat_menu_form_refresh($form, &$form_state) {
   return $form['action_info']['attributes'];
 }
+
+
+function wechat_scan_add_test2() {
+  return theme('wechat_scan_add_test');
+}
