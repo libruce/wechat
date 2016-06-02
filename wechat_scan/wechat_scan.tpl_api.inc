@@ -39,6 +39,11 @@ function wechat_scan_get_qr_callback($keystandard, $keystr, $type, $qrcode_size 
   }
 }
 
+function wechat_scan_get_product_list_callback($offset, $number, $status) {
+  $Controller = new \Drupal\wechat_scan\WechatScanTplApiController();
+  return $Controller->get_product_list_callback($offset, $number, $status);
+}
+
 function wechat_scan_get_category_list_callback() {
   $Controller = new \Drupal\wechat_scan\WechatScanTplApiController();
   return $Controller->get_category_list_callback();

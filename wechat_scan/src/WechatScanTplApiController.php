@@ -39,6 +39,12 @@ class WechatScanTplApiController {
     return [$product];
   }
 
+  function get_product_list_callback($offset, $number, $status) {
+    $Query = new \EntityFieldQuery();
+    $list = [];
+    return ['list' => $list];
+  }
+
   /**
    * @param $keystandard
    * @param $keystr

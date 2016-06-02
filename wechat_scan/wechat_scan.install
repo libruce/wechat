@@ -50,6 +50,12 @@ function wechat_scan_schema() {
         'not null' => FALSE,
         'size' => 'big',
       ),
+      'status' => array(
+        'description' => '产品状态。1、为未创建；2、off为未发布状态；3、on为发布状态；4、check为审核中状态5、reject为审核未通过状态；',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
       //发送
       'title' => array(
         'description' => '商品名称，建议不超过15个字，超过部分在客户端上以省略号显示。',
