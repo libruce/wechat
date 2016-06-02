@@ -395,17 +395,9 @@ function wechat_scan_tpl_api() {
       ),
       'responses' => [
         'url' => [
-          'type' => 'array',
-          'description' => '二维码url',
-          'default value' => ['asdf'],
+          'type' => 'string',
+          'description' => '二维码图片url',
         ],
-//        array(
-//          'name' => 'url',
-//          'optional' => FALSE,
-//          'type' => 'string',
-//          'description' => '商品编码格式.',
-//          'source' => array('data' => 'keystandard'),
-//        ),
       ],
     ),
   );

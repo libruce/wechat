@@ -26,7 +26,7 @@ function wechat_scan_get_custom_qr_callback($keystandard, $keystr, $extinfo, $qr
 }
 
 function wechat_scan_get_qr_callback($keystandard, $keystr, $type, $qrcode_size = 64) {
-  return [$keystr];
+  return ["url" => 'http://open.dd:8085/themes/bartik/screenshot.png'];
   $entities = entity_load('wechat_scan_product', FALSE, [
     'keystandard' => $keystandard,
     'keystr' => $keystr
