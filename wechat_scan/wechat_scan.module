@@ -264,6 +264,23 @@ class WechatScanProduct extends Entity {
     $Controller->createProduct($data);
   }
 
+  protected function thumb_url() {
+
+  }
+
+  /**
+   * ['link'=>$link]
+   * 商品详情页顶端横幅图片，640px*320px，单张≤200k，支持jpg、png、gif、jpeg格式，最多可上传6张。
+   */
+  protected function banner_list($links) {
+    $list = [];
+    foreach ($links as $link) {
+//      image_style_load()
+      $list[] = ['link' => image_style_url('detail_info_banner_list_link', $link->uri)];
+    }
+    return $list;
+  }
+
 }
 
 class WechatScanProductQrcode extends Entity {
@@ -400,5 +417,50 @@ function wechat_scan_tpl_api() {
         ],
       ],
     ),
+    'get-category-list' => [
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_category_list_callback',
+      'description' => '获取商品类目列表',
+      'responses' => [
+        'list' => [
+          'type' => 'array',
+          'description' => '商品类目列表',
+        ],
+      ],
+    ],
+    'get-store-vendorid-list' => [
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_store_vendorid_list_callback',
+      'description' => '获取电商渠道列表',
+      'responses' => [
+        'list' => [
+          'type' => 'array',
+          'description' => '电商渠道列表',
+        ],
+      ],
+    ],
+    'get-brand-tag-list' => [
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_brand_tag_list_callback',
+      'description' => '获取品牌字段列表',
+      'responses' => [
+        'list' => [
+          'type' => 'array',
+          'description' => '品牌字段列表',
+        ],
+      ],
+    ],
   );
 }

@@ -214,31 +214,14 @@ function wechat_scan_settings_form_merchantinfo($form, &$form_state) {
   $access_token = wechat_api_get_access_token();
   $url = "https://api.weixin.qq.com/scan/merchantinfo/get?access_token={$access_token}";
   $request = drupal_http_request($url);
-
   if ($request->code == 200) {
     $data = $request->data;
-
     $data = drupal_json_decode($data);
-    dpm($data);
     if ($data['errcode'] == 0) {
-
       variable_set('wechat_scan_brand_tag_list', $data['brand_tag_list']);
-      $v = taxonomy_vocabulary_machine_name_load('brand_tag');
-      $term = taxonomy_term_load_multiple(FALSE, ['vid' => $v->vid]);
-      foreach ($term as $i) {
-        taxonomy_term_delete($i->tid);
-      }
-      if (!empty($data['brand_tag_list']) && is_array($data['brand_tag_list'])) {
-        foreach ($data['brand_tag_list'] as $i) {
-          $t = new stdClass();
-          $t->vid = $v->vid;
-          $t->name = $i;
-          taxonomy_term_save($t);
-        }
-      }
+      variable_set('wechat_scan_verified_list', $data['verified_list']);
     }
   }
-
 }
 
 //ob2sIv3Jgq7HBMplEv-dsRaX_wmg

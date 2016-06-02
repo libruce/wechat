@@ -38,3 +38,18 @@ function wechat_scan_get_qr_callback($keystandard, $keystr, $type, $qrcode_size 
     $entity = reset($entities);
   }
 }
+
+function wechat_scan_get_category_list_callback() {
+  $Controller = new \Drupal\wechat_scan\WechatScanTplApiController();
+  return $Controller->get_category_list_callback();
+}
+
+function wechat_scan_get_store_vendorid_list_callback() {
+  $Controller = new \Drupal\wechat_scan\WechatScanTplApiController();
+  return $Controller->get_store_vendorid_list_callback();
+}
+
+function wechat_scan_get_brand_tag_list_callback() {
+  $Controller = new \Drupal\wechat_scan\WechatScanTplApiController();
+  return $Controller->get_brand_tag_list_callback();
+}

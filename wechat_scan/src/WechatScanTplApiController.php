@@ -55,4 +55,36 @@ class WechatScanTplApiController {
     }
     return FALSE;
   }
+
+  function get_category_list_callback() {
+    $list = [];
+    $verified_list = variable_get('wechat_scan_verified_list', []);
+    foreach ($verified_list as $ilist) {
+      foreach ($ilist['verified_cate_list'] as $i) {
+        $list[$i['verified_cate_id']] = $i['verified_cate_name'];
+      }
+    }
+    return ['list' => $list];
+  }
+
+  function get_store_vendorid_list_callback() {
+    $list = [
+      2 => '亚马逊',
+      3 => '当当网',
+      4 => '京东',
+      9 => '一号店',
+      11 => '聚美优品',
+      19 => '酒仙网',
+    ];
+    return ['list' => $list];
+  }
+
+  function get_brand_tag_list_callback() {
+    $list = [];
+    $brand_tag_list = variable_get('wechat_scan_brand_tag_list', []);
+    foreach ($brand_tag_list as $i) {
+      $list[] = $i;
+    }
+    return ['list' => $list];
+  }
 }
