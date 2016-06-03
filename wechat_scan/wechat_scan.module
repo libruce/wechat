@@ -375,6 +375,31 @@ function wechat_scan_tpl_api() {
         ),
       ),
     ),
+    'update-scan-product' => array(
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_update_product_callback',
+      'description' => '更新扫一扫产品',
+      'args' => array(
+        array(
+          'name' => 'spid',
+          'optional' => FALSE,
+          'type' => 'int',
+          'description' => '扫一扫产品ID.',
+          'source' => array('data' => 'spid'),
+        ),
+        array(
+          'name' => 'brand_info',
+          'optional' => FALSE,
+          'type' => 'array',
+          'description' => '数据。支持部分更新',
+          'source' => array('data' => 'brand_info'),
+        ),
+      ),
+    ),
     'change-scan-product-status' => [
       'file' => array(
         'type' => 'inc',
