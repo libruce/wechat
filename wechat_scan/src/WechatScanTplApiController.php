@@ -28,6 +28,17 @@ class WechatScanTplApiController {
     throw new \Exception(format_string('编码 @keystr 的商品不存在', ['@keystr' => $keystr]), 900002);
   }
 
+  function delete_product_callback($spids) {
+    foreach ($spids as $spid) {
+      $this->delete_product($spid);
+    }
+    return [];
+  }
+
+  protected function delete_product($spid) {
+    entity_delete('wechat_scan_product', $spid);
+  }
+
   /**
    * @param $keystandard
    * @param $keystr

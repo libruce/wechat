@@ -400,6 +400,24 @@ function wechat_scan_tpl_api() {
         ),
       ),
     ],
+    'delete-scan-product' => [
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_delete_product_callback',
+      'description' => '删除产品，可一次删除多个',
+      'args' => array(
+        array(
+          'name' => 'spids',
+          'optional' => FALSE,
+          'type' => 'array',
+          'description' => '商品产品ID数组.',
+          'source' => array('data' => 'spids'),
+        ),
+      ),
+    ],
     'get-scan-product-list' => [
       'file' => array(
         'type' => 'inc',
