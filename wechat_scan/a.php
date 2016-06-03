@@ -12,4 +12,15 @@ php;
 
 $b = unserialize($a);
 
-var_dump($b);
+//var_dump($b);
+
+
+$a = '6901382';
+$b = '69013821631';
+$keystr = $b;
+$c = strncmp($a, $b, 7);
+$d = is_numeric($keystr);
+var_dump($d);
+
+$e = strlen($b);
+var_dump($e);

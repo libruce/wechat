@@ -28,7 +28,34 @@ class WechatScanTplApiController {
     throw new \Exception(format_string('编码 @keystr 的商品不存在', ['@keystr' => $keystr]), 900002);
   }
 
+  /**
+   * @param $keystandard
+   * @param $keystr
+   * @return bool
+   * @todo 检查商品编码，正确返回 true  不正确返回 false
+   */
+  protected function checkKeystr($keystandard, $keystr) {
+    //@todo 如果是条码类型，检测编码前缀，及格式
+    if ($keystandard != 'ean13') {
+      if (is_numeric($keystr) && strlen($keystr) == 13) {
+        $verified_list = variable_get('wechat_scan_verified_list', []);
+        foreach ($verified_list as $verified) {
+          if (strncmp($keystr, $verified['verified_firm_code'], 7) == 0) {
+            return TRUE;
+          }
+        }
+      }
+      return FALSE;
+    }
+    return TRUE;
+  }
+
   function add_product_callback($keystandard, $keystr, $brand_info) {
+
+    if (!$this->checkKeystr($keystandard, $keystr)) {
+      throw new \Exception('商品编码不正确', 900004);
+    }
+
     $product = new \WechatScanProduct();
     $product->keystandard = $keystandard;
     $product->keystr = $keystr;
@@ -92,5 +119,14 @@ class WechatScanTplApiController {
       $list[] = $i;
     }
     return ['list' => $list];
+  }
+
+  function  change_product_status_callback($spid, $status) {
+    $sproduct = wechat_session_load($spid);
+    if (!empty($sproduct) && $sproduct instanceof \WechatScanProduct) {
+      $sproduct->setStatus($status);
+      $sproduct->save();
+    }
+    throw new \Exception(format_string('SPID @spid 的商品不存在', ['@spid' => $spid]), 900003);
   }
 }

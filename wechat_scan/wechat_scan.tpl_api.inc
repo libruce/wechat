@@ -58,3 +58,8 @@ function wechat_scan_get_brand_tag_list_callback() {
   $Controller = new \Drupal\wechat_scan\WechatScanTplApiController();
   return $Controller->get_brand_tag_list_callback();
 }
+
+function wechat_scan_change_product_status_callback($spid, $status) {
+  $Controller = new \Drupal\wechat_scan\WechatScanTplApiController();
+  return $Controller->change_product_status_callback($spid, $status);
+}
