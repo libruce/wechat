@@ -15,9 +15,17 @@ function wechat_scan_theme($existing, $type, $theme, $path) {
   );
 }
 
-function wechat_scan_theme_test($v) {
-  dpm($v);
-  return 'aaaa';
+function wechat_scan_theme_test($variables) {
+  $output = '';
+  $extension = '.tpl.twig';
+  $render_function = 'twig_render_template';
+
+  // Render the output using the template file.
+  $template_file = $variables['theme_hook_original'] . $extension;
+  $template_file = $variables['directory'] . '/' . $template_file;
+
+  $output .= $render_function($template_file, $variables);
+  return $output;
 }
 
 /**
