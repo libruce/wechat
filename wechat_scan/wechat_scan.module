@@ -576,3 +576,11 @@ function wechat_scan_tpl_api() {
     ],
   );
 }
+
+
+/**
+ * Implements hook_insert().
+ */
+function wechat_scan_insert($node) {
+
+}

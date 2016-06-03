@@ -24,3 +24,6 @@ var_dump($d);
 
 $e = strlen($b);
 var_dump($e);
+
+$a = utf8_decode('ð');
+echo $a;

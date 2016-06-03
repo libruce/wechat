@@ -1,8 +1,22 @@
-{#
-   sosyuki 在 2016/6/2 18:05 创建这个文件.
-   源模版：
-   变量表:  
-#}
+<div id="product">
+    <div class="show">
+        {{ "{{titile}}" }}
+        {{ "{{keystandard}}" }}
+        {{ "{{keystr}}" }}
+        {{ "{{brand_tag}}" }}
 
-{{ dump(_context) }}
+        颜色：{{ "{{color}}" }}
 
+    </div>
+
+    <div class="input">
+        <input v-model="titile">
+        <select v-model="keystandard">
+            <option value="ean13">条码</option>
+            <option value="qrcode">二维码</option>
+        </select>
+        <input v-model="keystr">
+        <input v-model="brand_tag">
+    </div>
+
+</div>
