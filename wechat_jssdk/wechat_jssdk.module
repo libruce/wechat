@@ -332,7 +332,7 @@ function wechat_jssdk_get_settings() {
     'timestamp' => $getSignPackage['timestamp'],
     'nonceStr' => $getSignPackage['nonceStr'],
     'signature' => $getSignPackage['signature'],
-    'editAddress' => $JSSDK->GetEditAddressParameters(),
+//    'editAddress' => $JSSDK->GetEditAddressParameters(),
   );
   return $settings;
 }
