@@ -143,6 +143,6 @@ class ScanController {
   }
 
   protected function access_token() {
-    return wechat_api_get_access_token();
+    return authorizer_info_access_token(3);
   }
 }
