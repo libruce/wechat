@@ -104,6 +104,10 @@ function wechat_scan_access($type, $entity = NULL, $op = NULL) {
   return TRUE;
 }
 
+function wechat_scan_pull_product_test($i) {
+  sleep(3);
+}
+
 /**
  * @param $keystandard
  * @param $keystr
