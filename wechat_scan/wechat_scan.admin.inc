@@ -211,17 +211,17 @@ function wechat_scan_settings_form_product_getlist($form, &$form_state) {
 }
 
 function wechat_scan_settings_form_merchantinfo($form, &$form_state) {
-  $operations = [];
-  for ($i = 0; $i < 30; $i++) {
-    $operations[] = [
-      'wechat_scan_pull_product_test', [$i]
-    ];
-  }
-  batch_set(array(
-    'operations' => $operations,
-    'title' => '商品信息同步',
-  ));
-  return;
+//  $operations = [];
+//  for ($i = 0; $i < 30; $i++) {
+//    $operations[] = [
+//      'wechat_scan_pull_product_test', [$i]
+//    ];
+//  }
+//  batch_set(array(
+//    'operations' => $operations,
+//    'title' => '商品信息同步',
+//  ));
+//  return;
   $access_token = authorizer_info_access_token(3);
   dpm($access_token);
   $url = "https://api.weixin.qq.com/scan/merchantinfo/get?access_token={$access_token}";
