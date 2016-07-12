@@ -1,10 +1,9 @@
-{kQ_gsD2Q76o
-  Rg-yevOR76o
-  "keystandard": "ean13",
-  "keystr": "6901382999996",
+{
+  "keystandard": "qrcode",
+  "keystr": "6901382999996affffffffffff",
   "brand_info": {
     "base_info": {
-      "title": "扫一扫动态主页Test",
+      "title": "测试二维码产品",
       "thumb_url": "http://mmbiz.qpic.cn/mmbiz/AhrnkhhK7rWevHib2pmq1phtply6JicADNrX6Yrvd7LzKERyic3kn3VdSsmFr5F5ibXzj9Al65yWFudmjqcWic1Qe9g/0",
       "brand_tag": "Test",
       "category_id": 200531971,
@@ -41,7 +40,7 @@
       "action_list": [
         {
           "type": "price",
-          "retail_price": "12.00"
+          "retail_price": "12456.00"
         },
         {
           "type": "link",
@@ -52,12 +51,12 @@
         },
         {
           "type": "link",
-          "name": "自定义活动1",
+          "name": "aaaaaaaaaaaaaaaaaaaaaaaa",
           "link": "http://p.url.cn/wxscan.php"
         },
         {
           "type": "link",
-          "name": "自定义活动2",
+          "name": "asdfasdfafdasdfsasfdadsfasd",
           "link": "http://p.url.cn/wxscan.php"
         },
         {
