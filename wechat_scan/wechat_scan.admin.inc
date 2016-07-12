@@ -239,7 +239,7 @@ function wechat_scan_settings_form_merchantinfo($form, &$form_state) {
 
 //ob2sIv3Jgq7HBMplEv-dsRaX_wmg
 function wechat_scan_settings_form_testwhitelist($form, &$form_state) {
-  $access_token = wechat_api_get_access_token();
+  $access_token = authorizer_info_access_token(3);
   $url = "https://api.weixin.qq.com/scan/testwhitelist/set?access_token={$access_token}";
   $testwhitelist['openid'] = $form_state['values']['testwhitelist']['openid'];
   $testwhitelist['username'] = $form_state['values']['testwhitelist']['username'];
