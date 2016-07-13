@@ -89,7 +89,6 @@ function wechat_scan_settings_form($form, &$form_state) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#tree' => TRUE,
-
     );
     $form['update']['data'] = array(
       '#type' => 'textarea',
@@ -186,7 +185,7 @@ function wechat_scan_settings_form_qr($form, &$form_state) {
 }
 
 function wechat_scan_settings_form_testupdate($form, &$form_state) {
-  $data = $form_state['values']['test']['data'];
+  $data = $form_state['values']['update']['data'];
   $Controller = new \Drupal\wechat_scan\ScanController();
   $data1 = drupal_json_decode($data);
   $r = $Controller->updateProduct($data1);
