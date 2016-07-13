@@ -83,7 +83,7 @@ class ScanController {
     return $this->request($url, 'POST', drupal_json_encode($data));
 
   }
-
+  
   function  getQr($keystandard, $keystr, $extinfo, $qrcode_size = 64) {
     $data = [
       'keystandard' => $keystandard,

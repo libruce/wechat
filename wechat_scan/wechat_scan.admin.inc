@@ -107,7 +107,6 @@ function wechat_scan_settings_form($form, &$form_state) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#tree' => TRUE,
-
     );
     $form['getproduct']['data'] = array(
       '#type' => 'textfield',
@@ -117,6 +116,31 @@ function wechat_scan_settings_form($form, &$form_state) {
       '#type' => 'submit',
       '#submit' => array('wechat_scan_settings_form_getproduct'),
       '#value' => t('获取商品数据'),
+    );
+
+    $form['modstatus'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('测试发布商品'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+    $form['modstatus']['keystandard'] = array(
+      '#type' => 'textfield',
+      '#title' => t('商品编码标准'),
+    );
+    $form['modstatus']['keystr'] = array(
+      '#type' => 'textfield',
+      '#title' => t('商品编码内容'),
+    );
+    $form['modstatus']['status'] = array(
+      '#type' => 'textfield',
+      '#title' => t('设置的目标状态，on为提交审核，off为取消发布'),
+    );
+    $form['modstatus']['submit'] = array(
+      '#type' => 'submit',
+      '#submit' => array('wechat_scan_settings_form_modstatus'),
+      '#value' => t('测试发布商品'),
     );
 
     $form['qr'] = array(
@@ -142,6 +166,15 @@ function wechat_scan_settings_form($form, &$form_state) {
     );
   }
   return $form;
+}
+
+function wechat_scan_settings_form_modstatus($form, &$form_state) {
+  $Controller = new \Drupal\wechat_scan\ScanController();
+  $keystandard = $form_state['values']['modstatus']['keystandard'];
+  $keystr = $form_state['values']['modstatus']['keystr'];
+  $status = $form_state['values']['modstatus']['status'];
+  $r = $Controller->modStatus($keystandard, $keystr, $status);
+  dpm($r);
 }
 
 function wechat_scan_settings_form_qr($form, &$form_state) {
