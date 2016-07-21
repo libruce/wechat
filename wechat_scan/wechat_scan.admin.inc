@@ -107,6 +107,10 @@ function wechat_scan_settings_form($form, &$form_state) {
       '#collapsed' => TRUE,
       '#tree' => TRUE,
     );
+    $form['getproduct']['datatype'] = array(
+      '#type' => 'textfield',
+      '#title' => t('编码格式'),
+    );
     $form['getproduct']['data'] = array(
       '#type' => 'textfield',
       '#title' => t('编码'),
@@ -196,7 +200,8 @@ function wechat_scan_settings_form_testupdate($form, &$form_state) {
 function wechat_scan_settings_form_getproduct($form, &$form_state) {
   $Controller = new \Drupal\wechat_scan\ScanController();
   $data = $form_state['values']['getproduct']['data'];
-  $r = $Controller->getProduct('ean13', $data);
+  $type = $form_state['values']['getproduct']['datatype'];
+  $r = $Controller->getProduct($type, $data);
   dpm($r);
 }
 
