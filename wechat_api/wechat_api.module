@@ -54,6 +54,14 @@ function wechat_api_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['wechat/%'] = array(
+    'title' => 'wechat',
+    'description' => 'wechat callback',
+    'page callback' => 'wechat_api_callback',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -140,16 +148,21 @@ function wechat_api_access_token_refresh($form, &$form_state) {
 }
 
 
-function wechat_api_init_wechatobj() {
-  $wechat = &drupal_static(__FUNCTION__);
-  if (!isset($wechat)) {
+function wechat_api_init_wechatobj($wechat_options = array()) {
+  // $wechat = &drupal_static(__FUNCTION__);
+  // if (!isset($wechat)) {
     $options = array(
       'token' => variable_get('wechat_api_token', ""),
       'appid' => variable_get('wechat_api_appid', ""),
       'appsecret' => variable_get('wechat_api_appsecret', ""),
       'encodingaeskey' => variable_get('wechat_api_encodingaeskey', ''),
     );
+    if(!empty($wechat_options)){
+      $options = $wechat_options;
+    }
+    drupal_json_output($options);
     $wechat = new Wechat($options);
+    drupal_json_output($wechat);
     $access_token = variable_get("wechat_api_access_token", '');
     if (variable_get("wechat_api_access_token_time", 0) > time() - 7000 && $access_token != '') {
       $wechat->checkAuth('', '', $access_token);
@@ -165,17 +178,26 @@ function wechat_api_init_wechatobj() {
       variable_set("wechat_api_access_token", $access_token);
       variable_set("wechat_api_access_token_time", time());
     }
-  }
+  // }
   return $wechat;
 }
 
 /**
  * 微信接口回调函数，提供验证是否接入成功。在wechat_session模块中使用hook_menu_alter()覆写提供更强大的功能。
  */
-function wechat_api_callback() {
-  $wechat_obj = wechat_api_init_wechatobj();
-  $wechat_obj->valid(variable_get('wechat_api_debug', FALSE));
+function wechat_api_callback($wechat_index = FALSE) {
+  watchdog('wechat_api_callback21', drupal_json_output($wechat_obj));
+  $wechat_options = array();
+  if($wechat_index)
+  {
+    //TODO: Get related wechat options from DB
+    // update $wechat_options
+  }
+  $wechat_obj = wechat_api_init_wechatobj($wechat_options);
+  watchdog('wechat_api_callback1', drupal_json_output($wechat_obj));
+  $wechat_obj->valid(variable_get('wechat_api_debug', FALSE)); //TODO
   $wechat_obj->getRev();
+  watchdog('wechat_api_callback1', drupal_json_output($wechat_obj));
   $xml_obj = $wechat_obj->getRevData();
   $xml_obj = (object) $xml_obj;
   $to_user_name = $wechat_obj->getRevFrom();
@@ -201,7 +223,6 @@ function wechat_api_callback() {
     </xml>";
 
   $result_str = sprintf($return_template, $to_user_name, $from_user_name, $request_time, $content);
-
+  watchdog('wechat_api_callback', drupal_json_output($result_str));
   echo $result_str;
 }
-
