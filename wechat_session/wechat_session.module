@@ -147,7 +147,6 @@ function wechat_session_callback() {
   $wechat_obj = wechat_api_init_wechatobj();
   watchdog('wechat_api_callback43', 'aaad');
   $wechat_obj->valid(variable_get('wechat_api_debug', FALSE));
-  drupal_json_output($wechat_obj);
   $wechat_obj->getRev();
   $openid = $wechat_obj->getRevFrom();
   watchdog('wechat_api_callback90', $openid);
@@ -156,6 +155,7 @@ function wechat_session_callback() {
   $content = '';
   $xml_obj = $wechat_obj->getRevData();
   $xml_obj = (object) $xml_obj;
+  watchdog('wechat_api_callback9009', 'dd');
   switch ($xml_obj->MsgType) {
     case 'text': {
       $content = $xml_obj->Content;
@@ -218,16 +218,18 @@ function wechat_session_callback() {
       </xml>";
 
       $result_str = sprintf($return_template, $send_to_user_name, $send_from_user_name, $request_time);
-      watchdog('wechat_api_callback2', drupal_json_output($result_str));
+      watchdog('wechat_api_callback2', 'd3');
       echo $result_str;
     }
     else {
+      watchdog('wechat_api_callback2122', 'd3');
       echo $echo_callback($wechat_obj);
     }
   }
   if ($send_modal == 'silent') {
     echo 'success';
   }
+  watchdog('wechat_api_callback2122', 'd3');
   $function_callback($wechat_obj);
 }
 

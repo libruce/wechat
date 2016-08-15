@@ -2,7 +2,7 @@
 /**
  * Is test mode
  */
-define('TEST_MOD', 1);
+define('TEST_MOD', 0);
 
 /**
  * RESPONSE STATUS AND ERROR CODES
@@ -307,7 +307,7 @@ function wechat_messages_api_send(){
   //   "key":"WECHAT_MESSAGE_SEND_API_KEY",
   //   "msgtype": "text",
   //   "content":"测试文字消息内容",
-  //   "wechat_index": -1,
+  //   "wechat_api_id": -1,
   // }');
 
   $post = array();
@@ -317,43 +317,61 @@ function wechat_messages_api_send(){
       $post = array_merge($post, $_GET);
   }
 
+  $wechat_api = FALSE;
+  //check wechat index is not -1 which refers to the default wechat config
+  if(isset($post['wechat_api_id']) && $post['wechat_api_id'] != -1){
+    //get corresponding wechat config from DB
+    $wechat_api = wechat_api_load($post['wechat_api_id']);
+  }
+
   /**
    * Check access key is right
    */
-  //TODO
-  // if (!isset($post['key'])) {
-  //   $error = 'argument: key is mandatory';
-  // }
-  // else {
-  //   $apikey = variable_get('wechat_message_send_api_key', WECHAT_MESSAGE_SEND_API_KEY);
-  //   if ($post['key'] != $apikey) {
-  //      $error = 'Your access key is error';
-  //   }
-  // }
-  //
-  // if (!empty($error)) {
-  //   $return = array(
-  //     'status'  => STATUS_CODE_FAILED,
-  //     'message' => $error,
-  //     'data'    => null
-  //   );
-  //   drupal_json_output($return);
-  //   exit;
-  // }
+  if($wechat_api && !TEST_MOD)
+  {
+    if (!isset($post['key'])) {
+      $error = 'argument: key is mandatory';
+    }
+    else {
+      $apikey = isset($wechat_api['api_key']) ? $wechat_api['api_key'] : FALSE;
+      if ($post['key'] != $apikey) {
+         $error = 'Your access key is wrong';
+      }
+    }
+
+    if (!empty($error)) {
+      $return = array(
+        'status'  => STATUS_CODE_FAILED,
+        'message' => $error,
+        'data'    => null
+      );
+      drupal_json_output($return);
+      exit;
+    }
+  }
+
 
   /**
   * Check arguments
   */
-  //TODO
-
   $wechat_options = array();
+  $wechat_access_array = array();
   //check wechat index is not -1 which refers to the default wechat config
-  if(isset($post['wechat_index']) && $post['wechat_index'] != -1){
-    //TODO get corresponding wechat config from DB
-    $wechat_options = array();
+  if($wechat_api){
+    $wechat_options = array(
+      'token' => $wechat_api['app_token'],
+      'appid' => $wechat_api['app_id'],
+      'appsecret' => $wechat_api['app_secret'],
+      'encodingaeskey' => $wechat_api['encodingaeskey'],
+    );
+    $wechat_access_array = array(
+      'wechat_id' => $wechat_api['wechat_id'],
+      'access_token' => $wechat_api['access_token'],
+      'access_token_time' => $wechat_api['access_token_time']
+    );
   }
 
-  $wechat_obj = wechat_api_init_wechatobj($wechat_options);
+  $wechat_obj = wechat_api_init_wechatobj($wechat_options, $wechat_access_array);
   $body = array();
 
   $touser = $post['user_openid'];
