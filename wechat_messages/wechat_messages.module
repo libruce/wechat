@@ -351,9 +351,23 @@ function wechat_messages_api_send(){
   }
 
 
+
   /**
   * Check arguments
   */
+
+  if(!isset($post['user_openid']) || !isset($post['wechat_uid']) || !isset($post['msgtype'])){
+    $error = 'Arguments missing';
+    $return = array(
+      'status'  => STATUS_CODE_FAILED,
+      'message' => $error,
+      'data'    => null
+    );
+    drupal_json_output($return);
+    exit;
+  }
+
+
   $wechat_options = array();
   $wechat_access_array = array();
   //check wechat index is not -1 which refers to the default wechat config
@@ -378,26 +392,45 @@ function wechat_messages_api_send(){
   $wechat_uid = $post['wechat_uid'];
   $type = $post['msgtype'];
 
-  switch ($type) {
-    case 'text': {
-      $body['content'] = $post['content'];
-      break;
+
+  if($type !== 'template')
+  {
+    //普通消息
+    switch ($type) {
+      case 'text': {
+        $body['content'] = $post['content'];
+        break;
+      }
+      //TODO add other types of messages
     }
-    //TODO add other types of messages
+    //debug
+    drupal_json_output($wechat_obj);
+
+    $data = array(
+      'touser' => $touser,
+      'msgtype' => $type,
+      $type => $body,
+    );
+
+    //debug
+    drupal_json_output($data);
+
+    $return = $wechat_obj->sendCustomMessage($data);
   }
-  //debug
-  drupal_json_output($wechat_obj);
+  else {
+    // 模版消息
+    $template_id = $post['template_id'];
+    $temp_msg_data = json_decode($post['template_data']);
+    $data = array(
+      'touser' => $touser,
+      'template_id' => $template_id,
+      'data' => $temp_msg_data,
+    );
 
-  $data = array(
-    'touser' => $touser,
-    'msgtype' => $type,
-    $type => $body,
-  );
+    $return = $wechat_obj->sendTemplateMessage($data);
 
-  //debug
-  drupal_json_output($data);
+  }
 
-  $return = $wechat_obj->sendCustomMessage($data);
   $success = STATUS_CODE_FAILED;
   if ($return['errcode'] == '0' && $return['errmsg'] == 'ok') {
     $success = STATUS_CODE_SUCCESS;
