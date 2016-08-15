@@ -196,40 +196,40 @@ function wechat_api_init_wechatobj($wechat_options = array(), $wechat_token_arra
     if(!empty($wechat_options)){
       $options = $wechat_options;
     }
-    drupal_json_output($options);
+    watchdog('wechat_1', json_encode($options));
     $wechat = new Wechat($options);
-    drupal_json_output($wechat);
-    if(!empty($wechat_token_array)){
-      $access_token = $wechat_token_array['access_token'];
-      $access_token_time = $wechat_token_array['access_token_time'];
-      drupal_json_output('access_token1');
-    }
-    else{
-      $access_token = variable_get("wechat_api_access_token", '');
-      $access_token_time = variable_get("wechat_api_access_token_time", 0);
-      drupal_json_output('access_token2');
-    }
-
-    if ($access_token_time > time() - 7000 && $access_token != '') {
-      drupal_json_output('$access_token1');
-      $wechat->checkAuth('', '', $access_token);
-      $return = $wechat->getServerIp();
-      if (!$return) {
-        $access_token = $wechat->checkAuth();
-        if(!empty($wechat_token_array) && isset($wechat_token_array['wechat_id'])){
-          $wechat_token_array['access_token_time'] = time();
-          $wechat_token_array['access_token'] = $access_token;
-          wechat_api_save($wechat_token_array);
-        }
-        else {
-          variable_set("wechat_api_access_token", $access_token);
-          variable_set("wechat_api_access_token_time", time());
-        }
-      }
-    }
-    else {
-      drupal_json_output('$access_token2');
+    watchdog('wechat_2', json_encode($wechat));
+    // if(!empty($wechat_token_array)){
+    //   $access_token = $wechat_token_array['access_token'];
+    //   $access_token_time = $wechat_token_array['access_token_time'];
+    // }
+    // else{
+    //   $access_token = variable_get("wechat_api_access_token", '');
+    //   $access_token_time = variable_get("wechat_api_access_token_time", 0);
+    // }
+    //
+    // if ($access_token_time > time() - 7000 && $access_token != '') {
+    //   watchdog('wechat_3', json_encode($access_token));
+    //   $wechat->checkAuth('', '', $access_token);
+    //   $return = $wechat->getServerIp();
+    //   watchdog('wechat_3', json_encode($return));
+    //   if (!$return) {
+    //     $access_token = $wechat->checkAuth();
+    //     if(!empty($wechat_token_array) && isset($wechat_token_array['wechat_id'])){
+    //       $wechat_token_array['access_token_time'] = time();
+    //       $wechat_token_array['access_token'] = $access_token;
+    //       wechat_api_save($wechat_token_array);
+    //     }
+    //     else {
+    //       variable_set("wechat_api_access_token", $access_token);
+    //       variable_set("wechat_api_access_token_time", time());
+    //     }
+    //   }
+    // }
+    // else {
+      watchdog('wechat_4', '4');
       $access_token = $wechat->checkAuth();
+      watchdog('wechat_4', json_encode($access_token));
       if(!empty($wechat_token_array) && isset($wechat_token_array['wechat_id'])){
         $wechat_token_array['access_token_time'] = time();
         $wechat_token_array['access_token'] = $access_token;
@@ -239,7 +239,7 @@ function wechat_api_init_wechatobj($wechat_options = array(), $wechat_token_arra
         variable_set("wechat_api_access_token", $access_token);
         variable_set("wechat_api_access_token_time", time());
       }
-    }
+    // }
   // }
   return $wechat;
 }
