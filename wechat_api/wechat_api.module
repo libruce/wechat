@@ -248,7 +248,6 @@ function wechat_api_init_wechatobj($wechat_options = array(), $wechat_token_arra
  * 微信接口回调函数，提供验证是否接入成功。在wechat_session模块中使用hook_menu_alter()覆写提供更强大的功能。
  */
 function wechat_api_callback($wechat_index = FALSE) {
-  watchdog('wechat_api_callback21', drupal_json_output($wechat_obj));
   $wechat_options = array();
   $wechat_access_array = array();
   if($wechat_index)
@@ -270,10 +269,10 @@ function wechat_api_callback($wechat_index = FALSE) {
     }
   }
   $wechat_obj = wechat_api_init_wechatobj($wechat_options, $wechat_access_array);
-  watchdog('wechat_api_callback1', drupal_json_output($wechat_obj));
+  watchdog('wechat_api_callback1', '1');
   $wechat_obj->valid(variable_get('wechat_api_debug', FALSE)); //TODO
   $wechat_obj->getRev();
-  watchdog('wechat_api_callback1', drupal_json_output($wechat_obj));
+  watchdog('wechat_api_callback1', '2');
   $xml_obj = $wechat_obj->getRevData();
   $xml_obj = (object) $xml_obj;
   $to_user_name = $wechat_obj->getRevFrom();
@@ -282,13 +281,13 @@ function wechat_api_callback($wechat_index = FALSE) {
   $content = format_date(time(), 'short') . '
   api配置成功
   ';
-  if ($xml_obj->MsgType == 'text') {
+  if (isset($xml_obj->MsgType) && $xml_obj->MsgType == 'text') {
     $content .= $wechat_obj->getRevContent();
   }
   else {
     $content .= 'api配置成功。';
   }
-
+  watchdog('wechat_api_callback2', $content);
   $return_template = "<xml>
       <ToUserName><![CDATA[%s]]></ToUserName>
       <FromUserName><![CDATA[%s]]></FromUserName>
@@ -299,7 +298,8 @@ function wechat_api_callback($wechat_index = FALSE) {
     </xml>";
 
   $result_str = sprintf($return_template, $to_user_name, $from_user_name, $request_time, $content);
-  watchdog('wechat_api_callback', drupal_json_output($result_str));
+
+  watchdog('wechat_api_callback3', $result_str);
   echo $result_str;
 }
 

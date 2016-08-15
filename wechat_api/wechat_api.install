@@ -40,7 +40,7 @@ function wechat_api_schema() {
       'app_token' => array(
         'description' => 'The app token for oauth-based access.',
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 64,
       ),
       'encodingaeskey' => array(
         'description' => 'The encodingaeskey for oauth-based access.',
@@ -50,7 +50,7 @@ function wechat_api_schema() {
       'access_token' => array(
         'description' => 'The access token for oauth-based access.',
         'type' => 'varchar',
-        'length' => 64,
+        'length' => 255,
       ),
       'access_token_time' => array(
         'description' => "The access token for oauth-based access save time in UNIX timestamp format.",

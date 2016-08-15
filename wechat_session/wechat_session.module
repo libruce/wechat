@@ -94,7 +94,6 @@ function wechat_session_default_status_callback($wechat_obj) {
  */
 function wechat_session_default_status_echo($wechat_obj) {
   $wechat_obj = wechat_api_init_wechatobj();
-  watchdog('wechat_api_callback1', drupal_json_output($wechat_obj));
   $wechat_obj->valid(variable_get('wechat_api_debug', FALSE));
   $wechat_obj->getRev();
   $xml_obj = $wechat_obj->getRevData();
@@ -122,7 +121,6 @@ function wechat_session_default_status_echo($wechat_obj) {
     </xml>";
 
   $result_str = sprintf($return_template, $to_user_name, $from_user_name, $request_time, $content);
-  watchdog('wechat_api_callback2', drupal_json_output($result_str));
   return $result_str;
 }
 
@@ -149,7 +147,7 @@ function wechat_session_callback() {
   $wechat_obj->valid(variable_get('wechat_api_debug', FALSE));
   $wechat_obj->getRev();
   $openid = $wechat_obj->getRevFrom();
-  watchdog('wechat_api_callback90', $openid);
+  watchdog('wechat_api_callback90', json_encode($openid));
   $event = '';
   $event_key = '';
   $content = '';
@@ -181,7 +179,6 @@ function wechat_session_callback() {
   rules_invoke_event('wechat_session_message_before', $openid, $event, $event_key, $content);
 
   $wechat_session = wechat_session_load($openid);
-  watchdog('wechat_api_callback22', drupal_json_output($wechat_session));
 
   if (empty($wechat_session)) {
     $status_info = wechat_session_set_default_status($openid);
