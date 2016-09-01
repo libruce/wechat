@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * Implements hook_requirements().
+ */
+function weixin_lib_requirements($phase) {
+  $requirements = array();
+  $t = get_t();
+  $mcrypt_available = function_exists('mcrypt_get_block_size');
+
+  $requirements['weixin_lib_mcrypt'] = array(
+    'title' => $t('Mcrypt'),
+    'value' => $mcrypt_available ? $t('Mcrypt library Enabled') : $t('Mcrypt library not found'),
+  );
+
+  if (!$mcrypt_available) {
+    $requirements['weixin_lib_mcrypt'] += array(
+      'severity' => REQUIREMENT_ERROR,
+      'description' => $t("WeixinMsgCrypt requires the PHP <a href='!mcrypt_url'>Mcrypt</a> library.",
+        array('!mcrypt_url' => 'http://php.net/manual/en/book.mcrypt.php')),
+    );
+  }
+
+  return $requirements;
+}
