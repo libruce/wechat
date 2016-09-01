@@ -1,0 +1,8 @@
+name = 微信多个公众号接入支持
+description = 微信多个公众号接入支持
+core = 7.x
+package = wechat
+version = 7.x-1.0
+files[] = wechat_multi_app.test
+dependencies[] = xautoload (>= 7.x-5.0)
+dependencies[] = entity
