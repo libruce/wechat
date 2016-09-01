@@ -13,6 +13,13 @@ function wechat_app_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'name' => array(
+        'description' => '公众号名称，方便管理',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'appid' => array(
         'description' => 'appid',
         'type' => 'varchar',

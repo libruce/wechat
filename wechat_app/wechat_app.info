@@ -6,3 +6,4 @@ version = 7.x-1.0
 files[] = wechat_app.test
 dependencies[] = xautoload (>= 7.x-5.0)
 dependencies[] = entity
+dependencies[] = wechat_api
