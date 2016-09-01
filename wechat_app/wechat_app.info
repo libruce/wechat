@@ -1,0 +1,8 @@
+name = 微信公众号接入
+description = 微信公众号接入，支持多个公众号
+core = 7.x
+package = wechat
+version = 7.x-1.0
+files[] = wechat_app.test
+dependencies[] = xautoload (>= 7.x-5.0)
+dependencies[] = entity

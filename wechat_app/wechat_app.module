@@ -1,0 +1,17 @@
+<?php
+
+
+/**
+ * Implements hook_menu().
+ */
+function wechat_app_menu() {
+
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_app_entity_info() {
+  return [];
+}
+
