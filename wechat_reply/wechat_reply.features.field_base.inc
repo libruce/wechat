@@ -13,7 +13,7 @@ function wechat_reply_field_default_field_bases() {
   // Exported field_base: 'field_news_reference'
   $field_bases['field_news_reference'] = array(
     'active' => 1,
-    'cardinality' => -1,
+    'cardinality' => 8,
     'deleted' => 0,
     'entity_types' => array(),
     'field_name' => 'field_news_reference',
@@ -39,7 +39,6 @@ function wechat_reply_field_default_field_bases() {
           'news' => 'news',
         ),
       ),
-      
       'target_type' => 'wechat_reply',
     ),
     'translatable' => 0,
@@ -60,9 +59,7 @@ function wechat_reply_field_default_field_bases() {
     ),
     'locked' => 0,
     'module' => 'text',
-    'settings' => array(
-      
-    ),
+    'settings' => array(),
     'translatable' => 0,
     'type' => 'text_long',
   );
@@ -125,7 +122,6 @@ function wechat_reply_field_default_field_bases() {
     'settings' => array(
       'display_default' => 0,
       'display_field' => 0,
-      
       'uri_scheme' => 'public',
     ),
     'translatable' => 0,
@@ -249,7 +245,6 @@ function wechat_reply_field_default_field_bases() {
     'module' => 'image',
     'settings' => array(
       'default_image' => 0,
-      
       'uri_scheme' => 'public',
     ),
     'translatable' => 0,
@@ -314,7 +309,6 @@ function wechat_reply_field_default_field_bases() {
     'module' => 'image',
     'settings' => array(
       'default_image' => 0,
-      
       'uri_scheme' => 'public',
     ),
     'translatable' => 0,
@@ -338,7 +332,6 @@ function wechat_reply_field_default_field_bases() {
     'settings' => array(
       'display_default' => 0,
       'display_field' => 0,
-      
       'uri_scheme' => 'public',
     ),
     'translatable' => 0,
@@ -402,7 +395,6 @@ function wechat_reply_field_default_field_bases() {
     'settings' => array(
       'display_default' => 0,
       'display_field' => 0,
-      
       'uri_scheme' => 'public',
     ),
     'translatable' => 0,

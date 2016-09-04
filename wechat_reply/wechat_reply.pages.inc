@@ -14,6 +14,7 @@ function wechat_reply_add_page() {
   return theme('wechat_reply_add_list', array('content' => $content));
 }
 
+
 /**
  * Returns HTML for a list of available node types for node creation.
  *
@@ -44,7 +45,6 @@ function theme_wechat_reply_add_list($variables) {
 
 
 function wechat_reply_pages(WechatReply $wechatReply) {
-  //dpm($wechatReply);
   $output = '';
   $entity_view = entity_view('wechat_reply', array($wechatReply));
   $output .= render($entity_view);
@@ -52,9 +52,7 @@ function wechat_reply_pages(WechatReply $wechatReply) {
 }
 
 function wechat_reply_delete_confirm($form, &$form_state, WechatReply $wechatReply) {
-  $form['#wechat_reply'] = $wechatReply;
-  // Always provide entity id in the same form key as in the entity edit form.
-  $form['id'] = array('#type' => 'value', '#value' => $wechatReply->id);
+  $form_state['#wechat_reply'] = $wechatReply;
   return confirm_form($form,
     //消息
     t('您确定要删除这个消息:ID:%id 标题:%title 类型:%type', array(
@@ -75,8 +73,8 @@ function wechat_reply_delete_confirm($form, &$form_state, WechatReply $wechatRep
 
 function wechat_reply_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
-
-//    wechat_reply_delete($form['id']);
+    $wechatReply = $form_state['#wechat_reply'];
+    wechat_reply_delete($wechatReply->id);
   }
   $form_state['redirect'] = 'admin/content/reply';
 }

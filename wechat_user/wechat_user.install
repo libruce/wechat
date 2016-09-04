@@ -3,81 +3,153 @@
  * Implements hook_schema().
  */
 function wechat_user_schema() {
-
   $schema['wechat_user'] = array(
-    'description' => 'wechat message.',
+    'description' => '微信用户实体表.',
     'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键，自增长',
+      ),
       'uid' => array(
-        'description' => 'userid.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'openid' => array(
-        'description' => 'openid',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'subscribe' => array(
-        'description' => 'subscribe',
+        'description' => '站点UID.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
       ),
-      'nickname' => array(
-        'description' => 'nickname',
+      'subscribe' => array(
+        'description' => '用户是否订阅该公众号标识，值为0时，代表此用户没有关注该公众号，拉取不到其余信息，只有openid和UnionID（在该公众号绑定到了微信开放平台账号时才有）。',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'openid' => array(
+        'description' => '用户的标识，对当前公众号唯一',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
+      ),
+      'nickname' => array(
+        'description' => '用户的昵称',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
         'default' => '',
       ),
       'sex' => array(
-        'description' => 'sex',
+        'description' => '用户的性别，值为1时是男性，值为2时是女性，值为0时是未知',
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => 0,
       ),
-      'province' => array(
-        'description' => 'province',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
       'city' => array(
-        'description' => 'city',
+        'description' => '用户所在城市',
         'type' => 'varchar',
         'length' => 255,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => '',
       ),
       'country' => array(
-        'description' => 'country',
+        'description' => '用户所在国家',
         'type' => 'varchar',
         'length' => 255,
-        'not null' => TRUE,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'province' => array(
+        'description' => '用户所在省份',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'language' => array(
+        'description' => '用户的语言，简体中文为zh_CN',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
         'default' => '',
       ),
       'headimgurl' => array(
-        'description' => 'headimgurl',
+        'description' => '用户头像，最后一个数值代表正方形头像大小（有0、46、64、96、132数值可选，0代表640*640正方形头像），用户没有头像时该项为空。若用户更换头像，原有头像URL将失效。',
         'type' => 'varchar',
         'length' => 255,
-        'not null' => TRUE,
+        'not null' => FALSE,
         'default' => '',
       ),
       'subscribe_time' => array(
-        'description' => t('subscribe time.'),
+        'description' => '用户关注时间，为时间戳。如果用户曾多次关注，则取最后关注时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'unionid' => array(
+        'description' => '只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段。详见：获取用户个人信息（UnionID机制）',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'remark' => array(
+        'description' => '公众号运营者对粉丝的备注，公众号运营者可在微信公众平台用户管理界面对粉丝添加备注',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'groupid' => array(
+        'description' => '用户所在的分组ID',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'user' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
+  );
+  $schema['wechat_user_group'] = array(
+    'description' => '微信用户分组管理表.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键，自增长',
+      ),
+      'gid' => array(
+        'description' => '分组id，由微信分配',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
       ),
-    ),
-    'primary key' => array('openid'),
-  );
+      'name' => array(
+        'description' => '分组名字，UTF8编码',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'count' => array(
+        'description' => '分组内用户数量',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
 
+    ),
+    'primary key' => array('id'),
+  );
   return $schema;
 }

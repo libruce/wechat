@@ -1,71 +1,40 @@
 <?php
-
 /**
- * Implements hook_modules_enabled().
+ * @param $status
+ * @return bool
  */
-function wechat_session_modules_enabled($modules) {
-  wechat_session_status_rebuild();
+function wechat_session_status_load($status) {
+  $s = wechat_session_get_status();
+  return isset($s[$status]) ? $s[$status] : FALSE;
 }
 
-/**
- * Implements hook_cron().
- */
-function wechat_session_cron() {
-  wechat_session_status_rebuild();
-}
-
-function wechat_session_status_rebuild() {
-  _wechat_session_status_build(TRUE);
-}
-
-function _wechat_session_status_build($rebuild = FALSE) {
-  foreach (module_implements('wechat_session_status') as $module) {
-    $info_array = module_invoke($module, 'wechat_session_status');
-    foreach ($info_array as $type => $info) {
-      $info['status'] = $type;
-      wechat_session_status_save($info);
+function wechat_session_get_status() {
+  $status = &drupal_static(__FUNCTION__, []);
+  if (empty($status)) {
+    $modules = module_implements('wechat_session_status');
+    foreach ($modules as $module) {
+      $info = call_user_func("{$module}_wechat_session_status");
+      if (empty($info)) {
+        continue;
+      }
+      $status = array_merge($status, $info);
     }
   }
+  return $status;
 }
 
-/**
- * @param $info
- * @throws \Exception
- * 保存session类型
- */
-function wechat_session_status_save($info) {
-  $result = db_select('wechat_session_status', 'wss')
-    ->fields('wss')
-    ->condition('status', $info['status'])
-    ->execute()
-    ->fetchAssoc();
-
-  $fields = array(
-    'status' => (string) $info['status'],
-    'name' => (string) $info['name'],
-    'function_callback' => (string) $info['function callback'],
-    'echo_callback' => (string) $info['echo callback'],
-    'timeout' => (int) $info['timeout'],
-  );
-
-  if (empty($result)) {
-    db_insert('wechat_session_status')->fields($fields)->execute();
-  }
-  else {
-    db_update('wechat_session_status')
-      ->fields($fields)
-      ->condition('status', $info['status'])
-      ->execute();
-  }
+function wechat_session_status_list() {
+  $status = wechat_session_get_status();
+  return $status;
 }
 
-function wechat_session_status_load($status) {
-  $result = db_select('wechat_session_status', 'wss')
-    ->fields('wss')
-    ->condition('status', $status)
-    ->execute()
-    ->fetchAssoc();
-  return $result;
+function wechat_session_status_options_list() {
+  $status = wechat_session_status_list();
+  $return = array();
+  foreach ($status as $key => $info) {
+    $return[$key] = $info['name'] . '(' . $key . ')';
+  }
+  return $return;
 }
 
 function wechat_session_wechat_session_status() {
@@ -111,14 +80,17 @@ function wechat_session_default_status_echo($wechat_obj) {
     $content .= 'api配置成功。';
   }
 
-  $return_template = "<xml>
+  $return_template = <<<xml
+<xml>
       <ToUserName><![CDATA[%s]]></ToUserName>
       <FromUserName><![CDATA[%s]]></FromUserName>
       <CreateTime>%s</CreateTime>
       <MsgType><![CDATA[text]]></MsgType>
       <Content><![CDATA[%s]]></Content>
       <FuncFlag>0</FuncFlag>
-    </xml>";
+  </xml>
+xml;
+
 
   $result_str = sprintf($return_template, $to_user_name, $from_user_name, $request_time, $content);
 
@@ -126,108 +98,97 @@ function wechat_session_default_status_echo($wechat_obj) {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function wechat_session_menu() {
+  $items['admin/config/wechat/session/config'] = array(
+    'title' => '微信Session设置',
+    'description' => '微信Session设置.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_session_settings_form'),
+    'access arguments' => array('administer wechat configuration'),
+    'file' => 'wechat_session.admin.inc',
+  );
+  return $items;
+}
+
+/**
  * Implements hook_menu_alter().
  */
 function wechat_session_menu_alter(&$items) {
-  $items['wechat'] = array(
-    'title' => 'wechat',
-    'description' => 'wechat session 覆写',
-    'page callback' => 'wechat_session_callback',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
+  $items['wechat']['page callback'] = 'wechat_session_wechat_callback';
 }
 
 /**
  * wechat_session 覆写的wechat_api 微信接口回调
  */
-function wechat_session_callback() {
-  $wechat_obj = wechat_api_init_wechatobj();
-  $wechat_obj->valid(variable_get('wechat_api_debug', FALSE));
-  $wechat_obj->getRev();
+function wechat_session_wechat_callback() {
+  try {
 
-  $openid = $wechat_obj->getRevFrom();
 
-  $event = '';
-  $event_key = '';
-  $content = '';
-  $xml_obj = $wechat_obj->getRevData();
-  $xml_obj = (object) $xml_obj;
-  switch ($xml_obj->MsgType) {
-    case 'text': {
-      $content = $xml_obj->Content;
-      break;
+    $wechat_obj = wechat_api_init_wechatobj();
+    $wechat_obj->valid(variable_get('wechat_api_debug', FALSE));
+    $wechat_obj->getRev();
+
+    $openid = $wechat_obj->getRevFrom();
+    if (empty($openid)) {
+      throw new Exception('Openid为空');
     }
-    case 'voice': {
-      //取语音识别结果
-      if (!empty($xml_obj->Recognition)) {
-        $content = $xml_obj->Recognition;
-      }
-      break;
-    }
-    case 'event': {
-      $EventKey = $xml_obj->EventKey;
-      if (!empty($EventKey)) {
-        $event_key = $EventKey;
-      }
-      $event = $xml_obj->Event;
-      break;
-    }
-  }
-  rules_invoke_event('wechat_session_message_before', $openid, $event, $event_key, $content);
+    $wechat_session = wechat_session_load($openid);
 
-
-  $wechat_session = wechat_session_load($openid);
-
-
-  if (empty($wechat_session)) {
-    $status_info = wechat_session_set_default_status($openid);
-  }
-  else {
-    //存在判断是否过期
-    $status_info = wechat_session_status_load($wechat_session->status);
-    $timeout = $status_info['timeout'];
-    if ($timeout != 0 && time() > $wechat_session->update_time + $timeout) {
+    if (empty($wechat_session)) {
       $status_info = wechat_session_set_default_status($openid);
     }
-  }
-
-
-  $function_callback = $status_info['function_callback'];
-  $echo_callback = $status_info['echo_callback'];
-
-
-  $send_modal = variable_get('wechat_session_send_modal', 'asynchrony');
-  //判断消息回复模式，同步 | 异步。同步回复暂未开发完成
-  if ($send_modal == 'asynchrony') {
-    //判断是否开启多客服
-    if (variable_get('wechat_session_dkf', 0)) {
-      $send_to_user_name = $wechat_obj->getRevFrom();
-      $send_from_user_name = $wechat_obj->getRevTo();
-      $request_time = time();
-
-      $return_template = "
-<xml>
-     <ToUserName><![CDATA[%s]]></ToUserName>
-     <FromUserName><![CDATA[%s]]></FromUserName>
-     <CreateTime>%s</CreateTime>
-     <MsgType><![CDATA[transfer_customer_service]]></MsgType>
-     </xml>
-";
-
-      $result_str = sprintf($return_template, $send_to_user_name, $send_from_user_name, $request_time);
-
-      echo $result_str;
-    }
     else {
-      echo $echo_callback($wechat_obj);
+      //存在判断是否过期
+      $status_info = wechat_session_status_load($wechat_session->status);
+      $timeout = $status_info['timeout'];
+      if ($timeout != 0 && time() > $wechat_session->update_time + $timeout) {
+        $status_info = wechat_session_set_default_status($openid);
+      }
     }
+
+    $function_callback = $status_info['function callback'];
+    $echo_callback = $status_info['echo callback'];
+
+    $send_modal = variable_get('wechat_session_send_modal', 'asynchrony');
+    //判断消息回复模式，同步 | 异步。同步回复暂未开发完成
+    if ($send_modal == 'asynchrony') {
+      //判断是否开启多客服
+      if (variable_get('wechat_session_dkf', 0)) {
+        $send_to_user_name = $wechat_obj->getRevFrom();
+        $send_from_user_name = $wechat_obj->getRevTo();
+        $request_time = time();
+
+        $return_template = "
+      <xml>
+        <ToUserName><![CDATA[%s]]></ToUserName>
+        <FromUserName><![CDATA[%s]]></FromUserName>
+        <CreateTime>%s</CreateTime>
+        <MsgType><![CDATA[transfer_customer_service]]></MsgType>
+      </xml>";
+
+        $result_str = sprintf($return_template, $send_to_user_name, $send_from_user_name, $request_time);
+
+        echo $result_str;
+      }
+      else {
+        echo $echo_callback($wechat_obj);
+      }
+    }
+    if ($send_modal == 'silent') {
+      echo 'success';
+    }
+
+//    ob_flush();
+//    flush();
+
+    $function_callback($wechat_obj);
+  } catch (Exception $e) {
+    watchdog_exception('', $e);
   }
-  if ($send_modal == 'silent') {
-    echo 'success';
-  }
-  $function_callback($wechat_obj);
 }
+
 
 /**
  * @param $openid
@@ -278,54 +239,6 @@ function wechat_session_openid_to_status($openid, $status) {
   }
 }
 
-/**
- * Implements hook_menu().
- */
-function wechat_session_menu() {
-  $items['admin/config/wechat/session/config'] = array(
-    'title' => '微信Session设置',
-    'description' => '微信Session设置.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('wechat_session_settings_form'),
-    'access arguments' => array('administer wechat configuration'),
-  );
-  return $items;
-}
-
-function wechat_session_settings_form($form, &$form_state) {
-
-  $options = array();
-
-  foreach (wechat_session_status_list() as $info) {
-    $options[$info->status] = $info->name;
-  }
-  //dpm($options);
-  $form['required']['wechat_session_default_status'] = array(
-    '#type' => 'radios',
-    '#title' => t('默认状态'),
-    '#default_value' => variable_get('wechat_session_default_status', 'default'),
-    '#options' => $options,
-    '#required' => TRUE,
-  );
-  $form['required']['wechat_session_send_modal'] = array(
-    '#type' => 'radios',
-    '#title' => t('消息回复模式'),
-    '#default_value' => variable_get('wechat_session_send_modal', 'asynchrony'),
-    '#options' => array(
-      'sync' => '同步回复（无法使用客服接口时使用）',
-      'asynchrony' => '异步回复（可以使用客服接口时使用）',
-      'silent' => '静默（不回复任何消息）',
-    ),
-    '#required' => TRUE,
-  );
-  $form['required']['wechat_session_dkf'] = array(
-    '#default_value' => variable_get('wechat_session_dkf', 0),
-    '#type' => 'checkbox',
-    '#title' => t('是否打开多客服.'),
-  );
-  return system_settings_form($form);
-}
-
 
 /**
  * Implements hook_entity_info().
@@ -367,7 +280,11 @@ function wechat_session_load_multiple($ids = array(), $conditions = array(), $re
 }
 
 function wechat_session_access() {
-  return TRUE;
+  global $user;
+  if ($user->uid == 1) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 class WechatSession extends Entity {
@@ -392,24 +309,6 @@ class WechatSession extends Entity {
     $this->update_time = time();
     parent::save();
   }
-}
-
-function wechat_session_status_list() {
-  $types = db_select('wechat_session_status', 'wss')
-    ->fields('wss')
-    ->execute()
-    ->fetchAllAssoc('status');
-  return $types;
-}
-
-function wechat_session_status_options_list() {
-  $status = wechat_session_status_list();
-  //dpm($return);
-  $return = array();
-  foreach ($status as $key => $info) {
-    $return[$key] = $info->name . '(' . $key . ')';
-  }
-  return $return;
 }
 
 class WechatSessionMetadataController extends EntityDefaultMetadataController {
@@ -456,35 +355,6 @@ class WechatSessionMetadataController extends EntityDefaultMetadataController {
     );
     return $info;
   }
-}
-
-/**
- * Implements hook_rules_event_info().
- */
-function wechat_session_rules_event_info() {
-  $events['wechat_session_message_before'] = array(
-    'label' => t('微信session接收到消息，交个回调处理前'),
-    'group' => t('微信'),
-    'variables' => array(
-      'openid' => array(
-        'type' => 'text',
-        'label' => t('OpenId'),
-      ),
-      'event' => array(
-        'type' => 'text',
-        'label' => t('事件'),
-      ),
-      'event_key' => array(
-        'type' => 'text',
-        'label' => t('事件KEY'),
-      ),
-      'content' => array(
-        'type' => 'text',
-        'label' => t('内容'),
-      ),
-    ),
-  );
-  return $events;
 }
 
 /**

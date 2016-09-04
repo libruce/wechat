@@ -1,0 +1,6 @@
+name = 微信扫一扫UI
+description = 微信扫一扫UI
+core = 7.x
+package = wechat
+version = 7.x-1.0
+dependencies[] = xautoload (>= 7.x-5.0)

@@ -1,5 +1,7 @@
 <?php
 include_once 'wechat_request.features.inc';
+use Drupal\wechat_api\Wechat;
+
 /**
  * Implements hook_entity_info().
  */
@@ -13,16 +15,6 @@ function wechat_request_entity_info() {
       'controller class' => 'EntityAPIController',
       'base table' => 'wechat_request',
       'fieldable' => TRUE,
-      'view modes' => array(
-        'full' => array(
-          'label' => t('查看消息'),
-          'custom settings' => FALSE,
-        ),
-        'preview' => array(
-          'label' => t('消息预览'),
-          'custom settings' => FALSE,
-        ),
-      ),
       'entity keys' => array(
         'id' => 'id',
         'bundle' => 'msg_type',
@@ -185,6 +177,7 @@ class WechatRequest extends Entity {
   public $msg_id;
   public $subscription;
   public $openid;
+  public $data;
 
   public function __construct($values = array()) {
     parent::__construct($values, 'wechat_request');
@@ -195,15 +188,27 @@ class WechatRequest extends Entity {
   }
 
   public function save() {
-    //@todo 增加消息排重检查
-    if ($this->checkOnly($this)) {
-      return;
+    try {
+      //@todo 增加消息排重检查
+      if ($this->checkOnly($this)) {
+        return;
+      }
+      if (empty($this->create_time)) {
+        $this->create_time = time();
+      }
+      parent::save();
+    } catch (Exception $e) {
+      watchdog_exception('save', $e);
     }
-    parent::save();
   }
 
   //@todo 检查消息是否唯一,存在返回TRUE
   function  checkOnly(WechatRequest $request) {
+
+//    $Query = new EntityFieldQuery();
+//    $Query->entityCondition('entity_type', 'wechat_request')
+//      ->propertyCondition('openid', $request->openid);
+
     if (!empty($request->msg_id)) {
       return !empty(entity_load('wechat_request', FALSE, array(
         'msg_id' => $request->msg_id
@@ -218,7 +223,6 @@ class WechatRequest extends Entity {
 }
 
 class WechatRequestType extends Entity {
-
 
   public $type;
   public $label;
@@ -337,123 +341,130 @@ function wechat_request_save_media($file_content, $file_name, $field_name, $msg_
  * @param \Wechat $wechat
  */
 function wechat_request_save_request_messages(Wechat $wechat) {
-  $wechat->getRev();
-  $xml_obj = $wechat->getRevData();
-  $xml_obj = (object) $xml_obj;
+//  sleep(10);
+  try {
+    $wechat->getRev();
+    $xml_obj = $wechat->getRevData();
+    $xml_obj = (object) $xml_obj;
 
-  $wechat_obj = wechat_api_init_wechatobj();
+    $wechat_obj = $wechat;
 
-  $request = entity_create('wechat_request', array('msg_type' => $xml_obj->MsgType));
-  $request_wrapper = entity_metadata_wrapper('wechat_request', $request);
+    $request = new WechatRequest();
+    $request->msg_type = $xml_obj->MsgType;
 
-
-  $request_wrapper->subscription->set($xml_obj->ToUserName);
-  $request_wrapper->openid->set($xml_obj->FromUserName);
-  $request_wrapper->create_time->set($xml_obj->CreateTime);
-
-  if ($xml_obj->MsgType == 'event') {
-    $request_wrapper->msg_id->set('');
-  }
-  else {
-    $request_wrapper->msg_id->set($xml_obj->MsgId);
-  }
+    $request_wrapper = $request->wrapper();
 
 
-  switch ($xml_obj->MsgType) {
-    case 'text': {
-      $request_wrapper->field_content->set($xml_obj->Content);
-      break;
+    $request_wrapper->subscription->set($xml_obj->ToUserName);
+    $request_wrapper->openid->set($xml_obj->FromUserName);
+    $request_wrapper->create_time->set($xml_obj->CreateTime);
+
+    if ($xml_obj->MsgType == 'event') {
+      $request_wrapper->msg_id->set('');
     }
-    case 'image': {
-      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
-      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.jpg', 'field_wechat_image', 'image');
-      $request_wrapper->field_media_id->set($xml_obj->MediaId);
-      $request_wrapper->field_pic_url->set($xml_obj->PicUrl);
-      $request_wrapper->field_wechat_image->file->set($file);
-      break;
+    else {
+      $request_wrapper->msg_id->set($xml_obj->MsgId);
     }
-    case 'voice': {
-      //存媒体ID
-      $request_wrapper->field_media_id->set($xml_obj->MediaId);
-      //存语音格式
-      $request_wrapper->field_file_format->set($xml_obj->Format);
-      //存媒体文件，是用格式拼装
-      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
 
-      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.' . $xml_obj->Format, 'field_media_file', 'file');
-      $request_wrapper->field_media_file->file->set($file);
-
-      //存语音识别结果
-      $Recognition = $xml_obj->Recognition;
-      if (!empty($Recognition)) {//使用isset存在bug
-        $request_wrapper->field_recongnition->set($xml_obj->Recognition);
+    switch ($xml_obj->MsgType) {
+      case 'text': {
+        $request_wrapper->field_content->set($xml_obj->Content);
+        break;
       }
-      break;
-    }
-
-    case 'shortvideo':
-    case 'video': {
-      //存媒体和媒体缩略图ID
-      $request_wrapper->field_media_id->set($xml_obj->MediaId);
-      $request_wrapper->field_thumb_media_id->set($xml_obj->MediaId);
-      //存媒体文件
-      $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
-      $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.mp4', 'field_media_file', 'file');
-      $request_wrapper->field_media_file->file->set($file);
-      //存缩略图文件
-      $file_content = $wechat_obj->getMedia($xml_obj->ThumbMediaId);
-      $file = wechat_request_save_media($file_content, $xml_obj->ThumbMediaId . '.jpeg', 'field_thumb_media_image', 'image');
-      $request_wrapper->field_thumb_media_image->file->set($file);
-      break;
-    }
-
-    case 'location': {
-      $request_wrapper->field_label->set($xml_obj->Label);
-      $request_wrapper->field_scale->set($xml_obj->Scale);
-      $request_wrapper->field_location_x->set($xml_obj->Location_X);
-      $request_wrapper->field_location_y->set($xml_obj->Location_Y);
-      break;
-    }
-
-    case 'link': {
-      $request_wrapper->field_title->set($xml_obj->Title);
-      $request_wrapper->field_description->set($xml_obj->Description);
-      $request_wrapper->field_url->set($xml_obj->Url);
-      break;
-    }
-    case 'event': {
-      $EventKey = $xml_obj->EventKey;
-      if (!empty($EventKey)) {
-        watchdog('key_track', $EventKey);
-        $request_wrapper->field_event_key->set($EventKey);
+      case 'image': {
+        $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+        $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.jpg', 'field_wechat_image', 'image');
+        $request_wrapper->field_media_id->set($xml_obj->MediaId);
+        $request_wrapper->field_pic_url->set($xml_obj->PicUrl);
+        $request_wrapper->field_wechat_image->file->set($file);
+        break;
       }
-      //watchdog('wechat_EventKey', $EventKey);
-      $request_wrapper->field_event->set($xml_obj->Event);
-      //watchdog('wechat', json_encode((array) $xml_obj));
+      case 'voice': {
+        //存媒体ID
+        $request_wrapper->field_media_id->set($xml_obj->MediaId);
+        //存语音格式
+        $request_wrapper->field_file_format->set($xml_obj->Format);
+        //存媒体文件，是用格式拼装
+        $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
 
-      //处理特殊事件数据，如上报地理位置事件、关注、取消关注等。
-      switch ($xml_obj->Event) {
-        //关注，处理扫码关注。普通关注无特殊数据
-        case 'subscribe':
-          //用户已关注时的事件推送
-        case 'SCAN': {
-          $request_wrapper->field_ticket->set($xml_obj->Ticket);
-          break;
+        $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.' . $xml_obj->Format, 'field_media_file', 'file');
+        $request_wrapper->field_media_file->file->set($file);
+
+        //存语音识别结果
+        $Recognition = $xml_obj->Recognition;
+        if (!empty($Recognition)) {//使用isset存在bug
+          $request_wrapper->field_recongnition->set($xml_obj->Recognition);
         }
-        //上报地理位置事件
-        case 'LOCATION': {
-          $request_wrapper->field_location_x->set($xml_obj->Latitude);
-          $request_wrapper->field_location_y->set($xml_obj->Longitude);
-          $request_wrapper->field_precision->set($xml_obj->Precision);
-        }
+        break;
       }
-      break;
-    }
-  }
-  //全部消息数据转换为json格式，存入数据库
-//  $request_wrapper->data->set(json_encode((array) $xml_obj));
-  $request_wrapper->save();
 
+      case 'shortvideo':
+      case 'video': {
+        //存媒体和媒体缩略图ID
+        $request_wrapper->field_media_id->set($xml_obj->MediaId);
+        $request_wrapper->field_thumb_media_id->set($xml_obj->MediaId);
+        //存媒体文件
+        $file_content = $wechat_obj->getMedia($xml_obj->MediaId);
+        $file = wechat_request_save_media($file_content, $xml_obj->MediaId . '.mp4', 'field_media_file', 'file');
+        $request_wrapper->field_media_file->file->set($file);
+        //存缩略图文件
+        $file_content = $wechat_obj->getMedia($xml_obj->ThumbMediaId);
+        $file = wechat_request_save_media($file_content, $xml_obj->ThumbMediaId . '.jpeg', 'field_thumb_media_image', 'image');
+        $request_wrapper->field_thumb_media_image->file->set($file);
+        break;
+      }
+
+      case 'location': {
+        $request_wrapper->field_label->set($xml_obj->Label);
+        $request_wrapper->field_scale->set($xml_obj->Scale);
+        $request_wrapper->field_location_x->set($xml_obj->Location_X);
+        $request_wrapper->field_location_y->set($xml_obj->Location_Y);
+        break;
+      }
+
+      case 'link': {
+        $request_wrapper->field_title->set($xml_obj->Title);
+        $request_wrapper->field_description->set($xml_obj->Description);
+        $request_wrapper->field_url->set($xml_obj->Url);
+        break;
+      }
+      case 'event': {
+        $EventKey = $xml_obj->EventKey;
+        if (!empty($EventKey)) {
+          $request_wrapper->field_event_key->set($EventKey);
+        }
+        $request_wrapper->field_event->set($xml_obj->Event);
+
+        //处理特殊事件数据，如上报地理位置事件、关注、取消关注等。
+        switch ($xml_obj->Event) {
+          //关注，处理扫码关注。普通关注无特殊数据
+          case 'subscribe':
+            //用户已关注时的事件推送
+          case 'SCAN': {
+            if (!empty($xml_obj->Ticket)) {
+              $request_wrapper->field_ticket->set($xml_obj->Ticket);
+            }
+            break;
+          }
+          //上报地理位置事件
+          case 'LOCATION': {
+            $request_wrapper->field_location_x->set($xml_obj->Latitude);
+            $request_wrapper->field_location_y->set($xml_obj->Longitude);
+            $request_wrapper->field_precision->set($xml_obj->Precision);
+          }
+        }
+        break;
+      }
+    }
+    $request->data = serialize($xml_obj);
+    //全部消息数据转换为json格式，存入数据库
+    $request_wrapper->save();
+
+    watchdog('$request', json_encode($request));
+
+  } catch (Exception $e) {
+    watchdog_exception('wechat_request_save_request_messages', $e);
+  }
 }
 
 function wechat_request_echo(Wechat $wechat) {

@@ -173,6 +173,7 @@ function wechat_menu_item($subval) {
 
   return $subelement;
 }
+use Drupal\wechat_api\ErrCode;
 
 function wechat_menu_update_menu() {
   $menu_array = wechat_menu_get_menu_array();

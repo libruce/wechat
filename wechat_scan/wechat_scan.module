@@ -1,0 +1,633 @@
+<?php
+/**
+ * Implements hook_theme().
+ */
+function wechat_scan_theme($existing, $type, $theme, $path) {
+  return array(
+    'wechat_scan' => array(
+      'render element' => 'content',
+    ),
+    'wechat_scan_add_test' => array(
+      'render element' => 'content',
+      'template' => 'wechat_scan_add_test',
+      'function' => 'wechat_scan_theme_test'
+    ),
+  );
+}
+
+function wechat_scan_theme_test($variables) {
+  $output = '';
+  $extension = '.tpl.twig';
+  $render_function = 'twig_render_template';
+
+  // Render the output using the template file.
+  $template_file = $variables['theme_hook_original'] . $extension;
+  $template_file = $variables['directory'] . '/' . $template_file;
+
+  $output .= $render_function($template_file, $variables);
+  return $output;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function wechat_scan_menu() {
+  $items['wechat-scan/product/add'] = array(
+    'page callback' => 'wechat_scan_product_add_form',
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', NULL, 'add'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_scan.forms.inc',
+  );
+  $items['wechat-scan/product/add2'] = array(
+    'page callback' => 'wechat_scan_product_add_form2',
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', NULL, 'add'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_scan.forms.inc',
+  );
+  $items['wechat-scan/product/%wechat_scan_product/edit'] = array(
+    'page callback' => 'wechat_scan_product_edit_form',
+    'page arguments' => array(2),
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', 2, 'edit'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_scan.forms.inc',
+  );
+
+  $items['admin/structure/wechat_scan_product'] = array(
+    'title' => '微信扫一扫设置',
+    'description' => '微信用户设置，如：微信登录自动注册为某角色，刷新用户信息等。',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['wechat_scan_settings_form'],
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', NULL, 'add'),
+    'file' => 'wechat_scan.admin.inc',
+  );
+  $items['admin/structure/wechat_scan_product/settings'] = array(
+    'title' => 'Settings',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+
+  $items['wechat-scan/product/add2'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_scan_add_test'),
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', NULL, 'add'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_scan.pages.inc',
+  );
+
+  $items['wechat-scan/product/add3'] = array(
+    'page callback' => 'wechat_scan_add_test2',
+    'access callback' => 'wechat_scan_access',
+    'access arguments' => array('product', NULL, 'add'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_scan.pages.inc',
+  );
+
+  return $items;
+}
+
+function wechat_scan_product_load($id, $reset = FALSE) {
+  $entities = wechat_scan_product_load_multiple(array($id), array(), $reset);
+  return reset($entities);
+}
+
+function wechat_scan_product_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_scan_product', $ids, $conditions, $reset);
+}
+
+
+function wechat_scan_access($type, $entity = NULL, $op = NULL) {
+  return TRUE;
+}
+
+function wechat_scan_pull_product_test($i) {
+  sleep(3);
+}
+
+/**
+ * @param $keystandard
+ * @param $keystr
+ * @todo 使用编码信息拉取商品信息，并保存到本地。如果本地存在相应的商品则覆盖
+ */
+function wechat_scan_pull_product($keystandard, $keystr) {
+  try {
+    $product = wechat_scan_product_load_by_key($keystandard, $keystr);
+
+    if (!$product) {
+      $product = new WechatScanProduct();
+    }
+
+    $product->update($keystandard, $keystr);
+    $product->save();
+
+  } catch (Exception $e) {
+
+  }
+}
+
+function wechat_scan_product_load_by_key($keystandard, $keystr) {
+  $entities = entity_load('wechat_scan_product', FALSE, [
+    'keystandard' => $keystandard,
+    'keystr' => $keystr
+  ]);
+  if (!empty($entities)) {
+    return reset($entities);
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function wechat_scan_field_extra_fields() {
+  $extra = array();
+  $extra['wechat_scan_product']['wechat_scan_product'] = array(
+    'form' => array(
+      'title' => array(
+        'label' => t('标题'),
+        'description' => t('商品标题'),
+        'weight' => -7,
+      ),
+      'keystandard' => array(
+        'label' => t('编码类型'),
+        'description' => t('编码类型'),
+        'weight' => -7,
+      ),
+      'keystr' => array(
+        'label' => t('编码内容'),
+        'description' => t('编码内容'),
+        'weight' => -6,
+      ),
+    ),
+  );
+  return $extra;
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function wechat_scan_entity_info() {
+  $return['wechat_scan_product'] = array(
+    'label' => t('扫一扫商品信息'),
+    'plural label' => t('扫一扫商品信息'),
+    'description' => t('扫一扫商品信息.'),
+    'entity class' => 'WechatScanProduct',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_scan_product',
+    'revision table' => 'wechat_scan_product_revision',
+    'fieldable' => TRUE,
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'title',
+      'revision' => 'vid',
+    ),
+    'bundles' => array(
+      'wechat_scan_product' => array(
+        'label' => t('扫一扫商品'),
+        'admin' => array(
+          'path' => 'admin/structure/wechat_scan_product',
+          'access arguments' => array('administer users'),
+        ),
+      ),
+    ),
+    'module' => 'wechat_scan',
+  );
+  $return['wechat_scan_product_qrcode'] = array(
+    'label' => t('扫一扫商品二维码'),
+    'plural label' => t('扫一扫商品二维码'),
+    'description' => t('扫一扫商品二维码.'),
+    'entity class' => 'WechatScanProductQrcode',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_scan_product_qrcode',
+    'fieldable' => FALSE,
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'title',
+    ),
+    'module' => 'wechat_scan',
+  );
+
+
+  return $return;
+}
+
+class WechatScanProduct extends Entity {
+  public $id;
+  public $uid;
+  public $vid;
+  public $title;
+  public $created;
+  public $changed;
+  public $data;
+
+  public $keystandard = 'ean13';
+  public $keystr;
+
+  //创建成功返回的PID
+  public $pid;
+
+  public $log = '';
+  public $is_new_revision;
+
+  function __construct($values = array()) {
+    $this->is_new_revision = TRUE;
+    parent::__construct($values, 'wechat_scan_product');
+  }
+
+  protected function checkOnly(WechatScanProduct $wechatScanProduct) {
+    return !empty(entity_load('wechat_scan_product', FALSE, array(
+      'keystandard' => $wechatScanProduct->keystandard,
+      'keystr' => $wechatScanProduct->keystr,
+    )));
+  }
+
+  function save() {
+    /**
+     * @todo 如果ID不存在，则表示是新商品。则检查是否已存在
+     */
+    if (empty($this->id) && $this->checkOnly($this)) {
+      return;
+    }
+
+    $this->changed = time();
+
+    if (empty($this->created)) {
+      $this->created = time();
+    }
+
+    if (empty($this->uid)) {
+      global $user;
+      $this->uid = $user->uid;
+    }
+
+    parent::save();
+  }
+
+  /**
+   * @param $info
+   * @todo 从微信更新数据
+   */
+  function update($keystandard, $keystr) {
+    $Controller = new \Drupal\wechat_scan\ScanController();
+    $info = $Controller->getProduct($keystandard, $keystr);
+
+    $this->log = '微信同步-' . date('Y-m-d H:i:s');
+    $this->title = $info['brand_info']['base_info']['title'];
+    $this->keystandard = $keystandard;
+    $this->keystr = $keystr;
+    $this->data = serialize($info['brand_info']);
+  }
+
+  /**
+   * @todo 将商品信息推送到微信，及商品创建
+   */
+  function push() {
+    $Controller = new \Drupal\wechat_scan\ScanController();
+    $data = unserialize($this->data);
+    $Controller->createProduct($data);
+  }
+
+  protected function thumb_url() {
+
+  }
+
+  /**
+   * ['link'=>$link]
+   * 商品详情页顶端横幅图片，640px*320px，单张≤200k，支持jpg、png、gif、jpeg格式，最多可上传6张。
+   */
+  protected function banner_list($links) {
+    $list = [];
+    foreach ($links as $link) {
+//      image_style_load()
+      $list[] = ['link' => image_style_url('detail_info_banner_list_link', $link->uri)];
+    }
+    return $list;
+  }
+
+}
+
+class WechatScanProductQrcode extends Entity {
+  function __construct($values = array()) {
+    parent::__construct($values, 'wechat_scan_product_qrcode');
+  }
+
+  function save() {
+    parent::save();
+  }
+}
+
+/**
+ * @return array
+ */
+function wechat_scan_status() {
+  $status = [
+    1 => '未创建',
+    2 => '未发布',
+    3 => '已发布',
+    4 => '审核中',
+    5 => '审核未通过',
+  ];
+  return $status;
+}
+
+function wechat_scan_get_status() {
+  return ['list' => wechat_scan_status()];
+}
+
+/**
+ * Implements hook_tpl_api().
+ */
+function wechat_scan_tpl_api() {
+  return array(
+    'add-scan-product' => array(
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_add_product_callback',
+      'description' => '添加扫一扫产品',
+      'args' => array(
+        array(
+          'name' => 'keystandard',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '商品编码类型.',
+          'source' => array('data' => 'keystandard'),
+        ),
+        array(
+          'name' => 'keystr',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '商品编码.',
+          'source' => array('data' => 'keystr'),
+        ),
+        array(
+          'name' => 'brand_info',
+          'optional' => FALSE,
+          'type' => 'array',
+          'description' => '数据.',
+          'source' => array('data' => 'brand_info'),
+        ),
+      ),
+    ),
+    'update-scan-product' => array(
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_update_product_callback',
+      'description' => '更新扫一扫产品',
+      'args' => array(
+        array(
+          'name' => 'spid',
+          'optional' => FALSE,
+          'type' => 'int',
+          'description' => '扫一扫产品ID.',
+          'source' => array('data' => 'spid'),
+        ),
+        array(
+          'name' => 'brand_info',
+          'optional' => FALSE,
+          'type' => 'array',
+          'description' => '数据。支持部分更新',
+          'source' => array('data' => 'brand_info'),
+        ),
+      ),
+    ),
+    'change-scan-product-status' => [
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_change_product_status_callback',
+      'description' => '修改产品状态',
+      'args' => array(
+        array(
+          'name' => 'spid',
+          'optional' => FALSE,
+          'type' => 'int',
+          'description' => '商品产品ID.',
+          'source' => array('data' => 'spid'),
+        ),
+        array(
+          'name' => 'status',
+          'optional' => FALSE,
+          'type' => 'int',
+          'description' => '需要修改到的状态代码。 1、2、3等.',
+          'source' => array('data' => 'status'),
+        ),
+      ),
+    ],
+    'delete-scan-product' => [
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_delete_product_callback',
+      'description' => '删除产品，可一次删除多个',
+      'args' => array(
+        array(
+          'name' => 'spids',
+          'optional' => FALSE,
+          'type' => 'array',
+          'description' => '商品产品ID数组.',
+          'source' => array('data' => 'spids'),
+        ),
+      ),
+    ],
+    'get-scan-product-list' => [
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_product_list_callback',
+      'description' => '获取扫一扫产品列表',
+      'args' => [
+        array(
+          'name' => 'offset',
+          'optional' => FALSE,
+          'type' => 'int',
+          'description' => '需要偏移的值.',
+          'source' => array('data' => 'offset'),
+        ),
+        array(
+          'name' => 'number',
+          'optional' => FALSE,
+          'type' => 'int',
+          'description' => '数量.',
+          'source' => array('data' => 'number'),
+        ),
+        [
+          'name' => 'status',
+          'optional' => TRUE,
+          'default value' => 'all',
+          'type' => 'string',
+          'description' => '状态.',
+          'source' => array('data' => 'status'),
+        ]
+      ],
+    ],
+    'get-scan-product-status-list' => [
+      'callback' => 'wechat_scan_get_status',
+      'description' => '获取扫一扫产品的状态列表，包含自定义状态',
+      'responses' => [
+        'list' => [
+          'type' => 'array',
+          'description' => '状态列表',
+        ],
+      ],
+    ],
+    'get-scan-product-custom-qr' => array(
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_custom_qr_callback',
+      'description' => '生成自定义二维码',
+      'args' => array(
+        array(
+          'name' => 'keystandard',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '商品编码类型.',
+          'source' => array('data' => 'keystandard'),
+        ),
+        array(
+          'name' => 'keystr',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '商品编码.',
+          'source' => array('data' => 'keystr'),
+        ),
+        array(
+          'name' => 'extinfo',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '数据.',
+          'source' => array('data' => 'extinfo'),
+        ),
+        array(
+          'name' => 'qrcode_size',
+          'optional' => TRUE,
+          'type' => 'int',
+          'description' => '数据.',
+          'default value' => 64,
+          'source' => array('data' => 'qrcode_size'),
+        ),
+      ),
+    ),
+    'get-scan-product-qr' => array(
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_qr_callback',
+      'description' => '生成扫一扫商品二维码，按类型',
+      'args' => array(
+        array(
+          'name' => 'keystandard',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '商品编码格式.',
+          'source' => array('data' => 'keystandard'),
+        ),
+        array(
+          'name' => 'keystr',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '商品编码.',
+          'source' => array('data' => 'keystr'),
+        ),
+        array(
+          'name' => 'type',
+          'optional' => FALSE,
+          'type' => 'string',
+          'description' => '码类型.',
+          'source' => array('data' => 'type'),
+        ),
+        array(
+          'name' => 'qrcode_size',
+          'optional' => TRUE,
+          'type' => 'int',
+          'description' => '需要的码大小.',
+          'default value' => 64,
+          'source' => array('data' => 'qrcode_size'),
+        ),
+      ),
+      'responses' => [
+        'url' => [
+          'type' => 'string',
+          'description' => '二维码图片url',
+        ],
+      ],
+    ),
+    'get-category-list' => [
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_category_list_callback',
+      'description' => '获取商品类目列表',
+      'responses' => [
+        'list' => [
+          'type' => 'array',
+          'description' => '商品类目列表',
+        ],
+      ],
+    ],
+    'get-store-vendorid-list' => [
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_store_vendorid_list_callback',
+      'description' => '获取电商渠道列表',
+      'responses' => [
+        'list' => [
+          'type' => 'array',
+          'description' => '电商渠道列表',
+        ],
+      ],
+    ],
+    'get-brand-tag-list' => [
+      'file' => array(
+        'type' => 'inc',
+        'module' => 'wechat_scan',
+        'name' => 'wechat_scan.tpl_api'
+      ),
+      'callback' => 'wechat_scan_get_brand_tag_list_callback',
+      'description' => '获取品牌字段列表',
+      'responses' => [
+        'list' => [
+          'type' => 'array',
+          'description' => '品牌字段列表',
+        ],
+      ],
+    ],
+  );
+}
+
+
+/**
+ * Implements hook_insert().
+ */
+function wechat_scan_insert($node) {
+
+}

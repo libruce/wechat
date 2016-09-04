@@ -323,11 +323,7 @@ class JSSDK {
   }
 }
 
-/**
- * Implements hook_page_build().
- */
-function wechat_jssdk_page_build(&$page) {
-
+function wechat_jssdk_get_settings() {
   $JSSDK = new JSSDK();
   $getSignPackage = $JSSDK->getSignPackage();
 
@@ -336,42 +332,7 @@ function wechat_jssdk_page_build(&$page) {
     'timestamp' => $getSignPackage['timestamp'],
     'nonceStr' => $getSignPackage['nonceStr'],
     'signature' => $getSignPackage['signature'],
-    'editAddress' => $JSSDK->GetEditAddressParameters(),
+//    'editAddress' => $JSSDK->GetEditAddressParameters(),
   );
-
-  if (current_path() == 'foodshopcunt' || current_path() == 'foodpersonal') {
-    global $base_url;
-    $redirect_uri = $base_url . '/' . current_path();
-    $tools = new JsApiPay();
-    $tools->Set_redirect_uri($redirect_uri);
-    $tools->GetOpenid();
-    $editAddress = $tools->GetEditAddressParameters();
-    $editAddress = array(
-      "addrSign" => $editAddress['addrSign'],
-      "appId" => $editAddress['appId'],
-      "timeStamp" => $editAddress['timeStamp'],
-      "nonceStr" => $editAddress['nonceStr'],
-    );
-    drupal_add_js(array('editAddress' => $editAddress), 'setting');
-  }
-
-  drupal_add_js(array('wechatJSSDK' => $settings), 'setting');
-
-  drupal_add_js(drupal_get_path('module', 'wechat_jssdk') . "/lib/jweixin-1.0.0.js");
-  drupal_add_js(drupal_get_path('module', 'wechat_jssdk') . "/wechat_jssdk.js");
-
-
-//  $page['page_bottom']['order_remind_subscribe'] = array('#markup' => theme('jssdk_test'));
-
-}
-
-/**
- * Implements hook_theme().
- */
-function wechat_jssdk_theme($existing, $type, $theme, $path) {
-  $return['jssdk_test'] = array(
-    'render element' => 'content',
-    'template' => 'jssdk_test',
-  );
-  return $return;
+  return $settings;
 }

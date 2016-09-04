@@ -66,7 +66,7 @@ function wechat_reply_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 1,
+      'weight' => 2,
     ),
   );
 
@@ -124,16 +124,20 @@ function wechat_reply_field_default_field_instances() {
         'progress_indicator' => 'throbber',
       ),
       'type' => 'image_image',
-      'weight' => 0,
+      'weight' => 3,
     ),
   );
 
   // Exported field_instance: 'wechat_reply-multiple_news-field_news_reference'
   $field_instances['wechat_reply-multiple_news-field_news_reference'] = array(
     'bundle' => 'multiple_news',
-    'default_value' => NULL,
+    'default_value' => array(
+      0 => array(
+        'target_id' => 1,
+      ),
+    ),
     'deleted' => 0,
-    'description' => '多图文消息是由<em>图文消息</em>组合而成。所以需要先添加图文消息。',
+    'description' => '多图文消息是由<b>图文消息</b>组合而成。所以需要先添加图文消息。',
     'display' => array(
       'default' => array(
         'label' => 'above',
@@ -155,9 +159,7 @@ function wechat_reply_field_default_field_instances() {
     'widget' => array(
       'active' => 1,
       'module' => 'options',
-      'settings' => array(
-        'apply_chosen' => 1,
-      ),
+      'settings' => array(),
       'type' => 'options_select',
       'weight' => 1,
     ),
@@ -215,7 +217,7 @@ function wechat_reply_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 3,
+      'weight' => -6,
     ),
   );
 
@@ -275,7 +277,7 @@ function wechat_reply_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 7,
+      'weight' => 2,
     ),
   );
 
@@ -345,7 +347,7 @@ function wechat_reply_field_default_field_instances() {
         'progress_indicator' => 'throbber',
       ),
       'type' => 'file_generic',
-      'weight' => 4,
+      'weight' => 6,
     ),
   );
 
@@ -380,7 +382,7 @@ function wechat_reply_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 1,
+      'weight' => 3,
     ),
   );
 
@@ -414,7 +416,7 @@ function wechat_reply_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 3,
+      'weight' => 5,
     ),
   );
 
@@ -448,7 +450,7 @@ function wechat_reply_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 0,
+      'weight' => 2,
     ),
   );
 
@@ -482,7 +484,7 @@ function wechat_reply_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 2,
+      'weight' => 4,
     ),
   );
 
@@ -559,7 +561,7 @@ function wechat_reply_field_default_field_instances() {
         'progress_indicator' => 'throbber',
       ),
       'type' => 'image_image',
-      'weight' => 5,
+      'weight' => 7,
     ),
   );
 
@@ -619,7 +621,7 @@ function wechat_reply_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 6,
+      'weight' => 2,
     ),
   );
 
@@ -653,7 +655,7 @@ function wechat_reply_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 1,
+      'weight' => 3,
     ),
   );
 
@@ -730,7 +732,7 @@ function wechat_reply_field_default_field_instances() {
         'progress_indicator' => 'throbber',
       ),
       'type' => 'image_image',
-      'weight' => 4,
+      'weight' => 5,
     ),
   );
 
@@ -764,7 +766,7 @@ function wechat_reply_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 0,
+      'weight' => 2,
     ),
   );
 
@@ -821,7 +823,7 @@ function wechat_reply_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 2,
+      'weight' => 4,
     ),
   );
 
@@ -881,7 +883,7 @@ function wechat_reply_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 2,
+      'weight' => -6,
     ),
   );
 
@@ -975,7 +977,7 @@ function wechat_reply_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 5,
+      'weight' => -6,
     ),
   );
 
@@ -1121,7 +1123,7 @@ function wechat_reply_field_default_field_instances() {
         'progress_indicator' => 'throbber',
       ),
       'type' => 'file_generic',
-      'weight' => 2,
+      'weight' => 6,
     ),
   );
 
@@ -1156,7 +1158,7 @@ function wechat_reply_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 1,
+      'weight' => 5,
     ),
   );
 
@@ -1190,7 +1192,7 @@ function wechat_reply_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 0,
+      'weight' => 4,
     ),
   );
 
@@ -1250,7 +1252,7 @@ function wechat_reply_field_default_field_instances() {
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 2,
+      'weight' => -6,
     ),
   );
 
@@ -1334,7 +1336,7 @@ function wechat_reply_field_default_field_instances() {
   t('图文消息描述');
   t('图文消息标题');
   t('图片');
-  t('多图文消息是由<em>图文消息</em>组合而成。所以需要先添加图文消息。');
+  t('多图文消息是由<b>图文消息</b>组合而成。所以需要先添加图文消息。');
   t('如果<b>音乐链接</b>和<b>高质量音乐链接</b>没有填写。则使用这个文件。<p>
 ');
   t('消息内容');

@@ -3,9 +3,10 @@
 /**
  * @param $material_body
  * @param $material_type
+ * @param $entity_type
+ * @param $entity_id
  * @param int $forever
- * @return array|bool|int|string
- * @todo 素材上传
+ * @return array
  */
 function wechat_material_upload($material_body, $material_type, $entity_type, $entity_id, $forever = 0) {
   $media_id = '';
@@ -44,8 +45,9 @@ function wechat_material_upload_file($material_body, $material_type, $forever) {
   $file = file_load($material_body['fid']);
   $file_path = drupal_realpath($file->uri);
 
+  $file = new CURLFile($file_path);
   //拼装数组
-  $data = ['media' => '@' . $file_path];
+  $data = ['media' => $file];
 
   if ($forever) {
     $return = $wechat_obj->uploadForeverMedia($data, $material_type);

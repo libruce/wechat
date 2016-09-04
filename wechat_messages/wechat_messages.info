@@ -5,4 +5,4 @@ package = wechat
 dependencies[] = wechat_api
 dependencies[] = rules
 
-version = 7.x-1.x
+version = 7.x-2.0-dev

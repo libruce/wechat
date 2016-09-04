@@ -1,29 +1,13 @@
 <?php
+//默认工作模式。公众平台
+define('WEIXIN_USE_DEFAULT', 1);
+//开放平台工作模式
+define('WEIXIN_USE_OPEN', 2);
 
-//libraries_load('wechat');
+//include_once 'sdk/autoload.php';
 
-/**
- * Implements hook_libraries_info().
- */
-function wechat_api_libraries_info() {
-  return array(
-    'wechat' => array(
-      'name' => 'Wechat',
-      'vendor url' => 'https://github.com/sosyuki/wechat-php-sdk',
-      'download url' => 'https://github.com/sosyuki/wechat-php-sdk',
-      'version arguments' => array(
-        'file' => 'wechat.class.php',
-        'pattern' => "/@version\s+([0-9\.]+)/",
-        'lines' => 100,
-      ),
-      'files' => array(
-        'php' => array(
-          'wechat.class.php',
-        ),
-      ),
-    ),
-  );
-}
+use Drupal\wechat_api\Wechat;
+use Drupal\wechat_api\ErrCode;
 
 /**
  * Implements hook_permission().
@@ -58,6 +42,13 @@ function wechat_api_menu() {
     'page arguments' => array('wechat_api_settings_form'),
     'access arguments' => array('administer wechat configuration'),
   );
+  $items['admin/config/wechat/api/use'] = array(
+    'title' => '微信使用配置',
+    'description' => '设置使用方式.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_api_use_settings_form'),
+    'access arguments' => array('administer wechat configuration'),
+  );
   $items['wechat'] = array(
     'title' => 'wechat',
     'description' => 'wechat callback',
@@ -68,20 +59,32 @@ function wechat_api_menu() {
   return $items;
 }
 
+
+function wechat_api_use_settings_form($form, &$form_state) {
+  $form['required'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('微信使用配置'),
+  );
+
+  $form['required']['wechat_api_use'] = array(
+    '#type' => 'radios',
+    '#title' => t('运行模式'),
+    '#default_value' => variable_get('wechat_api_use', WEIXIN_USE_DEFAULT),
+    '#options' => array(
+      '1' => '公众平台',
+      '2' => '开放平台',
+    ),
+    '#required' => TRUE,
+  );
+  return system_settings_form($form);
+}
+
 function wechat_api_settings_form($form, &$form_state) {
   global $base_url;
   $form['required'] = array(
     '#type' => 'fieldset',
     '#title' => t('Wechat app info'),
     '#description' => t("当前服务器微信接入地址：<b>%base_url</b>", array('%base_url' => $base_url . '/wechat')),
-  );
-
-
-  $form['required']['wechat_api_token'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Token'),
-    '#default_value' => variable_get('wechat_api_token', ''),
-    '#required' => TRUE,
   );
 
   $form['required']['wechat_api_appid'] = array(
@@ -96,9 +99,24 @@ function wechat_api_settings_form($form, &$form_state) {
     '#default_value' => variable_get('wechat_api_appsecret', ''),
     '#required' => TRUE,
   );
+
+
+  $form['required']['wechat_api_token'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Token'),
+    '#default_value' => variable_get('wechat_api_token', ''),
+    '#required' => TRUE,
+  );
+  $form['required']['wechat_api_encodingaeskey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('EncodingAESKey'),
+    '#default_value' => variable_get('wechat_api_encodingaeskey', ''),
+    '#required' => TRUE,
+  );
+
   $form['required']['wechat_api_debug'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Debug（测试环境使用）'),
+    '#title' => t('Debug（测试时使用，选中时不验证消息签名）'),
     '#default_value' => variable_get('wechat_api_debug', FALSE),
   );
   $form['#submit'][] = 'wechat_api_access_token_refresh';
@@ -106,7 +124,6 @@ function wechat_api_settings_form($form, &$form_state) {
 }
 
 function wechat_api_access_token_refresh($form, &$form_state) {
-  libraries_load('wechat');
   $token = $form_state['input']['wechat_api_token'];
   $appid = $form_state['input']['wechat_api_appid'];
   $appsecret = $form_state['input']['wechat_api_appsecret'];
@@ -124,33 +141,115 @@ function wechat_api_access_token_refresh($form, &$form_state) {
   variable_set("wechat_api_access_token_time", time());
 }
 
+
 function wechat_api_init_wechatobj() {
   $wechat = &drupal_static(__FUNCTION__);
-  if (!isset($wechat)) {
-    libraries_load('wechat');
-    $options = array(
-      'token' => variable_get('wechat_api_token', ""),
-      'appid' => variable_get('wechat_api_appid', ""),
-      'appsecret' => variable_get('wechat_api_appsecret', ""),
-    );
-    $wechat = new Wechat($options);
-    $access_token = variable_get("wechat_api_access_token", '');
-    if (variable_get("wechat_api_access_token_time", 0) > time() - 7000 && $access_token != '') {
-      $wechat->checkAuth('', '', $access_token);
-      $return = $wechat->getServerIp();
-      if (!$return) {
-        $access_token = $wechat->checkAuth();
-        variable_set("wechat_api_access_token", $access_token);
-        variable_set("wechat_api_access_token_time", time());
+  switch (variable_get('wechat_api_use', WEIXIN_USE_DEFAULT)) {
+    case WEIXIN_USE_DEFAULT:
+    default: {
+      if (!isset($wechat)) {
+        $options = array(
+          'token' => variable_get('wechat_api_token', ""),
+          'appid' => variable_get('wechat_api_appid', ""),
+          'appsecret' => variable_get('wechat_api_appsecret', ""),
+          'encodingaeskey' => variable_get('wechat_api_encodingaeskey', ''),
+        );
+        $wechat = new Wechat($options);
+        $access_token = variable_get("wechat_api_access_token", '');
+        if (variable_get("wechat_api_access_token_time", 0) > time() - 7000 && $access_token != '') {
+          $wechat->checkAuth('', '', $access_token);
+          $return = $wechat->getServerIp();
+          if (!$return) {
+            $access_token = $wechat->checkAuth();
+            variable_set("wechat_api_access_token", $access_token);
+            variable_set("wechat_api_access_token_time", time());
+          }
+        }
+        else {
+          $access_token = $wechat->checkAuth();
+          variable_set("wechat_api_access_token", $access_token);
+          variable_set("wechat_api_access_token_time", time());
+        }
       }
     }
-    else {
-      $access_token = $wechat->checkAuth();
-      variable_set("wechat_api_access_token", $access_token);
-      variable_set("wechat_api_access_token_time", time());
+    case WEIXIN_USE_OPEN: {
+      if (!isset($wechat)) {
+
+        if (isset($_GET['wx_token'])) {
+          //@todo 通过 url 传递 token  需要验证token 的有效性。有效进行存储
+          $access_token = $_GET['wx_token'];
+          variable_set('wechat_api_access_token', $access_token);
+          $wechat = new \Drupal\wechat_api\Wechat2(['access_token' => $access_token,]);
+          $return = $wechat->getServerIp();
+
+          if (!$return) {
+            variable_set('wechat_api_access_token', $access_token);
+          }
+          $wechat->getRev();
+          $openid = $wechat->getRevFrom();
+          watchdog('openid', $openid);
+          if ($openid == 'ob2sIv3Jgq7HBMplEv-dsRaX_wmg') {
+            $event = $wechat->getRevEvent();
+            watchdog('$event', serialize($event));
+            $r = $wechat->getRevData();
+            watchdog('AAAAAAAAAAAAAAA', serialize($r));
+
+            if ($event['event'] == 'scan_product_callback') {
+
+              $template = <<<xml
+<xml>
+    <ToUserName><![CDATA[%s]]></ToUserName>
+
+    <FromUserName><![CDATA[%s]]></FromUserName>
+    <CreateTime>%s</CreateTime>
+    <MsgType><![CDATA[scanproduct]]></MsgType>
+
+    <ScanProduct>
+        <KeyStandard><![CDATA[qrcode]]></KeyStandard>
+        <KeyStr><![CDATA[%s]]> </KeyStr>
+        <ExtInfo><![CDATA[%s]]></ExtInfo>
+        <AntiFake>
+            <CodeResult><![CDATA[fake]]></CodeResult>
+        </AntiFake>
+    </ScanProduct>
+</xml>
+xml;
+
+
+              $result_str = sprintf($template, $wechat->getRevTo(), $wechat->getRevFrom(), REQUEST_TIME, $wechat->getRevByKey('KeyStr'), $wechat->getRevByKey('ExtInfo'));
+              watchdog('回复到授权管理的内容', $result_str);
+              echo $result_str;
+              drupal_exit();
+            }
+          }
+        }
+        else {
+          //@todo 异步调用情况，读取存储的token
+          $access_token = variable_get('wechat_api_access_token');
+          $wechat = new \Drupal\wechat_api\Wechat2(['access_token' => $access_token,]);
+
+        }
+
+        watchdog('$access_token', $access_token);
+
+      }
     }
   }
+
   return $wechat;
+}
+
+function wechat_api_get_access_token() {
+  $obj = wechat_api_init_wechatobj();
+  return $obj->get_access_token();
+}
+
+/**
+ * @return null
+ * @todo 返回微信debug状态  debug 返回 true 否则返回 false
+ */
+function wechat_api_isdebug() {
+  return variable_get('wechat_api_debug', FALSE);
 }
 
 /**

@@ -49,12 +49,50 @@ function wechat_reply_views_default_views() {
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
     'id' => 'id',
+    'title' => 'title',
+    'msg_type' => 'msg_type',
+    'create_time' => 'create_time',
+    'field_reply_keyword' => 'field_reply_keyword',
+    'nothing' => 'nothing',
   );
   $handler->display->display_options['style_options']['default'] = '-1';
   $handler->display->display_options['style_options']['info'] = array(
     'id' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'title' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'msg_type' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'create_time' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_reply_keyword' => array(
       'sortable' => 0,
       'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'nothing' => array(
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -66,21 +104,45 @@ function wechat_reply_views_default_views() {
   $handler->display->display_options['empty']['area_text_custom']['field'] = 'area_text_custom';
   $handler->display->display_options['empty']['area_text_custom']['empty'] = TRUE;
   $handler->display->display_options['empty']['area_text_custom']['content'] = '未找到内容！';
+  /* Relationship: 微信回应消息: User uid */
+  $handler->display->display_options['relationships']['user']['id'] = 'user';
+  $handler->display->display_options['relationships']['user']['table'] = 'wechat_reply';
+  $handler->display->display_options['relationships']['user']['field'] = 'user';
+  $handler->display->display_options['relationships']['user']['label'] = '用户';
   /* Field: 微信回应消息: 微信回应消息 ID */
   $handler->display->display_options['fields']['id']['id'] = 'id';
   $handler->display->display_options['fields']['id']['table'] = 'wechat_reply';
   $handler->display->display_options['fields']['id']['field'] = 'id';
-  /* Field: 微信回应消息: 消息类型 */
+  $handler->display->display_options['fields']['id']['label'] = 'ID';
+  /* Field: 微信回应消息: Label */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'wechat_reply';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['label'] = '标签';
+  /* Field: 微信回应消息: Msg_type */
   $handler->display->display_options['fields']['msg_type']['id'] = 'msg_type';
   $handler->display->display_options['fields']['msg_type']['table'] = 'wechat_reply';
   $handler->display->display_options['fields']['msg_type']['field'] = 'msg_type';
-  /* Field: 微信回应消息: Create time */
-  $handler->display->display_options['fields']['create_time']['id'] = 'create_time';
-  $handler->display->display_options['fields']['create_time']['table'] = 'wechat_reply';
-  $handler->display->display_options['fields']['create_time']['field'] = 'create_time';
-  $handler->display->display_options['fields']['create_time']['label'] = '添加/修改时间';
-  $handler->display->display_options['fields']['create_time']['date_format'] = 'short';
-  $handler->display->display_options['fields']['create_time']['second_date_format'] = 'long';
+  $handler->display->display_options['fields']['msg_type']['label'] = '消息类型';
+  /* Field: 微信回应消息: Update time */
+  $handler->display->display_options['fields']['update_time']['id'] = 'update_time';
+  $handler->display->display_options['fields']['update_time']['table'] = 'wechat_reply';
+  $handler->display->display_options['fields']['update_time']['field'] = 'update_time';
+  $handler->display->display_options['fields']['update_time']['label'] = '更新时间';
+  $handler->display->display_options['fields']['update_time']['date_format'] = 'short';
+  $handler->display->display_options['fields']['update_time']['second_date_format'] = 'long';
+  /* Field: 微信回应消息: 关键字 */
+  $handler->display->display_options['fields']['field_reply_keyword']['id'] = 'field_reply_keyword';
+  $handler->display->display_options['fields']['field_reply_keyword']['table'] = 'field_data_field_reply_keyword';
+  $handler->display->display_options['fields']['field_reply_keyword']['field'] = 'field_reply_keyword';
+  $handler->display->display_options['fields']['field_reply_keyword']['type'] = 'text_plain';
+  /* Field: User: Name */
+  $handler->display->display_options['fields']['name']['id'] = 'name';
+  $handler->display->display_options['fields']['name']['table'] = 'users';
+  $handler->display->display_options['fields']['name']['field'] = 'name';
+  $handler->display->display_options['fields']['name']['relationship'] = 'user';
+  $handler->display->display_options['fields']['name']['label'] = 'BY';
+  $handler->display->display_options['fields']['name']['link_to_user'] = FALSE;
   /* Field: Global: Custom text */
   $handler->display->display_options['fields']['nothing']['id'] = 'nothing';
   $handler->display->display_options['fields']['nothing']['table'] = 'views';
@@ -121,11 +183,15 @@ function wechat_reply_views_default_views() {
     t('下一页 ›'),
     t('末页 »'),
     t('未找到内容！'),
-    t('微信回应消息 ID'),
+    t('用户'),
+    t('ID'),
     t('.'),
     t(','),
+    t('标签'),
     t('消息类型'),
-    t('添加/修改时间'),
+    t('更新时间'),
+    t('关键字'),
+    t('BY'),
     t('操作'),
     t('<ul class="links inline operations">
 <li>

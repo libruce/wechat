@@ -189,7 +189,7 @@ function wechat_qr2_entity_info() {
     'entity keys' => array(
       'id' => 'id',
       'label' => 'title',
-      'bundle' => 'bundle',
+      'bundle' => 'type',
     ),
     'bundles' => array(),
     'bundle keys' => array(
@@ -271,8 +271,8 @@ function wechat_qr2_access($op, $entity = NULL, $account = NULL) {
 /**
  * Implements hook_wechat_qr2_access().
  */
-function wechat_qr2_wechat_qr2_access($op, $entity = NULL, $account = NULL) {
-  if (isset($entity) && ($type_name = $entity->bundle) && $op != 'delete') {
+function wechat_qr2_wechat_qr2_access($op, WechatQr2 $entity = NULL, $account = NULL) {
+  if (isset($entity) && ($type_name = $entity->type) && $op != 'delete') {
     if (user_access("$op any $type_name wecaht qr2", $account)) {
       return TRUE;
     }
@@ -344,7 +344,7 @@ function wechat_qr2_get_types($type_name = NULL) {
 
 class WechatQr2 extends Entity {
   public $id;
-  public $bundle;
+  public $type;
   public $title;
   public $uid;
   public $update_time;
@@ -359,8 +359,8 @@ class WechatQr2 extends Entity {
 
 
   public function __construct($values = array()) {
-    if (isset($values['bundle']) && is_object($values['bundle'])) {
-      $values['bundle'] = $values['bundle']->type;
+    if (isset($values['type']) && is_object($values['type'])) {
+      $values['type'] = $values['type']->type;
     }
     parent::__construct($values, 'wechat_qr2');
   }
@@ -375,8 +375,28 @@ class WechatQr2 extends Entity {
     return $output;
   }
 
+  protected function makeKey() {
+    $old_key = variable_get(__CLASS__ . __FUNCTION__, 1);
+    if ($old_key > 4294967295) {
+      $new_key = 1;
+    }
+    else {
+      $new_key = $old_key + 1;
+    }
+    variable_set(__CLASS__ . __FUNCTION__, $new_key);
+
+    return $old_key;
+  }
+
   public function  save() {
-    //$this->bundle = $this->bundle->type;
+
+    //临时二维码key自动生成
+    if ($this->qr_type == 0 && empty($this->qr_key)) {
+      $this->qr_key = $this->makeKey();
+    }
+    if ($this->qr_type == 1 && is_numeric($this->qr_key)) {
+      return;
+    }
     $this->update_time = time();
 
     if (!isset($this->create_time)) {
@@ -399,7 +419,7 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
     $info = parent::entityPropertyInfo();
     $properties = &$info[$this->type]['properties'];
 //    dpm($properties);
-    $properties['bundle'] = array(
+    $properties['type'] = array(
         'label' => t('使用场景类型'),
         'type' => 'wechat_qr2_type',
         'getter callback' => 'entity_property_getter_method',
@@ -407,7 +427,7 @@ class WechatQr2MetadataController extends EntityDefaultMetadataController {
         'setter permission' => 'administer profiles',
         'required' => TRUE,
         'description' => t('The profile type.'),
-      ) + $properties['bundle'];
+      ) + $properties['type'];
 
     $properties['title'] = array(
       'label' => t('标题'),

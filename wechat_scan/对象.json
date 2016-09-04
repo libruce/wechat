@@ -1,0 +1,90 @@
+{
+  "scan_product": {
+    "spid": "",
+    //扫一扫产品ID
+    "keystandard": "ean13",
+    "keystr": "6900000000000",
+    "status": "",
+    "brand_info": {
+      "base_info": {
+        "title": "扫一扫动态主页demo",
+        "thumb_url": {
+          "file": {}
+        },
+        //转换为文件ID
+        "brand_tag": "小耿哥8",
+        "category_id": 123456,
+        "store_mgr_type": "auto",
+        "store_vendorid_list": [
+          {
+            "store_vendorid": {}
+          }
+        ],
+        "color": "auto"
+      },
+      "detail_info": {
+        "banner_list": [
+          {
+            "link": {
+              "file": {}
+            }
+            //转换为文件ID
+          }
+        ],
+        "detail_list": [
+          {
+            "title": "产品名称",
+            "desc": "微信相框moment"
+          }
+        ]
+      },
+      "action_info": {
+        "action_list": [
+          {
+            "type": "price",
+            "retail_price": "12.00"
+          },
+          {
+            "type": "link",
+            "name": "banner",
+            "link": "http://mp.weixin.qq.com",
+            "image": {
+              "file": {}
+            },
+            //转换为文件ID
+            "showtype": "banner"
+          },
+          {
+            "type": "link",
+            "name": "自定义活动1",
+            "link": "http://p.url.cn/wxscan.php"
+          },
+          {
+            "type": "user"
+          },
+          {
+            "type": "text",
+            "text": "此处可根据品牌商需要，用于简单描述商品或活动。"
+          }
+        ]
+      },
+      "module_info": {
+        "module_list": [
+          {
+            "type": "anti_fake",
+            "native_show": "fales",
+            "anti_fake_url": "weixin.qq.com"
+          }
+        ]
+      }
+    }
+  },
+  "file": {
+    "fid": "",
+    "uri": ""
+  },
+  "store_vendorid": {
+    "id": "",
+    "name": ""
+  }
+}

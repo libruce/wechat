@@ -1,0 +1,22 @@
+<div id="product">
+    <div class="show">
+        {{ "{{titile}}" }}
+        {{ "{{keystandard}}" }}
+        {{ "{{keystr}}" }}
+        {{ "{{brand_tag}}" }}
+
+        颜色：{{ "{{color}}" }}
+
+    </div>
+
+    <div class="input">
+        <input v-model="titile">
+        <select v-model="keystandard">
+            <option value="ean13">条码</option>
+            <option value="qrcode">二维码</option>
+        </select>
+        <input v-model="keystr">
+        <input v-model="brand_tag">
+    </div>
+
+</div>

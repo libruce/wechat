@@ -1,6 +1,8 @@
 name = 微信session管理
 description = 提供微信session管理。
 core = 7.x
+version = 7.x-2.0
 package = wechat
+dependencies[] = entity
 dependencies[] = rules
 dependencies[] = wechat_api

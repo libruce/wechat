@@ -1,9 +1,7 @@
 <?php
 function wechat_qr2_add_page() {
   $item = menu_get_item();
-  //dpm($item);
   $content = system_admin_menu_block($item);
-  // Bypass the node/add listing if only one content type is available.
   if (count($content) == 1) {
     $item = array_shift($content);
     drupal_goto($item['href']);
@@ -14,38 +12,21 @@ function wechat_qr2_add_page() {
 function wechat_qr2_view_page($entity) {
   $output = '';
   $ticket = UrlEncode($entity->ticket);
-//  dpm($entity);
-  $output .= "<div style='font-size: 20px'><b>该二维码是个人推荐码</b></div>";
   $expire = TRUE;
   if (($entity->qr_type) || time() < $entity->create_time + $entity->expire) {
     $expire = FALSE;
   }
-
   if ($expire) {
     $output .= "已过期";
   }
   else {
     $output .= '<img src="' . 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=' . $ticket . '"/>';
-    $output .= '
-    <div style="padding: 15px">
-
-     <div>点击右上方发送给好友，好友长按二维码识别关注【慢城联盟】，则你推荐好友成功，系统将自动统计你推荐好友数量。</div>
-    <div>累计一定数量，将成为本平台忠实粉丝，盟主将邀约你参与线下粉丝聚会活动，欢迎你的加入！</div>
-    <div>———————————————————</div>
-    <div style="color: #3b96cc;">注：关注平台后可在“招募会员”中获取自己的专属推广二维码！</div>
-    </div>
-';
   }
-//  $output .= "<div><b>KEY:</b> {$entity->qr_key}</div>";
-//  $username = format_username(user_load($entity->uid));
-//  $output .= "<div><b>创建者:</b>{$username}</div>";
-//  $output .= '<div><b>创建时间:</b>' . format_date($entity->create_time) . '</div>';
-//  $output .= '<div><b>过期时间:</b>' . format_date($entity->create_time + $entity->expire) . '</div>';
   return $output;
 }
 
 function wechat_qr2_add_form($type) {
-  $entity = entity_create('wechat_qr2', array('bundle' => $type));
+  $entity = entity_create('wechat_qr2', array('type' => $type));
   module_load_include('inc', 'wechat_qr2', 'wechat_reply.pages');
   return drupal_get_form('wechat_qr2_form', $entity, 'add');
 }
@@ -58,7 +39,6 @@ function wechat_qr2_edit_form($entity) {
 
 function wechat_qr2_form($form, &$form_state, $entity, $op) {
 
-  //dpm($entity);
   $form_state['wechat_qr2'] = $entity;
 
   $langcode = entity_language('wechat_qr2', $entity);
@@ -85,8 +65,8 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
     '#description' => t('
     <b>临时二维码:</b><br/>
        32位非0整型.<br/>
+       最大数:<b>4294967295</b><br/>
     <b>永久二维码:</b><br/>
-       数字:1--100000<br/>
        字符串:长度1到64.
     '),
     '#type' => 'textfield',
@@ -134,15 +114,14 @@ function wechat_qr2_form($form, &$form_state, $entity, $op) {
 }
 
 function wechat_qr2_form_validate($form, &$form_state) {
-//  dpm($form_state);
   $qr_type = $form_state['values']['qr_type'];
   $qr_key = $form_state['values']['qr_key'];
   if ($qr_type == 0 && !is_numeric($qr_key)) {
     form_set_error('qr_key', t('临时二维码KEY只能是数字'));
   }
-
-
-//  dpm($form);
+  if ($qr_type == 1 && is_numeric($qr_key)) {
+    form_set_error('qr_key', t('永久二维码不能使用数字'));
+  }
 }
 
 function wechat_qr2_form_submit(&$form, &$form_state) {
