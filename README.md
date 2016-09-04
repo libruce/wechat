@@ -16,3 +16,5 @@
 详细文档介绍请移步：http://sosyuki.com/book/wechat%E6%A8%A1%E5%9D%97%E7%BB%84%E6%89%8B%E5%86%8C
 
 # 第二版为分支 7.x-2.0 master 分支现在已第二版为基准
+
+# 7.x-1.0 版不在更新
