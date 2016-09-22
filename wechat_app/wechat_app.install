@@ -20,6 +20,13 @@ function wechat_app_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'subscription' => array(
+        'description' => '微信公众号原始ID.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'appid' => array(
         'description' => 'appid',
         'type' => 'varchar',
@@ -83,4 +90,19 @@ function wechat_app_schema() {
     'primary key' => array('id'),
   );
   return $schema;
+}
+
+/**
+ * Implements hook_update_N().
+ * @todo 增加原始id字段
+ */
+function wechat_app_update_7001(&$sandbox) {
+  $table = 'wechat_app';
+  db_add_field($table, 'subscription', array(
+    'description' => '微信公众号原始ID.',
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => '',
+  ));
 }
