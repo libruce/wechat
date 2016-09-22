@@ -15,10 +15,12 @@ class WechatApp extends \Entity {
   public $name;
   public $status = 1;
 
+  public $subscription;
   public $appid;
   public $appsecret;
   public $token;
   public $aes_key;
+
   public $access_token;
 
   public $uid;

@@ -4,30 +4,24 @@
  * Implements hook_menu().
  */
 function wechat_app_menu() {
-  $items['wechat/%wechat_app'] = array(
-    'title' => '微信消息推送地址',
-    'page callback' => 'wechat_app_api_callback',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-    'file' => 'wechat_app.pages.inc',
+  $items['admin/content/wechat-app/add'] = array(
+    'title' => '添加新的公众号',
+    'description' => '添加新的公众号',
+    'page callback' => 'wechat_app_add_form',
+    'access callback' => 'wechat_app_access',
+    'access arguments' => array('add'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wechat_app.admin.inc',
   );
-  $items['admin/content/application/%application/edit'] = array(
-    'title' => '开放平台应用编辑',
-    'description' => '开放平台应用编辑',
-    'page callback' => 'application_edit_form',
+  $items['admin/content/wechat-app/%wechat_app/edit'] = array(
+    'title' => '公众号编辑',
+    'description' => '公众号编辑',
+    'page callback' => 'wechat_app_edit_form',
     'page arguments' => array(3),
-    'access callback' => 'application_access',
+    'access callback' => 'wechat_app_access',
     'access arguments' => array('edit', 3),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'application.pages.inc',
-  );
-  $items['application/%application/notice/callback'] = array(
-    'title' => '开放平台通知',
-    'description' => '授权事件接收URL',
-    'page callback' => 'application_ticket_callback',
-    'page arguments' => array(1),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
+    'file' => 'wechat_app.admin.inc',
   );
   return $items;
 }
