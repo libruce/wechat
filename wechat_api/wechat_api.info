@@ -3,3 +3,4 @@ description = 微信sdk引入，提供基础认证 https://github.com/sosyuki/we
 core = 7.x
 package = wechat
 dependencies[] = libraries (>= 2.0)
+
