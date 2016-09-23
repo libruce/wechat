@@ -16,15 +16,20 @@ function wechat_app_edit_form(WechatApp $app) {
 function wechat_app_entity_form($form, &$form_state, WechatApp $entity, $op) {
   $form_state['entity'] = $entity;
   global $base_url;
+
   $form['fieldset'] = array(
     '#type' => 'fieldset',
     '#title' => '公众号信息',
-    '#description' => format_string("服务器微信接入地址：<b>%base_url</b>",
-      array(
-        '%base_url' => $base_url . '/wechat',
-      )),
+    '#description' => '保存后生成接入地址',
   );
 
+  if (!empty($entity->id)) {
+    $form['fieldset']['#description'] = format_string("服务器微信接入地址：<b>@base_url/wechat/@id</b>",
+      array(
+        '@base_url' => $base_url,
+        '@id' => $entity->id,
+      ));
+  }
 
   $form['fieldset']['name'] = array(
     '#title' => t('名称'),
@@ -85,6 +90,6 @@ function wechat_app_entity_form_submit($form, &$form_state) {
     $entity->aes_key = $form_state['values']['aes_key'];
     $entity->status = $form_state['values']['status'];
     $entity->save();
-    $form_state['redirect'] = "admin/content/application/{$entity->id}/edit";
+    $form_state['redirect'] = "admin/content/wechat-app/{$entity->id}/edit";
   }
 }
