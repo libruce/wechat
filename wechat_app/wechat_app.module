@@ -8,8 +8,7 @@ function wechat_app_menu() {
     'title' => '添加新的公众号',
     'description' => '添加新的公众号',
     'page callback' => 'wechat_app_add_form',
-    'access callback' => 'wechat_app_access',
-    'access arguments' => array('add'),
+    'access callback' => TRUE,
     'type' => MENU_LOCAL_TASK,
     'file' => 'wechat_app.admin.inc',
   );
@@ -18,8 +17,7 @@ function wechat_app_menu() {
     'description' => '公众号编辑',
     'page callback' => 'wechat_app_edit_form',
     'page arguments' => array(3),
-    'access callback' => 'wechat_app_access',
-    'access arguments' => array('edit', 3),
+    'access callback' => TRUE,
     'type' => MENU_LOCAL_TASK,
     'file' => 'wechat_app.admin.inc',
   );
