@@ -7,6 +7,7 @@ function wechat_app_menu() {
   $items['wechat/%wechat_app'] = array(
     'title' => '微信消息推送地址',
     'page callback' => 'wechat_app_api_callback',
+    'page arguments' => array(1),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'wechat_app.pages.inc',
