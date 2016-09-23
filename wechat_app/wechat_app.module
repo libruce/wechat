@@ -4,6 +4,13 @@
  * Implements hook_menu().
  */
 function wechat_app_menu() {
+  $items['wechat/%wechat_app'] = array(
+    'title' => '微信消息推送地址',
+    'page callback' => 'wechat_app_api_callback',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'wechat_app.pages.inc',
+  );
   $items['admin/content/wechat-app/add'] = array(
     'title' => '添加新的公众号',
     'description' => '添加新的公众号',
