@@ -48,6 +48,16 @@ function wechat_app_entity_info() {
   return $return;
 }
 
+
+function wechat_app_load($id, $reset = FALSE) {
+  $entities = wechat_app_load_multiple(array($id), array(), $reset);
+  return reset($entities);
+}
+
+function wechat_app_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wechat_app', $ids, $conditions, $reset);
+}
+
 function wechat_app_access($op, $entity, $account, $entity_type) {
   return $account->uid == 1;
 }
