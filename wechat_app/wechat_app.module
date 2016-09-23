@@ -1,5 +1,8 @@
 <?php
 
+use Drupal\wechat_app\Entity\WechatApp;
+use Drupal\wechat_app\WechatAppSDK;
+
 /**
  * Implements hook_menu().
  */
@@ -70,3 +73,14 @@ function wechat_app_access($op, $entity, $account, $entity_type) {
   return $account->uid == 1;
 }
 
+
+function wechat_app_init_lib(WechatApp $app) {
+  $options = array(
+    'token' => $app->token,
+    'appid' => $app->appid,
+    'appsecret' => $app->appsecret,
+    'encodingaeskey' => $app->aes_key,
+  );
+  $wechat = new WechatAppSDK($options);
+  return $wechat;
+}
