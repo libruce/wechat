@@ -1,5 +1,20 @@
 <?php
 /**
+ * Is test mode
+ */
+define('TEST_MOD', 0);
+
+/**
+ * RESPONSE STATUS AND ERROR CODES
+ */
+define('STATUS_CODE_SUCCESS', '1');
+
+/**
+ * Failure code
+ */
+define('STATUS_CODE_FAILED', '0');
+
+/**
  * Implements hook_help().
  */
 function wechat_messages_help($path, $arg) {
@@ -264,4 +279,155 @@ function wechat_messages_update_7100(&$sandbox) {
     'primary key' => array('openid'),
   );
   db_create_table('wechat_messages_request_reply_status', $schema['wechat_messages_request_reply_status']);
+}
+
+/**
+ * 消息发送接口
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function wechat_messages_menu() {
+  $items['wechat_messages/api/send'] = array(
+    'page callback' => 'wechat_messages_api_send',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+/**
+ * Callback of wechat message send api.
+ */
+function wechat_messages_api_send(){
+  //--- Sample post data ---//
+  // $post_data = (array)json_decode('{
+  //   "user_openid":"omPD7vtVtb7W3Gaya00S8YqFL8LU",
+  //   "key":"WECHAT_MESSAGE_SEND_API_KEY", //wechat aes_key
+  //   "msgtype": "text",
+  //   "content":"测试文字消息内容",
+  //   "wechat_api_id": -1,
+  // }');
+
+  $post = array();
+  if (!empty($_POST)) {
+      $post = array_merge($post, $_POST);
+  } elseif (TEST_MOD && !empty($_GET)) {
+      $post = array_merge($post, $_GET);
+  }
+
+  $wechat_api = FALSE;
+  //check wechat index is not -1 which refers to the default wechat config
+  if(isset($post['wechat_api_id']) && $post['wechat_api_id'] != -1){
+    //get corresponding wechat config from DB
+    $wechat_api = wechat_app_load($post['wechat_api_id']);
+  }
+
+  /**
+   * Check access key is right
+   */
+  if($wechat_api && !TEST_MOD)
+  {
+    if (!isset($post['key'])) {
+      $error = 'argument: key is mandatory';
+    }
+    else {
+      $apikey = isset($wechat_api->aes_key) ? $wechat_api->aes_key : FALSE;
+      if ($post['key'] != $apikey) {
+         $error = 'Your access key is wrong';
+      }
+    }
+
+    if (!empty($error)) {
+      $return = array(
+        'status'  => STATUS_CODE_FAILED,
+        'message' => $error,
+        'data'    => null
+      );
+      drupal_json_output($return);
+      exit;
+    }
+  }
+
+
+
+  /**
+  * Check arguments
+  */
+
+  if(!isset($post['user_openid']) || !isset($post['wechat_api_id']) || !isset($post['msgtype'])){
+    $error = 'Arguments missing';
+    $return = array(
+      'status'  => STATUS_CODE_FAILED,
+      'message' => $error,
+      'data'    => null
+    );
+    drupal_json_output($return);
+    exit;
+  }
+
+
+  $wechat_obj = wechat_app_init_lib($wechat_api);
+  $body = array();
+
+  $touser = $post['user_openid'];
+  $type = $post['msgtype'];
+
+
+  if($type !== 'template')
+  {
+    //普通消息
+    switch ($type) {
+      case 'text': {
+        $body['content'] = $post['content'];
+        break;
+      }
+      //TODO add other types of messages
+    }
+    //debug
+    drupal_json_output($wechat_obj);
+
+    $data = array(
+      'touser' => $touser,
+      'msgtype' => $type,
+      $type => $body,
+    );
+
+    //debug
+    drupal_json_output($data);
+
+    $return = $wechat_obj->sendCustomMessage($data);
+    var_dump($return);die;
+  }
+  else {
+    // 模版消息
+    $template_id = $post['template_id'];
+    $temp_msg_data = json_decode($post['template_data']);
+    $data = array(
+      'touser' => $touser,
+      'template_id' => $template_id,
+      'data' => $temp_msg_data,
+    );
+
+    $return = $wechat_obj->sendTemplateMessage($data);
+
+  }
+
+  $success = STATUS_CODE_FAILED;
+  if ($return['errcode'] == '0' && $return['errmsg'] == 'ok') {
+    $success = STATUS_CODE_SUCCESS;
+  }
+
+  watchdog('wechat_messages_api_send_message', json_encode($data, JSON_UNESCAPED_UNICODE));
+  watchdog('wechat_messages_api_send_result', json_encode($return, JSON_UNESCAPED_UNICODE));
+
+
+  $result = array(
+    'status'  => $success,
+    'message' => $return['errmsg'],
+    'data'    => $return
+  );
+
+  drupal_json_output($result);
+  exit();
 }

@@ -2462,8 +2462,8 @@ class Wechat {
     //$data = self::json_encode($data);
     //$data = json_encode($data, JSON_UNESCAPED_UNICODE);
     $result = $this->http_post(self::API_URL_PREFIX . self::CUSTOM_SEND_URL . 'access_token=' . $this->access_token, self::json_encode($data));
-    watchdog('api_data', $data);
-    watchdog('$result', json_encode(($result)));
+    // watchdog('api_data', $data);
+    // watchdog('$result', json_encode(($result)));
     if ($result) {
       $json = json_decode($result, TRUE);
       if (!$json || !empty($json['errcode'])) {
