@@ -26,11 +26,6 @@ function wechat_message_api_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
-  $items['wechat_messages/api/send/test'] = array(
-    'page callback' => 'wechat_messages_api_send_test',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
   return $items;
 }
 /**
@@ -173,48 +168,42 @@ function wechat_messages_api_send(){
 * Implements hook_entity_info().
 */
 function wechat_message_api_entity_info() {
-   $return['wechat_msg_api_log'] = array(
-     'label' => '微信消息发送api日志',
-     'plural label' => '微信消息发送api日志',
-     'description' => '微信消息发送api日志',
-     'entity class' => 'Entity',
-     'controller class' => 'EntityAPIController',
-     'base table' => 'wechat_message_api_log',
-     'entity keys' => array(
-       'id' => 'id',
-       'label' => 'wechat_id'
-     ),
-     'module' => 'wechat_message_api',
-   );
-   return $return;
+  $return['wechat_msg_api_log'] = array(
+    'label' => '微信消息发送api日志',
+    'plural label' => '微信消息发送api日志',
+    'description' => '微信消息发送api日志',
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'wechat_message_api_log',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'wechat_id'
+    ),
+    'module' => 'wechat_message_api',
+  );
+  return $return;
 }
 
 function wechat_msg_api_log_load($id, $reset = FALSE) {
-   $entities = wechat_msg_api_log_load_multiple(array($id), array(), $reset);
-   return reset($entities);
+  $entities = wechat_msg_api_log_load_multiple(array($id), array(), $reset);
+  return reset($entities);
 }
 
 function wechat_msg_api_log_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
-   return entity_load('wechat_msg_api_log', $ids, $conditions, $reset);
+  return entity_load('wechat_msg_api_log', $ids, $conditions, $reset);
 }
 
 function wechat_msg_api_log_save($log_id = FALSE, $wechat_id = FALSE, $status = 0, $msg_data = ''){
-   if($log_id){
-     $entity = wechat_msg_api_log_load($log_id);
-   }else{
-     $entity = entity_create('wechat_msg_api_log', array());
-     $entity->create_time = time();
-   }
-   $entity->wechat_id = $wechat_id;
-   $entity->status = $status;
-   if(!empty($msg_data)){
-     $entity->data = $msg_data;
-   }
-   $entity->save();
- }
-
-
- function wechat_messages_api_send_test(){
-   wechat_msg_api_log_save();
-   var_dump(wechat_msg_api_log_load(1));die;
- }
+  if($log_id){
+    $entity = wechat_msg_api_log_load($log_id);
+  }else{
+    $entity = entity_create('wechat_msg_api_log', array());
+    $entity->create_time = time();
+  }
+  $entity->wechat_id = $wechat_id;
+  $entity->status = $status;
+  if(!empty($msg_data)){
+    $entity->data = $msg_data;
+  }
+  $entity->save();
+}
