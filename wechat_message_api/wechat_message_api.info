@@ -1,0 +1,8 @@
+name = 微信消息API
+description = 微信消息API，提供消息发送API接口
+core = 7.x
+package = wechat
+dependencies[] = wechat_api
+dependencies[] = rules
+
+version = 7.x-2.0-dev

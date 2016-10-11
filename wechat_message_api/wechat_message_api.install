@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function wechat_message_api_schema() {
+  $schema['wechat_message_api_log'] = array(
+    'description' => '微信消息api发送日志表.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => '主键',
+      ),
+      'wechat_id' => array(
+        'description' => 'Wechat Id',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => '状态',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => FALSE,
+        'description' => '具体发送的数据（json）',
+      ),
+      'create_time' => array(
+        'description' => '创建时间',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
